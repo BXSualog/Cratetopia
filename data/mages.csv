@@ -1,0 +1,7 @@
+id,name,stars,hp,attack,defense,crit_chance,description
+MAG001,Arcane Initiate,1,85,18,4,4,A novice student holding a wooden wand and practicing spark spells.
+MAG002,Pyromancer,2,150,35,8,7,A fiery spellcaster who engulfs adversaries in scorching embers.
+MAG003,Frost Weaver,3,270,60,15,10,A master of chilling storms that slow and shatter incoming foes.
+MAG004,Archmage,4,440,105,25,15,A scholar of forbidden arts capable of summoning devastating meteor storms.
+MAG005,Astral Sorceress,5,750,170,42,20,A celestial sorceress drawing limitless energy directly from the cosmos.
+MAG006,God of the Arcane,6,1200,265,65,28,The embodiment of pure magic capable of rewriting the laws of reality.
