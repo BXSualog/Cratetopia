@@ -101,6 +101,29 @@ public class ItemDataManager {
         return null;
     }
 
+    /**
+     * Creates a fresh instance of an item by template ID for player inventories or equipment slots.
+     */
+    public Item createNewItemInstance(String id) {
+        Item template = getItemById(id);
+        if (template == null) return null;
+        if (template instanceof Weapon) {
+            Weapon w = (Weapon) template;
+            return new Weapon(w.getId(), w.getName(), w.getRarity(), w.getType(),
+                    w.getAttack(), w.getCritChance(), w.getEquippableClassesDisplay(), w.getDescription());
+        } else if (template instanceof Armor) {
+            Armor a = (Armor) template;
+            return new Armor(a.getId(), a.getName(), a.getRarity(), a.getType(),
+                    a.getSetName(), a.getDefense(), a.getHealthBonus(), a.getHealthPercentBonus(),
+                    a.getEquippableClassesDisplay(), a.getDescription());
+        } else if (template instanceof Accessory) {
+            Accessory ac = (Accessory) template;
+            return new Accessory(ac.getId(), ac.getName(), ac.getRarity(), ac.getType(),
+                    ac.getStatBonus(), ac.getBonusType(), ac.getEquippableClassesDisplay(), ac.getDescription());
+        }
+        return null;
+    }
+
     // -------------------------------------------------------------------------
     // CSV loaders
     // -------------------------------------------------------------------------

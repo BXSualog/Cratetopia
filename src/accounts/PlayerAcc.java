@@ -66,11 +66,28 @@ public class PlayerAcc extends Account {
         return roster;
     }
 
-    public void addItem(Item item) {
-        if (item != null) {
+    /**
+     * Returns true if the player already owns an item with the given ID.
+     */
+    public boolean hasItem(String itemId) {
+        if (itemId == null) return false;
+        for (Item it : inventory) {
+            if (it.getId().equalsIgnoreCase(itemId)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adds the item to the inventory only if no item with the same ID is already present.
+     * Returns true if the item was added, false if it was a duplicate and skipped.
+     */
+    public boolean addItem(Item item) {
+        if (item != null && !hasItem(item.getId())) {
             inventory.add(item);
             this.itemsOwned = inventory.size();
+            return true;
         }
+        return false;
     }
 
     public boolean removeItem(Item item) {
@@ -81,11 +98,28 @@ public class PlayerAcc extends Account {
         return removed;
     }
 
-    public void addHero(Hero hero) {
-        if (hero != null) {
+    /**
+     * Returns true if the player already owns a hero with the given ID.
+     */
+    public boolean hasHero(String heroId) {
+        if (heroId == null) return false;
+        for (Hero h : roster) {
+            if (h.getId().equalsIgnoreCase(heroId)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adds the hero to the roster only if no hero with the same ID is already present.
+     * Returns true if the hero was added, false if it was a duplicate and skipped.
+     */
+    public boolean addHero(Hero hero) {
+        if (hero != null && !hasHero(hero.getId())) {
             roster.add(hero);
             this.heroesCollected = roster.size();
+            return true;
         }
+        return false;
     }
 
     public boolean removeHero(Hero hero) {

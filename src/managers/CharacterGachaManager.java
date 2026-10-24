@@ -9,11 +9,26 @@ import java.util.Random;
 
 /**
  * Handles Character Gacha summoning mechanics.
- * Uses LinkedList, PriorityQueue (Heaps), and Queue strictly adhering to DSA constraints.
+ * Uses LinkedList, PriorityQueue (Heaps), and Queue strictly adhering to DSA
+ * constraints.
+ *
+ * Duplicate hero policy:
+ * If a rolled hero is already owned by the player it is automatically
+ * converted to shards based on the hero's star level:
+ * 1-Star → 3 shards
+ * 2-Star → 5 shards
+ * 3-Star → 10 shards
+ * 4-Star → 20 shards
+ * 5-Star → 40 shards
+ * 6-Star → 80 shards
  */
 public class CharacterGachaManager {
     public static final int SINGLE_PULL_SHARDS = 5;
     public static final int MULTI_PULL_SHARDS = 45; // 10x pull with discount
+
+    // Shards awarded when a duplicate hero is rolled, indexed by star level (index
+    // 0 unused)
+    private static final int[] DUP_SHARDS_PER_STAR = { 0, 3, 5, 10, 20, 40, 70 };
 
     private final CharacterDataManager charData;
     private final Random rng = new Random();
@@ -32,14 +47,10 @@ public class CharacterGachaManager {
         }
 
         player.setShards(player.getShards() - SINGLE_PULL_SHARDS);
+        GachaResult res = new GachaResult(true, "Summon successful!");
         Hero hero = rollSingleHero(false);
         if (hero != null) {
-            player.addHero(hero);
-        }
-
-        GachaResult res = new GachaResult(true, "Summon successful!");
-        if (hero != null) {
-            res.addHero(hero);
+            awardHero(player, res, hero);
         }
         return res;
     }
@@ -64,8 +75,7 @@ public class CharacterGachaManager {
                 if (hero.getStars() >= 3) {
                     guaranteedTriggered = true;
                 }
-                player.addHero(hero);
-                res.addHero(hero);
+                awardHero(player, res, hero);
             }
         }
         return res;
@@ -82,7 +92,8 @@ public class CharacterGachaManager {
             pool = charData.getAllHeroes();
         }
 
-        if (pool.isEmpty()) return null;
+        if (pool.isEmpty())
+            return null;
 
         Hero template = pool.get(rng.nextInt(pool.size()));
         return charData.createNewHeroInstance(template.getId());
@@ -90,31 +101,57 @@ public class CharacterGachaManager {
 
     /**
      * Rolls star level based on gacha odds:
-     *   6-Star: 0.5%
-     *   5-Star: 2.5%
-     *   4-Star: 7.0%
-     *   3-Star: 15.0%
-     *   2-Star: 30.0%
-     *   1-Star: 45.0%
+     * 6-Star: 0.5%
+     * 5-Star: 2.5%
+     * 4-Star: 7.0%
+     * 3-Star: 15.0%
+     * 2-Star: 30.0%
+     * 1-Star: 45.0%
      */
     private int rollStarTier(boolean guaranteeAtLeast3Star) {
         int roll = rng.nextInt(1000); // 0 - 999
-        if (roll < 5)   return 6; // 0.5%
-        if (roll < 30)  return 5; // 2.5%
-        if (roll < 100) return 4; // 7.0%
-        if (roll < 250) return 3; // 15.0%
+        if (roll < 5)
+            return 6; // 0.5%
+        if (roll < 30)
+            return 5; // 2.5%
+        if (roll < 100)
+            return 4; // 7.0%
+        if (roll < 250)
+            return 3; // 15.0%
 
         if (guaranteeAtLeast3Star) {
             // Re-roll between 3 to 6 star
             int gRoll = rng.nextInt(100);
-            if (gRoll < 3)  return 6;
-            if (gRoll < 15) return 5;
-            if (gRoll < 40) return 4;
+            if (gRoll < 3)
+                return 6;
+            if (gRoll < 15)
+                return 5;
+            if (gRoll < 40)
+                return 4;
             return 3;
         }
 
-        if (roll < 550) return 2; // 30.0%
-        return 1;                 // 45.0%
+        if (roll < 550)
+            return 2; // 30.0%
+        return 1; // 45.0%
+    }
+
+    /**
+     * Awards a hero to the player.
+     * If the hero is a duplicate (player already owns it), converts it to shards
+     * based on its star level instead.
+     */
+    private void awardHero(PlayerAcc player, GachaResult res, Hero hero) {
+        boolean added = player.addHero(hero);
+        if (added) {
+            res.addHero(hero);
+        } else {
+            // Duplicate — compensate with shards
+            int stars = Math.max(1, Math.min(6, hero.getStars()));
+            int shards = DUP_SHARDS_PER_STAR[stars];
+            player.setShards(player.getShards() + shards);
+            res.addDuplicateHero(hero, shards);
+        }
     }
 
     // =========================================================================
@@ -128,6 +165,9 @@ public class CharacterGachaManager {
         // PriorityQueue (Min/Max Heap) to sort highest rarity pulls first
         private final PriorityQueue<Hero> highestRankPulls = new PriorityQueue<>();
 
+        /** Tracks duplicate heroes and the shards they were converted to. */
+        private final LinkedList<DuplicateHeroEntry> duplicateHeroes = new LinkedList<>();
+
         public GachaResult(boolean success, String message) {
             this.success = success;
             this.message = message;
@@ -140,9 +180,55 @@ public class CharacterGachaManager {
             }
         }
 
-        public boolean isSuccess()                       { return success; }
-        public String getMessage()                       { return message; }
-        public LinkedList<Hero> getSummonedHeroes()      { return summonedHeroes; }
-        public PriorityQueue<Hero> getHighestRankPulls() { return highestRankPulls; }
+        /** Records a duplicate hero that was converted to shards. */
+        public void addDuplicateHero(Hero hero, int shardsAwarded) {
+            if (hero != null) {
+                duplicateHeroes.add(new DuplicateHeroEntry(hero, shardsAwarded));
+            }
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public LinkedList<Hero> getSummonedHeroes() {
+            return summonedHeroes;
+        }
+
+        public PriorityQueue<Hero> getHighestRankPulls() {
+            return highestRankPulls;
+        }
+
+        public LinkedList<DuplicateHeroEntry> getDuplicateHeroes() {
+            return duplicateHeroes;
+        }
+
+        /** Returns true if any rolled hero was a duplicate. */
+        public boolean hasDuplicateHeroes() {
+            return !duplicateHeroes.isEmpty();
+        }
+
+        /** Immutable record of one duplicate hero converted to shards. */
+        public static class DuplicateHeroEntry {
+            private final Hero hero;
+            private final int shardsAwarded;
+
+            public DuplicateHeroEntry(Hero hero, int shardsAwarded) {
+                this.hero = hero;
+                this.shardsAwarded = shardsAwarded;
+            }
+
+            public Hero getHero() {
+                return hero;
+            }
+
+            public int getShardsAwarded() {
+                return shardsAwarded;
+            }
+        }
     }
 }

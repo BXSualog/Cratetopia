@@ -10,18 +10,32 @@ import java.util.Random;
  * CrateManager handles all crate opening logic for Crateopia.
  *
  * Crate Tier Probabilities (rolled once per open):
- *   Wooden  - 75%  |  shard bonus chance 0.5%
- *   Silver  - 18%  |  shard bonus chance 2%
- *   Gold    -  6%  |  shard bonus chance 5%
- *   Diamond -  1%  |  shard bonus chance 12%
+ * Wooden - 75% | shard bonus chance 0.5%
+ * Silver - 18% | shard bonus chance 2%
+ * Gold - 6% | shard bonus chance 5%
+ * Diamond - 1% | shard bonus chance 12%
+ *
+ * Duplicate item policy:
+ * If a rolled item is already owned by the player it is automatically
+ * converted to coins based on rarity:
+ * Common → 100 coins
+ * Rare → 300 coins
+ * Epic → 700 coins
+ * Legendary → 2 000 coins
  */
 public class CrateManager {
 
     // Crate names (for display)
-    public static final String WOODEN  = "Wooden Crate";
-    public static final String SILVER  = "Silver Crate";
-    public static final String GOLD    = "Gold Crate";
+    public static final String WOODEN = "Wooden Crate";
+    public static final String SILVER = "Silver Crate";
+    public static final String GOLD = "Gold Crate";
     public static final String DIAMOND = "Diamond Crate";
+
+    // Coins awarded when a duplicate item is rolled (keyed by rarity string)
+    private static final int DUP_COINS_COMMON = 500;
+    private static final int DUP_COINS_RARE = 1000;
+    private static final int DUP_COINS_EPIC = 2000;
+    private static final int DUP_COINS_LEGENDARY = 10_000;
 
     private final ItemDataManager itemData;
     private final Random rng = new Random();
@@ -36,14 +50,18 @@ public class CrateManager {
 
     /**
      * Rolls a random crate tier based on the probability table:
-     *   Diamond 1%, Gold 6%, Silver 18%, Wooden 75%.
+     * Diamond 1%, Gold 6%, Silver 18%, Wooden 75%.
      */
     public String rollCrateTier() {
         int roll = rng.nextInt(100); // 0–99
-        if (roll < 1)        return DIAMOND;  // 1%
-        else if (roll < 7)   return GOLD;     // 6%
-        else if (roll < 25)  return SILVER;   // 18%
-        else                 return WOODEN;   // 75%
+        if (roll < 1)
+            return DIAMOND; // 1%
+        else if (roll < 7)
+            return GOLD; // 6%
+        else if (roll < 25)
+            return SILVER; // 18%
+        else
+            return WOODEN; // 75%
     }
 
     // -------------------------------------------------------------------------
@@ -53,9 +71,9 @@ public class CrateManager {
     /**
      * Opens a crate of the given tier and applies all rewards to the player.
      *
-     * @param crateTier  One of WOODEN, SILVER, GOLD, DIAMOND constants.
-     * @param player     The player who receives the rewards.
-     * @return           A CrateResult describing every reward gained.
+     * @param crateTier One of WOODEN, SILVER, GOLD, DIAMOND constants.
+     * @param player    The player who receives the rewards.
+     * @return A CrateResult describing every reward gained.
      */
     public CrateResult openCrate(String crateTier, PlayerAcc player) {
         CrateResult result = new CrateResult(crateTier);
@@ -92,16 +110,16 @@ public class CrateManager {
 
         // Common weapon (always)
         Item weapon = pickRandom(itemData.getWeaponsByRarity("Common"));
-        if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
+        awardItem(player, result, weapon);
 
         // Common armor (always)
         Item armor = pickRandom(itemData.getArmorsByRarity("Common"));
-        if (armor != null) { result.addItem(armor); player.addItem(armor); }
+        awardItem(player, result, armor);
 
         // Rare equipment: 15% chance
         if (chance(15)) {
             Item rare = pickRandom(itemData.getAllEquipmentByRarity("Rare"));
-            if (rare != null) { result.addItem(rare); player.addItem(rare); }
+            awardItem(player, result, rare);
         }
 
         // Shards: 2% chance → 1 shard
@@ -120,15 +138,16 @@ public class CrateManager {
         // Rare weapon: 20% chance
         if (chance(20)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Rare"));
-            if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
+            awardItem(player, result, weapon);
         }
 
         // Rare equipment (armor/accessory): 25% chance
         if (chance(25)) {
             // Pool is armor + accessories only (weapons handled separately above)
             Item equip = pickRandom(itemData.getArmorsByRarity("Rare"));
-            if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Rare"));
-            if (equip != null) { result.addItem(equip); player.addItem(equip); }
+            if (equip == null)
+                equip = pickRandom(itemData.getAccessoriesByRarity("Rare"));
+            awardItem(player, result, equip);
         }
 
         // Shards: 10% chance → 1-3 shards
@@ -147,14 +166,15 @@ public class CrateManager {
         // Epic equipment (armor/accessory): 45% chance
         if (chance(45)) {
             Item equip = pickRandom(itemData.getArmorsByRarity("Epic"));
-            if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Epic"));
-            if (equip != null) { result.addItem(equip); player.addItem(equip); }
+            if (equip == null)
+                equip = pickRandom(itemData.getAccessoriesByRarity("Epic"));
+            awardItem(player, result, equip);
         }
 
         // Epic weapon: 50% chance
         if (chance(50)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Epic"));
-            if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
+            awardItem(player, result, weapon);
         }
 
         // Shards: 40% chance → 3-5 shards
@@ -173,14 +193,15 @@ public class CrateManager {
         // Legendary equipment (armor/accessory): 50% chance
         if (chance(50)) {
             Item equip = pickRandom(itemData.getArmorsByRarity("Legendary"));
-            if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Legendary"));
-            if (equip != null) { result.addItem(equip); player.addItem(equip); }
+            if (equip == null)
+                equip = pickRandom(itemData.getAccessoriesByRarity("Legendary"));
+            awardItem(player, result, equip);
         }
 
         // Legendary weapon: 60% chance
         if (chance(60)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Legendary"));
-            if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
+            awardItem(player, result, weapon);
         }
 
         // Shards: 50% chance → 5-9 shards
@@ -204,22 +225,60 @@ public class CrateManager {
         return min + rng.nextInt(max - min + 1);
     }
 
-    /** Picks a random element from the linked list. Returns null if list is empty. */
+    /**
+     * Picks a random element from the linked list. Returns null if list is empty.
+     */
     private <T> T pickRandom(LinkedList<T> list) {
-        if (list == null || list.isEmpty()) return null;
+        if (list == null || list.isEmpty())
+            return null;
         return list.get(rng.nextInt(list.size()));
     }
 
     /** Adds coins to the player and records them in the result. */
     private void awardCoins(PlayerAcc player, CrateResult result, int amount) {
         player.setCoins(player.getCoins() + amount);
-        result.setCoinsEarned(amount);
+        result.setCoinsEarned(result.getCoinsEarned() + amount);
     }
 
     /** Adds shards to the player and records them in the result. */
     private void awardShards(PlayerAcc player, CrateResult result, int amount) {
         player.setShards(player.getShards() + amount);
         result.setShardsEarned(amount);
+    }
+
+    /**
+     * Awards an item to the player.
+     * If the item is a duplicate (player already owns it), converts it to coins
+     * based on its rarity instead.
+     */
+    private void awardItem(PlayerAcc player, CrateResult result, Item item) {
+        if (item == null)
+            return;
+        boolean added = player.addItem(item);
+        if (added) {
+            result.addItem(item);
+        } else {
+            // Duplicate — compensate with coins
+            int compensation = dupCoinsForRarity(item.getRarity());
+            awardCoins(player, result, compensation);
+            result.addDuplicateItem(item, compensation);
+        }
+    }
+
+    /** Returns the coin compensation for a duplicate item of the given rarity. */
+    private int dupCoinsForRarity(String rarity) {
+        if (rarity == null)
+            return DUP_COINS_COMMON;
+        switch (rarity.toLowerCase()) {
+            case "legendary":
+                return DUP_COINS_LEGENDARY;
+            case "epic":
+                return DUP_COINS_EPIC;
+            case "rare":
+                return DUP_COINS_RARE;
+            default:
+                return DUP_COINS_COMMON;
+        }
     }
 
     // =========================================================================
@@ -232,24 +291,81 @@ public class CrateManager {
      */
     public static class CrateResult {
         private final String crateTier;
-        private int coinsEarned  = 0;
+        private int coinsEarned = 0;
         private int shardsEarned = 0;
         private final java.util.LinkedList<Item> items = new java.util.LinkedList<>();
+
+        /** Tracks duplicate items and the coins they were converted to. */
+        private final java.util.LinkedList<DuplicateEntry> duplicates = new java.util.LinkedList<>();
 
         public CrateResult(String crateTier) {
             this.crateTier = crateTier;
         }
 
-        public void setCoinsEarned(int coins)   { this.coinsEarned  = coins;  }
-        public void setShardsEarned(int shards) { this.shardsEarned = shards; }
-        public void addItem(Item item)           { items.add(item); }
+        public void setCoinsEarned(int coins) {
+            this.coinsEarned = coins;
+        }
 
-        public String    getCrateTier()   { return crateTier; }
-        public int       getCoinsEarned() { return coinsEarned; }
-        public int       getShardsEarned(){ return shardsEarned; }
-        public java.util.LinkedList<Item> getItems() { return items; }
+        public void setShardsEarned(int shards) {
+            this.shardsEarned = shards;
+        }
+
+        public void addItem(Item item) {
+            items.add(item);
+        }
+
+        /** Records a duplicate item that was converted to coins. */
+        public void addDuplicateItem(Item item, int coinsAwarded) {
+            duplicates.add(new DuplicateEntry(item, coinsAwarded));
+        }
+
+        public String getCrateTier() {
+            return crateTier;
+        }
+
+        public int getCoinsEarned() {
+            return coinsEarned;
+        }
+
+        public int getShardsEarned() {
+            return shardsEarned;
+        }
+
+        public java.util.LinkedList<Item> getItems() {
+            return items;
+        }
+
+        public java.util.LinkedList<DuplicateEntry> getDuplicates() {
+            return duplicates;
+        }
+
+        /** Returns true if any rolled item was a duplicate. */
+        public boolean hasDuplicates() {
+            return !duplicates.isEmpty();
+        }
 
         /** Returns true if the result contains at least one shard reward. */
-        public boolean hasShards()        { return shardsEarned > 0; }
+        public boolean hasShards() {
+            return shardsEarned > 0;
+        }
+
+        /** Immutable record of one duplicate item converted to coins. */
+        public static class DuplicateEntry {
+            private final Item item;
+            private final int coinsAwarded;
+
+            public DuplicateEntry(Item item, int coinsAwarded) {
+                this.item = item;
+                this.coinsAwarded = coinsAwarded;
+            }
+
+            public Item getItem() {
+                return item;
+            }
+
+            public int getCoinsAwarded() {
+                return coinsAwarded;
+            }
+        }
     }
 }
