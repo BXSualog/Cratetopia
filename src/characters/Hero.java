@@ -401,18 +401,6 @@ public class Hero implements Comparable<Hero> {
         return sb.toString();
     }
 
-    public String getRarityTitle() {
-        switch (stars) {
-            case 1: return "Common";
-            case 2: return "Uncommon";
-            case 3: return "Rare";
-            case 4: return "Epic";
-            case 5: return "Legendary";
-            case 6: return "Mythic";
-            default: return "Novice";
-        }
-    }
-
     @Override
     public int compareTo(Hero other) {
         if (other == null) return 1;
