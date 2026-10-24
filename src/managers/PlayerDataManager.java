@@ -1,4 +1,4 @@
-package data;
+package managers;
 
 import accounts.PlayerAcc;
 import java.io.BufferedReader;
@@ -40,7 +40,7 @@ public class PlayerDataManager {
                 }
 
                 // Skip header if present
-                if (isFirstLine && line.equalsIgnoreCase("username,password")) {
+                if (isFirstLine && line.toLowerCase().startsWith("username,password")) {
                     isFirstLine = false;
                     continue;
                 }
@@ -50,7 +50,11 @@ public class PlayerDataManager {
                 if (parts.length >= 2) {
                     String username = parts[0].trim();
                     String password = parts[1].trim();
-                    playerList.add(new PlayerAcc(username, password));
+                    int coins = parts.length > 2 ? parseIntOrDefault(parts[2].trim(), 100) : 100;
+                    int shards = parts.length > 3 ? parseIntOrDefault(parts[3].trim(), 10) : 10;
+                    int heroesCollected = parts.length > 4 ? parseIntOrDefault(parts[4].trim(), 0) : 0;
+                    int itemsOwned = parts.length > 5 ? parseIntOrDefault(parts[5].trim(), 0) : 0;
+                    playerList.add(new PlayerAcc(username, password, coins, shards, heroesCollected, itemsOwned));
                 }
             }
         } catch (IOException e) {
@@ -87,24 +91,52 @@ public class PlayerDataManager {
         return false;
     }
 
-    private void savePlayerToCsv(PlayerAcc player) {
+    public boolean loginPlayer(String username, String password) {
+        return authenticate(username, password);
+    }
+
+    public PlayerAcc getPlayer(String username) {
+        for (PlayerAcc player : playerList) {
+            if (player.getUsername().equalsIgnoreCase(username)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    public void saveAllPlayersToCsv() {
         File file = new File(CSV_FILE_PATH);
         File parentDir = file.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
             parentDir.mkdirs();
         }
 
-        boolean writeHeader = !file.exists() || file.length() == 0;
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            if (writeHeader) {
-                writer.write("username,password");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
+            writer.write("username,password,coins,shards,heroesCollected,itemsOwned");
+            writer.newLine();
+            for (PlayerAcc player : playerList) {
+                writer.write(player.getUsername() + "," +
+                             player.getPassword() + "," +
+                             player.getCoins() + "," +
+                             player.getShards() + "," +
+                             player.getHeroesCollected() + "," +
+                             player.getItemsOwned());
                 writer.newLine();
             }
-            writer.write(player.getUsername() + "," + player.getPassword());
-            writer.newLine();
         } catch (IOException e) {
-            System.err.println("Error saving player to CSV: " + e.getMessage());
+            System.err.println("Error saving players to CSV: " + e.getMessage());
+        }
+    }
+
+    private void savePlayerToCsv(PlayerAcc player) {
+        saveAllPlayersToCsv();
+    }
+
+    private int parseIntOrDefault(String value, int defaultValue) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
     }
 }

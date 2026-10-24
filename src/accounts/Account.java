@@ -17,6 +17,4 @@ public abstract class Account {
         return password;
     }
 
-    //gjnrignwomg ewrgwrt gweg
-
 }
