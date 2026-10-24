@@ -17,11 +17,14 @@ public class Main {
 
     public static void main(String[] args) {
         InputHandling input = new InputHandling();
-        PlayerDataManager playerDataManager = new PlayerDataManager();
         ItemDataManager itemDataManager = new ItemDataManager();
         CharacterDataManager charDataManager = new CharacterDataManager();
+        PlayerDataManager playerDataManager = new PlayerDataManager(charDataManager, itemDataManager);
         CharacterGachaManager gachaManager = new CharacterGachaManager(charDataManager);
         CrateManager crateManager = new CrateManager(itemDataManager);
+
+        // Auto-save on JVM shutdown
+        Runtime.getRuntime().addShutdownHook(new Thread(playerDataManager::saveAllPlayersToCsv));
 
         String choice;
 
@@ -50,6 +53,7 @@ public class Main {
                     break;
 
                 case "0":
+                    playerDataManager.saveAllPlayersToCsv();
                     System.out.println("\nThank you for playing Infinite Realms!");
                     break;
 
@@ -168,7 +172,7 @@ public class Main {
                     openingCrates(input, playerDataManager, crateManager, player);
                     break;
                 case "2":
-                    charactersAndEquipmentMenu(input, gachaManager, player);
+                    charactersAndEquipmentMenu(input, playerDataManager, gachaManager, player);
                     break;
                 case "3":
                     inventoryMenu(input, player);
@@ -220,7 +224,8 @@ public class Main {
     // Characters & Equipment Menu
     // =========================================================================
 
-    public static void charactersAndEquipmentMenu(InputHandling input, CharacterGachaManager gachaManager, PlayerAcc player) {
+    public static void charactersAndEquipmentMenu(InputHandling input, PlayerDataManager playerDataManager,
+                                                   CharacterGachaManager gachaManager, PlayerAcc player) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -241,10 +246,10 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    viewRosterMenu(input, player);
+                    viewRosterMenu(input, playerDataManager, player);
                     break;
                 case "2":
-                    characterGachaMenu(input, gachaManager, player);
+                    characterGachaMenu(input, playerDataManager, gachaManager, player);
                     break;
                 case "0":
                     break;
@@ -259,7 +264,8 @@ public class Main {
     // Character Gacha Summon
     // =========================================================================
 
-    private static void characterGachaMenu(InputHandling input, CharacterGachaManager gachaManager, PlayerAcc player) {
+    private static void characterGachaMenu(InputHandling input, PlayerDataManager playerDataManager,
+                                           CharacterGachaManager gachaManager, PlayerAcc player) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -282,10 +288,10 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    performGacha(input, gachaManager, player, false);
+                    performGacha(input, playerDataManager, gachaManager, player, false);
                     break;
                 case "2":
-                    performGacha(input, gachaManager, player, true);
+                    performGacha(input, playerDataManager, gachaManager, player, true);
                     break;
                 case "0":
                     break;
@@ -296,7 +302,8 @@ public class Main {
         } while (!choice.equals("0"));
     }
 
-    private static void performGacha(InputHandling input, CharacterGachaManager gachaManager, PlayerAcc player, boolean isMulti) {
+    private static void performGacha(InputHandling input, PlayerDataManager playerDataManager,
+                                     CharacterGachaManager gachaManager, PlayerAcc player, boolean isMulti) {
         int cost = isMulti ? CharacterGachaManager.MULTI_PULL_SHARDS : CharacterGachaManager.SINGLE_PULL_SHARDS;
         if (player.getShards() < cost) {
             System.out.println("\n[!] Not enough shards! You need " + cost + " shards, but only have " + player.getShards() + ".");
@@ -318,6 +325,9 @@ public class Main {
             input.readLine("Press Enter to continue...");
             return;
         }
+
+        // Auto-save shards spent & summoned heroes
+        playerDataManager.saveAllPlayersToCsv();
 
         System.out.println("\n==================================================");
         System.out.println("              SUMMON RESULTS (" + (isMulti ? "10x" : "Single") + ")");
@@ -350,7 +360,7 @@ public class Main {
     // View Roster & Equipment
     // =========================================================================
 
-    private static void viewRosterMenu(InputHandling input, PlayerAcc player) {
+    private static void viewRosterMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
         LinkedList<Hero> roster = player.getRoster();
         if (roster.isEmpty()) {
             System.out.println("\n[!] Your hero roster is empty!");
@@ -378,7 +388,7 @@ public class Main {
             try {
                 int heroIdx = Integer.parseInt(choice) - 1;
                 if (heroIdx >= 0 && heroIdx < roster.size()) {
-                    heroDetailAndEquipMenu(input, player, roster.get(heroIdx));
+                    heroDetailAndEquipMenu(input, playerDataManager, player, roster.get(heroIdx));
                 } else {
                     System.out.println("Invalid hero selection.");
                     input.readLine("Press Enter to continue...");
@@ -390,7 +400,7 @@ public class Main {
         } while (!choice.equals("0"));
     }
 
-    private static void heroDetailAndEquipMenu(InputHandling input, PlayerAcc player, Hero hero) {
+    private static void heroDetailAndEquipMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -431,16 +441,16 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    equipItemFlow(input, player, hero, Weapon.class, "Weapon");
+                    equipItemFlow(input, playerDataManager, player, hero, Weapon.class, "Weapon");
                     break;
                 case "2":
-                    equipItemFlow(input, player, hero, Armor.class, "Armor");
+                    equipItemFlow(input, playerDataManager, player, hero, Armor.class, "Armor");
                     break;
                 case "3":
-                    equipItemFlow(input, player, hero, Accessory.class, "Accessory");
+                    equipItemFlow(input, playerDataManager, player, hero, Accessory.class, "Accessory");
                     break;
                 case "4":
-                    unequipFlow(input, player, hero);
+                    unequipFlow(input, playerDataManager, player, hero);
                     break;
                 case "0":
                     break;
@@ -451,7 +461,8 @@ public class Main {
         } while (!choice.equals("0"));
     }
 
-    private static <T extends Item> void equipItemFlow(InputHandling input, PlayerAcc player, Hero hero,
+    private static <T extends Item> void equipItemFlow(InputHandling input, PlayerDataManager playerDataManager,
+                                                       PlayerAcc player, Hero hero,
                                                        Class<T> itemClass, String slotName) {
         LinkedList<Item> matchingItems = new LinkedList<>();
         for (Item item : player.getInventory()) {
@@ -506,6 +517,9 @@ public class Main {
                     System.out.println("\n[SWAP] Returned previous item to inventory: " + oldItem.getName());
                 }
 
+                // Auto-save equipped gear & inventory state
+                playerDataManager.saveAllPlayersToCsv();
+
                 System.out.println("\n[SUCCESS] Successfully equipped " + chosenItem.getName() + " on " + hero.getName() + "!");
                 input.readLine("Press Enter to continue...");
             } else {
@@ -518,7 +532,7 @@ public class Main {
         }
     }
 
-    private static void unequipFlow(InputHandling input, PlayerAcc player, Hero hero) {
+    private static void unequipFlow(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
         System.out.println("\n==================================================");
         System.out.println("                   UNEQUIP GEAR");
         System.out.println("==================================================");
@@ -542,9 +556,13 @@ public class Main {
         Item unequipped = hero.unequip(slot);
         if (unequipped != null) {
             player.addItem(unequipped);
+
+            // Auto-save unequipped gear & inventory state
+            playerDataManager.saveAllPlayersToCsv();
+
             System.out.println("\n[SUCCESS] Unequipped " + unequipped.getName() + " and returned it to your inventory.");
         } else {
-            System.out.println("\n[!] Slot was already empty.");
+            System.out.println("\n[!] That slot is already empty.");
         }
         input.readLine("Press Enter to continue...");
     }
@@ -606,7 +624,7 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    performCrateOpen(input, crateManager, player);
+                    performCrateOpen(input, playerDataManager, crateManager, player);
                     break;
                 case "0":
                     break;
@@ -617,7 +635,8 @@ public class Main {
         } while (!choice.equals("0"));
     }
 
-    private static void performCrateOpen(InputHandling input, CrateManager crateManager, PlayerAcc player) {
+    private static void performCrateOpen(InputHandling input, PlayerDataManager playerDataManager,
+                                         CrateManager crateManager, PlayerAcc player) {
         System.out.print("\n  Rolling crate tier");
         for (int i = 0; i < 6; i++) {
             System.out.print(".");
@@ -633,6 +652,9 @@ public class Main {
         System.out.println("  =============================================");
 
         CrateManager.CrateResult result = crateManager.openCrate(tier, player);
+
+        // Auto-save earned coins, shards, and inventory items
+        playerDataManager.saveAllPlayersToCsv();
 
         System.out.println();
         System.out.println("  [REWARDS]");
