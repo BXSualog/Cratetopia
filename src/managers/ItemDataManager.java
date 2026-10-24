@@ -9,12 +9,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
 /**
  * Loads and provides access to all item pools from CSV files.
- * Each category (weapons, armor, accessories) is stored in its own CSV under data/.
+ * Adheres strictly to DSA constraints using LinkedList collections.
  *
  * CSV paths:
  *   data/weapons.csv
@@ -26,9 +25,9 @@ public class ItemDataManager {
     private static final String ARMOR_CSV       = "data/armor.csv";
     private static final String ACCESSORIES_CSV = "data/accessories.csv";
 
-    private final List<Weapon>    weapons     = new ArrayList<>();
-    private final List<Armor>     armors      = new ArrayList<>();
-    private final List<Accessory> accessories = new ArrayList<>();
+    private final LinkedList<Weapon>    weapons     = new LinkedList<>();
+    private final LinkedList<Armor>     armors      = new LinkedList<>();
+    private final LinkedList<Accessory> accessories = new LinkedList<>();
 
     public ItemDataManager() {
         loadWeapons();
@@ -40,9 +39,21 @@ public class ItemDataManager {
     // Public accessors
     // -------------------------------------------------------------------------
 
+    public LinkedList<Weapon> getWeapons() {
+        return weapons;
+    }
+
+    public LinkedList<Armor> getArmors() {
+        return armors;
+    }
+
+    public LinkedList<Accessory> getAccessories() {
+        return accessories;
+    }
+
     /** Returns all weapons of the given rarity. */
-    public List<Weapon> getWeaponsByRarity(String rarity) {
-        List<Weapon> result = new ArrayList<>();
+    public LinkedList<Weapon> getWeaponsByRarity(String rarity) {
+        LinkedList<Weapon> result = new LinkedList<>();
         for (Weapon w : weapons) {
             if (w.getRarity().equalsIgnoreCase(rarity)) result.add(w);
         }
@@ -50,8 +61,8 @@ public class ItemDataManager {
     }
 
     /** Returns all armors of the given rarity. */
-    public List<Armor> getArmorsByRarity(String rarity) {
-        List<Armor> result = new ArrayList<>();
+    public LinkedList<Armor> getArmorsByRarity(String rarity) {
+        LinkedList<Armor> result = new LinkedList<>();
         for (Armor a : armors) {
             if (a.getRarity().equalsIgnoreCase(rarity)) result.add(a);
         }
@@ -59,8 +70,8 @@ public class ItemDataManager {
     }
 
     /** Returns all accessories of the given rarity. */
-    public List<Accessory> getAccessoriesByRarity(String rarity) {
-        List<Accessory> result = new ArrayList<>();
+    public LinkedList<Accessory> getAccessoriesByRarity(String rarity) {
+        LinkedList<Accessory> result = new LinkedList<>();
         for (Accessory ac : accessories) {
             if (ac.getRarity().equalsIgnoreCase(rarity)) result.add(ac);
         }
@@ -68,12 +79,26 @@ public class ItemDataManager {
     }
 
     /** Returns all items (any type) of the given rarity pooled together. */
-    public List<Item> getAllEquipmentByRarity(String rarity) {
-        List<Item> result = new ArrayList<>();
+    public LinkedList<Item> getAllEquipmentByRarity(String rarity) {
+        LinkedList<Item> result = new LinkedList<>();
         result.addAll(getWeaponsByRarity(rarity));
         result.addAll(getArmorsByRarity(rarity));
         result.addAll(getAccessoriesByRarity(rarity));
         return result;
+    }
+
+    public Item getItemById(String id) {
+        if (id == null) return null;
+        for (Weapon w : weapons) {
+            if (w.getId().equalsIgnoreCase(id)) return w;
+        }
+        for (Armor a : armors) {
+            if (a.getId().equalsIgnoreCase(id)) return a;
+        }
+        for (Accessory ac : accessories) {
+            if (ac.getId().equalsIgnoreCase(id)) return ac;
+        }
+        return null;
     }
 
     // -------------------------------------------------------------------------
@@ -81,7 +106,7 @@ public class ItemDataManager {
     // -------------------------------------------------------------------------
 
     private void loadWeapons() {
-        // Header: id,name,rarity,type,attack,crit_chance,description
+        // Header: id,name,rarity,type,attack,crit_chance,equippable_classes,description
         try (BufferedReader reader = new BufferedReader(new FileReader(new File(WEAPONS_CSV)))) {
             String line;
             boolean first = true;
@@ -89,13 +114,22 @@ public class ItemDataManager {
                 line = line.trim();
                 if (line.isEmpty()) continue;
                 if (first) { first = false; continue; } // skip header
-                String[] p = line.split(",", 7);
+                String[] p = line.split(",", 8);
                 if (p.length < 7) continue;
-                weapons.add(new Weapon(
-                        p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
-                        parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
-                        p[6].trim()
-                ));
+
+                if (p.length == 7) {
+                    weapons.add(new Weapon(
+                            p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
+                            parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
+                            "All", p[6].trim()
+                    ));
+                } else {
+                    weapons.add(new Weapon(
+                            p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
+                            parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
+                            p[6].trim(), p[7].trim()
+                    ));
+                }
             }
         } catch (IOException e) {
             System.err.println("[ItemDataManager] Failed to load weapons: " + e.getMessage());
@@ -103,7 +137,7 @@ public class ItemDataManager {
     }
 
     private void loadArmors() {
-        // Header: id,name,rarity,type,defense,health_bonus,description
+        // Header: id,name,rarity,type,defense,health_bonus,equippable_classes,description
         try (BufferedReader reader = new BufferedReader(new FileReader(new File(ARMOR_CSV)))) {
             String line;
             boolean first = true;
@@ -111,13 +145,22 @@ public class ItemDataManager {
                 line = line.trim();
                 if (line.isEmpty()) continue;
                 if (first) { first = false; continue; } // skip header
-                String[] p = line.split(",", 7);
+                String[] p = line.split(",", 8);
                 if (p.length < 7) continue;
-                armors.add(new Armor(
-                        p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
-                        parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
-                        p[6].trim()
-                ));
+
+                if (p.length == 7) {
+                    armors.add(new Armor(
+                            p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
+                            parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
+                            "All", p[6].trim()
+                    ));
+                } else {
+                    armors.add(new Armor(
+                            p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
+                            parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
+                            p[6].trim(), p[7].trim()
+                    ));
+                }
             }
         } catch (IOException e) {
             System.err.println("[ItemDataManager] Failed to load armors: " + e.getMessage());
@@ -125,7 +168,7 @@ public class ItemDataManager {
     }
 
     private void loadAccessories() {
-        // Header: id,name,rarity,type,stat_bonus,bonus_type,description
+        // Header: id,name,rarity,type,stat_bonus,bonus_type,equippable_classes,description
         try (BufferedReader reader = new BufferedReader(new FileReader(new File(ACCESSORIES_CSV)))) {
             String line;
             boolean first = true;
@@ -133,13 +176,22 @@ public class ItemDataManager {
                 line = line.trim();
                 if (line.isEmpty()) continue;
                 if (first) { first = false; continue; } // skip header
-                String[] p = line.split(",", 7);
+                String[] p = line.split(",", 8);
                 if (p.length < 7) continue;
-                accessories.add(new Accessory(
-                        p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
-                        parseIntSafe(p[4].trim()), p[5].trim(),
-                        p[6].trim()
-                ));
+
+                if (p.length == 7) {
+                    accessories.add(new Accessory(
+                            p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
+                            parseIntSafe(p[4].trim()), p[5].trim(),
+                            "All", p[6].trim()
+                    ));
+                } else {
+                    accessories.add(new Accessory(
+                            p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
+                            parseIntSafe(p[4].trim()), p[5].trim(),
+                            p[6].trim(), p[7].trim()
+                    ));
+                }
             }
         } catch (IOException e) {
             System.err.println("[ItemDataManager] Failed to load accessories: " + e.getMessage());

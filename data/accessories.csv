@@ -1,26 +1,26 @@
-id,name,rarity,type,stat_bonus,bonus_type,description
-AC001,Copper Ring,Common,Ring,5,attack,A simple copper ring with minor enchantment.
-AC002,Frayed Amulet,Common,Amulet,8,health,A cracked amulet that once held power.
-AC003,Pebble Charm,Common,Charm,4,defense,A smooth pebble said to bring luck.
-AC004,Glass Bead,Common,Trinket,6,crit_chance,A glass bead that catches the light strangely.
-AC005,Bone Totem,Common,Trinket,5,defense,A small carving of bone from a forest beast.
-AC006,Silver Ring,Uncommon,Ring,15,attack,A silver ring set with a small gemstone.
-AC007,Jade Amulet,Uncommon,Amulet,22,health,An amulet of carved jade from the eastern shores.
-AC008,Lucky Clover,Uncommon,Charm,12,crit_chance,A four-leaf clover preserved under resin.
-AC009,Wind Chime,Uncommon,Trinket,18,defense,A charm of small bells that ward off evil.
-AC010,Merchant's Coin,Uncommon,Trinket,14,attack,An old coin rumored to bring fortune.
-AC011,Sapphire Ring,Rare,Ring,30,attack,A gold ring set with a deep blue sapphire.
-AC012,Dragon Tooth,Rare,Amulet,42,health,A tooth from a young dragon strung on leather.
-AC013,Phoenix Feather,Rare,Charm,35,crit_chance,A brilliant feather said to bring rebirth.
-AC014,Rune Stone,Rare,Trinket,38,defense,A stone etched with ancient protective runes.
-AC015,Astral Crystal,Rare,Trinket,32,attack,A crystal that pulses with astral energy.
-AC016,Void Eye Ring,Epic,Ring,52,crit_chance,A ring with a gem that seems to look back at you.
-AC017,Titan Pendant,Epic,Amulet,68,health,A massive pendant worn by ancient titans.
-AC018,Storm Shard,Epic,Charm,58,attack,A shard of crystallized lightning.
-AC019,Shadow Brooch,Epic,Trinket,62,defense,A brooch that cloaks the wearer in shadow.
-AC020,Eclipse Orb,Epic,Trinket,55,crit_chance,An orb that perfectly mirrors a solar eclipse.
-AC021,Ring of Eternity,Legendary,Ring,88,attack,A ring that has existed since the dawn of time.
-AC022,Celestial Locket,Legendary,Amulet,105,health,A locket containing a piece of a dying star.
-AC023,Fate's Thread,Legendary,Charm,95,crit_chance,A thread woven from the strings of destiny itself.
-AC024,Nexus Crystal,Legendary,Trinket,98,defense,A crystal at the nexus of all magical ley lines.
-AC025,Primordial Gem,Legendary,Trinket,92,attack,A gem formed at the birth of the universe.
+id,name,rarity,type,stat_bonus,bonus_type,equippable_classes,description
+AC001,Copper Ring,Common,Ring,5,attack,All,A simple copper ring with minor enchantment.
+AC002,Frayed Amulet,Common,Amulet,8,health,All,A cracked amulet that once held power.
+AC003,Pebble Charm,Common,Charm,4,defense,All,A smooth pebble said to bring luck.
+AC004,Glass Bead,Common,Trinket,6,crit_chance,All,A glass bead that catches the light strangely.
+AC005,Bone Totem,Common,Trinket,5,defense,All,A small carving of bone from a forest beast.
+AC006,Silver Ring,Uncommon,Ring,15,attack,All,A silver ring set with a small gemstone.
+AC007,Jade Amulet,Uncommon,Amulet,22,health,All,An amulet of carved jade from the eastern shores.
+AC008,Lucky Clover,Uncommon,Charm,12,crit_chance,All,A four-leaf clover preserved under resin.
+AC009,Wind Chime,Uncommon,Trinket,18,defense,All,A charm of small bells that ward off evil.
+AC010,Merchant's Coin,Uncommon,Trinket,14,attack,All,An old coin rumored to bring fortune.
+AC011,Sapphire Ring,Rare,Ring,30,attack,All,A gold ring set with a deep blue sapphire.
+AC012,Dragon Tooth,Rare,Amulet,42,health,All,A tooth from a young dragon strung on leather.
+AC013,Phoenix Feather,Rare,Charm,35,crit_chance,All,A brilliant feather said to bring rebirth.
+AC014,Rune Stone,Rare,Trinket,38,defense,All,A stone etched with ancient protective runes.
+AC015,Astral Crystal,Rare,Trinket,32,attack,All,A crystal that pulses with astral energy.
+AC016,Void Eye Ring,Epic,Ring,52,crit_chance,All,A ring with a gem that seems to look back at you.
+AC017,Titan Pendant,Epic,Amulet,68,health,All,A massive pendant worn by ancient titans.
+AC018,Storm Shard,Epic,Charm,58,attack,All,A shard of crystallized lightning.
+AC019,Shadow Brooch,Epic,Trinket,62,defense,All,A brooch that cloaks the wearer in shadow.
+AC020,Eclipse Orb,Epic,Trinket,55,crit_chance,All,An orb that perfectly mirrors a solar eclipse.
+AC021,Ring of Eternity,Legendary,Ring,88,attack,All,A ring that has existed since the dawn of time.
+AC022,Celestial Locket,Legendary,Amulet,105,health,All,A locket containing a piece of a dying star.
+AC023,Fate's Thread,Legendary,Charm,95,crit_chance,All,A thread woven from the strings of destiny itself.
+AC024,Nexus Crystal,Legendary,Trinket,98,defense,All,A crystal at the nexus of all magical ley lines.
+AC025,Primordial Gem,Legendary,Trinket,92,attack,All,A gem formed at the birth of the universe.

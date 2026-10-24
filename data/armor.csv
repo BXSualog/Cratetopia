@@ -1,26 +1,26 @@
-id,name,rarity,type,defense,health_bonus,description
-A001,Tattered Robe,Common,Robe,5,10,A fraying robe that barely offers protection.
-A002,Wooden Shield,Common,Shield,8,5,A round shield crudely shaped from oak.
-A003,Cloth Tunic,Common,Chest,6,15,A simple linen tunic with no real protection.
-A004,Leather Cap,Common,Helmet,4,8,A cap of rough leather offering minimal cover.
-A005,Rope Sandals,Common,Boots,3,5,Sandals woven from thick rope.
-A006,Chainmail Vest,Uncommon,Chest,18,30,Interlocked iron rings providing decent defense.
-A007,Iron Helmet,Uncommon,Helmet,15,20,A solid iron helmet with a full visor.
-A008,Studded Leather,Uncommon,Chest,16,25,Leather reinforced with iron studs.
-A009,Knight's Shield,Uncommon,Shield,22,15,A heater shield bearing a noble's crest.
-A010,Ranger Boots,Uncommon,Boots,12,18,Lightweight boots that aid in silent movement.
-A011,Dragonscale Vest,Rare,Chest,35,55,Armor crafted from genuine dragon scales.
-A012,Warden's Helm,Rare,Helmet,30,45,A helm enchanted to resist magical attacks.
-A013,Guardian Shield,Rare,Shield,40,35,A shield blessed by a war deity.
-A014,Shadowstep Boots,Rare,Boots,25,40,Enchanted boots that muffle every footstep.
-A015,Runic Gauntlets,Rare,Gloves,28,38,Gauntlets inscribed with protective runes.
-A016,Voidplate Chest,Epic,Chest,58,90,Forged from void-touched metals of another realm.
-A017,Celestial Helm,Epic,Helmet,52,80,A helm that glows faintly with starlight.
-A018,Abyss Shield,Epic,Shield,65,70,A shield that absorbs a portion of all damage.
-A019,Phantom Greaves,Epic,Boots,45,75,Leg armor that phases through minor projectiles.
-A020,Titan Gauntlets,Epic,Gloves,55,85,Gauntlets that amplify grip strength tenfold.
-A021,Godplate Armor,Legendary,Chest,92,150,The legendary armor worn by the first champion.
-A022,Eternal Crown,Legendary,Helmet,85,135,A crown said to grant its wearer immortality.
-A023,Aegis of Eternity,Legendary,Shield,100,120,The greatest shield ever forged by mortal hands.
-A024,Windwalker Boots,Legendary,Boots,75,110,Boots that allow the wearer to walk on air.
-A025,Dragonlord Gauntlets,Legendary,Gloves,88,130,Gauntlets that command the respect of dragons.
+id,name,rarity,type,defense,health_bonus,equippable_classes,description
+A001,Tattered Robe,Common,Robe,5,10,Mage;Support,A fraying robe that barely offers protection.
+A002,Wooden Shield,Common,Shield,8,5,Tank;Warrior,A round shield crudely shaped from oak.
+A003,Cloth Tunic,Common,Chest,6,15,All,A simple linen tunic with no real protection.
+A004,Leather Cap,Common,Helmet,4,8,Ranger;Assassin,A cap of rough leather offering minimal cover.
+A005,Rope Sandals,Common,Boots,3,5,All,Sandals woven from thick rope.
+A006,Chainmail Vest,Uncommon,Chest,18,30,Warrior;Tank;Ranger,Interlocked iron rings providing decent defense.
+A007,Iron Helmet,Uncommon,Helmet,15,20,Warrior;Tank,A solid iron helmet with a full visor.
+A008,Studded Leather,Uncommon,Chest,16,25,Ranger;Assassin,Leather reinforced with iron studs.
+A009,Knight's Shield,Uncommon,Shield,22,15,Tank;Warrior,A heater shield bearing a noble's crest.
+A010,Ranger Boots,Uncommon,Boots,12,18,Ranger;Assassin,Lightweight boots that aid in silent movement.
+A011,Dragonscale Vest,Rare,Chest,35,55,Warrior;Tank,Armor crafted from genuine dragon scales.
+A012,Warden's Helm,Rare,Helmet,30,45,Tank;Warrior;Support,A helm enchanted to resist magical attacks.
+A013,Guardian Shield,Rare,Shield,40,35,Tank,A shield blessed by a war deity.
+A014,Shadowstep Boots,Rare,Boots,25,40,Assassin;Ranger,Enchanted boots that muffle every footstep.
+A015,Runic Gauntlets,Rare,Gloves,28,38,Mage;Support,Gauntlets inscribed with protective runes.
+A016,Voidplate Chest,Epic,Chest,58,90,Warrior;Tank,Forged from void-touched metals of another realm.
+A017,Celestial Helm,Epic,Helmet,52,80,Mage;Support,A helm that glows faintly with starlight.
+A018,Abyss Shield,Epic,Shield,65,70,Tank,A shield that absorbs a portion of all damage.
+A019,Phantom Greaves,Epic,Boots,45,75,Warrior;Tank,Leg armor that phases through minor projectiles.
+A020,Titan Gauntlets,Epic,Gloves,55,85,Warrior;Tank,Gauntlets that amplify grip strength tenfold.
+A021,Godplate Armor,Legendary,Chest,92,150,Warrior;Tank,The legendary armor worn by the first champion.
+A022,Eternal Crown,Legendary,Helmet,85,135,All,A crown said to grant its wearer immortality.
+A023,Aegis of Eternity,Legendary,Shield,100,120,Tank,The greatest shield ever forged by mortal hands.
+A024,Windwalker Boots,Legendary,Boots,75,110,Ranger;Assassin,Boots that allow the wearer to walk on air.
+A025,Dragonlord Gauntlets,Legendary,Gloves,88,130,Warrior;Tank,Gauntlets that command the respect of dragons.

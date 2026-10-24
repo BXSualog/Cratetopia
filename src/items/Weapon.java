@@ -9,10 +9,15 @@ public class Weapon extends Item {
     private final int critChance;
 
     public Weapon(String id, String name, String rarity, String type,
-                  int attack, int critChance, String description) {
-        super(id, name, rarity, type, description);
+                  int attack, int critChance, String equippableClasses, String description) {
+        super(id, name, rarity, type, equippableClasses, description);
         this.attack = attack;
         this.critChance = critChance;
+    }
+
+    public Weapon(String id, String name, String rarity, String type,
+                  int attack, int critChance, String description) {
+        this(id, name, rarity, type, attack, critChance, "All", description);
     }
 
     public int getAttack()     { return attack; }
@@ -20,6 +25,7 @@ public class Weapon extends Item {
 
     @Override
     public String getSummary() {
-        return String.format("  ATK: %-4d | CRIT: %d%%  | %s", attack, critChance, getDescription());
+        return String.format("  ATK: %-4d | CRIT: %d%% | Classes: %-16s | %s",
+                attack, critChance, getEquippableClassesDisplay(), getDescription());
     }
 }

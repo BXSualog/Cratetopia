@@ -1,26 +1,26 @@
-id,name,rarity,type,attack,crit_chance,description
-W001,Rusty Sword,Common,Sword,12,3,A worn blade that has seen better days.
-W002,Wooden Club,Common,Club,10,2,A crudely crafted club of dense wood.
-W003,Iron Dagger,Common,Dagger,9,6,A short iron blade good for quick strikes.
-W004,Cracked Bow,Common,Bow,11,4,A bow with a hairline crack along the limb.
-W005,Apprentice Staff,Common,Staff,8,2,A gnarled staff used by novice mages.
-W006,Steel Shortsword,Uncommon,Sword,20,5,A reliable blade forged by a journeyman smith.
-W007,Hunter's Bow,Uncommon,Bow,18,8,A well-balanced bow favored by rangers.
-W008,Silver Dagger,Uncommon,Dagger,16,10,A dagger with a silver-coated edge.
-W009,Battle Axe,Uncommon,Axe,24,4,A heavy axe built for raw power.
-W010,Mage Wand,Uncommon,Wand,14,6,Channels arcane energy with surprising efficiency.
-W011,Flamebrand,Rare,Sword,35,8,A blade wreathed in perpetual flames.
-W012,Frostpiercer,Rare,Spear,38,7,A spear whose tip is eternally cold.
-W013,Shadow Bow,Rare,Bow,32,12,Arrows fired from this bow are nearly invisible.
-W014,Thunder Hammer,Rare,Hammer,44,5,Crackles with electricity on every swing.
-W015,Arcane Tome,Rare,Staff,30,10,A tome that amplifies spell power greatly.
-W016,Voidblade,Epic,Sword,58,12,A blade infused with the energy of the void.
-W017,Stormbringer Axe,Epic,Axe,65,9,Summons gales with every powerful swing.
-W018,Phantom Bow,Epic,Bow,55,16,Fires spectral arrows that phase through armor.
-W019,Eclipse Staff,Epic,Staff,52,14,Channels solar and lunar energy simultaneously.
-W020,Serpent's Fang,Epic,Dagger,50,20,Twin curved daggers dripping with venom.
-W021,Soulreaver,Legendary,Sword,90,18,A sentient blade that feeds on enemy souls.
-W022,Ragnarok Hammer,Legendary,Hammer,100,14,Forged from the heart of a dying star.
-W023,Eternal Longbow,Legendary,Bow,85,22,Said to never miss its intended target.
-W024,Godslayer Spear,Legendary,Spear,95,16,A spear that once felled a deity.
-W025,Armageddon Staff,Legendary,Staff,88,20,Commands apocalyptic arcane forces.
+id,name,rarity,type,attack,crit_chance,equippable_classes,description
+W001,Rusty Sword,Common,Sword,12,3,Warrior,A worn blade that has seen better days.
+W002,Wooden Club,Common,Club,10,2,Warrior;Tank,A crudely crafted club of dense wood.
+W003,Iron Dagger,Common,Dagger,9,6,Assassin,A short iron blade good for quick strikes.
+W004,Cracked Bow,Common,Bow,11,4,Ranger,A bow with a hairline crack along the limb.
+W005,Apprentice Staff,Common,Staff,8,2,Mage;Support,A gnarled staff used by novice mages.
+W006,Steel Shortsword,Uncommon,Sword,20,5,Warrior,A reliable blade forged by a journeyman smith.
+W007,Hunter's Bow,Uncommon,Bow,18,8,Ranger,A well-balanced bow favored by rangers.
+W008,Silver Dagger,Uncommon,Dagger,16,10,Assassin,A dagger with a silver-coated edge.
+W009,Battle Axe,Uncommon,Axe,24,4,Warrior,A heavy axe built for raw power.
+W010,Mage Wand,Uncommon,Wand,14,6,Mage;Support,Channels arcane energy with surprising efficiency.
+W011,Flamebrand,Rare,Sword,35,8,Warrior,A blade wreathed in perpetual flames.
+W012,Frostpiercer,Rare,Spear,38,7,Warrior;Tank,A spear whose tip is eternally cold.
+W013,Shadow Bow,Rare,Bow,32,12,Ranger,Arrows fired from this bow are nearly invisible.
+W014,Thunder Hammer,Rare,Hammer,44,5,Tank;Warrior,Crackles with electricity on every swing.
+W015,Arcane Tome,Rare,Staff,30,10,Mage;Support,A tome that amplifies spell power greatly.
+W016,Voidblade,Epic,Sword,58,12,Warrior,A blade infused with the energy of the void.
+W017,Stormbringer Axe,Epic,Axe,65,9,Warrior,Summons gales with every powerful swing.
+W018,Phantom Bow,Epic,Bow,55,16,Ranger,Fires spectral arrows that phase through armor.
+W019,Eclipse Staff,Epic,Staff,52,14,Mage;Support,Channels solar and lunar energy simultaneously.
+W020,Serpent's Fang,Epic,Dagger,50,20,Assassin,Twin curved daggers dripping with venom.
+W021,Soulreaver,Legendary,Sword,90,18,Warrior,A sentient blade that feeds on enemy souls.
+W022,Ragnarok Hammer,Legendary,Hammer,100,14,Tank;Warrior,Forged from the heart of a dying star.
+W023,Eternal Longbow,Legendary,Bow,85,22,Ranger,Said to never miss its intended target.
+W024,Godslayer Spear,Legendary,Spear,95,16,Warrior;Tank,A spear that once felled a deity.
+W025,Armageddon Staff,Legendary,Staff,88,20,Mage;Support,Commands apocalyptic arcane forces.

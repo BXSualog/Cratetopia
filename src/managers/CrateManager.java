@@ -3,32 +3,17 @@ package managers;
 import accounts.PlayerAcc;
 import items.Item;
 
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Random;
 
 /**
  * CrateManager handles all crate opening logic for Crateopia.
  *
  * Crate Tier Probabilities (rolled once per open):
- *   Wooden  – 75%  |  shard bonus chance 0.5%
- *   Silver  – 18%  |  shard bonus chance 2%
- *   Gold    –  6%  |  shard bonus chance 5%
- *   Diamond –  1%  |  shard bonus chance 12%
- *
- * Loot Tables:
- * ┌─────────────┬─────────────────────────────────────────────────────────────────┐
- * │ Wooden      │ Coins 200-700 (75%) | Common weapon/armor | Rare equipment 15% │
- * │             │ Shards 2% (1 shard)                                            │
- * ├─────────────┼─────────────────────────────────────────────────────────────────┤
- * │ Silver      │ Coins 800-1000 | Rare weapon 20% | Rare equipment 25%          │
- * │             │ Shards 1-3 (10%)                                               │
- * ├─────────────┼─────────────────────────────────────────────────────────────────┤
- * │ Gold        │ Coins 1500-2500 | Epic equipment 45% | Epic weapon 50%         │
- * │             │ Shards 3-5 (40%)                                               │
- * ├─────────────┼─────────────────────────────────────────────────────────────────┤
- * │ Diamond     │ Coins 5000-10000 | Legendary equipment 50% | Legendary weapon 60%│
- * │             │ Shards 5-9 (50%)                                               │
- * └─────────────┴─────────────────────────────────────────────────────────────────┘
+ *   Wooden  - 75%  |  shard bonus chance 0.5%
+ *   Silver  - 18%  |  shard bonus chance 2%
+ *   Gold    -  6%  |  shard bonus chance 5%
+ *   Diamond -  1%  |  shard bonus chance 12%
  */
 public class CrateManager {
 
@@ -107,16 +92,16 @@ public class CrateManager {
 
         // Common weapon (always)
         Item weapon = pickRandom(itemData.getWeaponsByRarity("Common"));
-        if (weapon != null) { result.addItem(weapon); player.setItemsOwned(player.getItemsOwned() + 1); }
+        if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
 
         // Common armor (always)
         Item armor = pickRandom(itemData.getArmorsByRarity("Common"));
-        if (armor != null) { result.addItem(armor); player.setItemsOwned(player.getItemsOwned() + 1); }
+        if (armor != null) { result.addItem(armor); player.addItem(armor); }
 
         // Rare equipment: 15% chance
         if (chance(15)) {
             Item rare = pickRandom(itemData.getAllEquipmentByRarity("Rare"));
-            if (rare != null) { result.addItem(rare); player.setItemsOwned(player.getItemsOwned() + 1); }
+            if (rare != null) { result.addItem(rare); player.addItem(rare); }
         }
 
         // Shards: 2% chance → 1 shard
@@ -135,7 +120,7 @@ public class CrateManager {
         // Rare weapon: 20% chance
         if (chance(20)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Rare"));
-            if (weapon != null) { result.addItem(weapon); player.setItemsOwned(player.getItemsOwned() + 1); }
+            if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
         }
 
         // Rare equipment (armor/accessory): 25% chance
@@ -143,7 +128,7 @@ public class CrateManager {
             // Pool is armor + accessories only (weapons handled separately above)
             Item equip = pickRandom(itemData.getArmorsByRarity("Rare"));
             if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Rare"));
-            if (equip != null) { result.addItem(equip); player.setItemsOwned(player.getItemsOwned() + 1); }
+            if (equip != null) { result.addItem(equip); player.addItem(equip); }
         }
 
         // Shards: 10% chance → 1-3 shards
@@ -163,13 +148,13 @@ public class CrateManager {
         if (chance(45)) {
             Item equip = pickRandom(itemData.getArmorsByRarity("Epic"));
             if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Epic"));
-            if (equip != null) { result.addItem(equip); player.setItemsOwned(player.getItemsOwned() + 1); }
+            if (equip != null) { result.addItem(equip); player.addItem(equip); }
         }
 
         // Epic weapon: 50% chance
         if (chance(50)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Epic"));
-            if (weapon != null) { result.addItem(weapon); player.setItemsOwned(player.getItemsOwned() + 1); }
+            if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
         }
 
         // Shards: 40% chance → 3-5 shards
@@ -189,13 +174,13 @@ public class CrateManager {
         if (chance(50)) {
             Item equip = pickRandom(itemData.getArmorsByRarity("Legendary"));
             if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Legendary"));
-            if (equip != null) { result.addItem(equip); player.setItemsOwned(player.getItemsOwned() + 1); }
+            if (equip != null) { result.addItem(equip); player.addItem(equip); }
         }
 
         // Legendary weapon: 60% chance
         if (chance(60)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Legendary"));
-            if (weapon != null) { result.addItem(weapon); player.setItemsOwned(player.getItemsOwned() + 1); }
+            if (weapon != null) { result.addItem(weapon); player.addItem(weapon); }
         }
 
         // Shards: 50% chance → 5-9 shards
@@ -219,8 +204,8 @@ public class CrateManager {
         return min + rng.nextInt(max - min + 1);
     }
 
-    /** Picks a random element from the list. Returns null if list is empty. */
-    private <T> T pickRandom(List<T> list) {
+    /** Picks a random element from the linked list. Returns null if list is empty. */
+    private <T> T pickRandom(LinkedList<T> list) {
         if (list == null || list.isEmpty()) return null;
         return list.get(rng.nextInt(list.size()));
     }
@@ -242,13 +227,14 @@ public class CrateManager {
     // =========================================================================
 
     /**
-     * Immutable-ish value object describing everything that came out of one crate open.
+     * Value object describing everything that came out of one crate open.
+     * Uses LinkedList adhering to DSA requirements.
      */
     public static class CrateResult {
         private final String crateTier;
         private int coinsEarned  = 0;
         private int shardsEarned = 0;
-        private final List<Item> items = new java.util.ArrayList<>();
+        private final java.util.LinkedList<Item> items = new java.util.LinkedList<>();
 
         public CrateResult(String crateTier) {
             this.crateTier = crateTier;
@@ -261,7 +247,7 @@ public class CrateManager {
         public String    getCrateTier()   { return crateTier; }
         public int       getCoinsEarned() { return coinsEarned; }
         public int       getShardsEarned(){ return shardsEarned; }
-        public List<Item> getItems()      { return items; }
+        public java.util.LinkedList<Item> getItems() { return items; }
 
         /** Returns true if the result contains at least one shard reward. */
         public boolean hasShards()        { return shardsEarned > 0; }
