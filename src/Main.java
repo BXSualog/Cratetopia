@@ -1,4 +1,7 @@
 import accounts.PlayerAcc;
+import items.Item;
+import managers.CrateManager;
+import managers.ItemDataManager;
 import managers.PlayerDataManager;
 
 public class Main {
@@ -6,6 +9,8 @@ public class Main {
     public static void main(String[] args) {
         InputHandling input = new InputHandling();
         PlayerDataManager playerDataManager = new PlayerDataManager();
+        ItemDataManager itemDataManager = new ItemDataManager();
+        CrateManager crateManager = new CrateManager(itemDataManager);
 
         String choice;
 
@@ -27,7 +32,7 @@ public class Main {
                     break;
 
                 case "2":
-                    loginUser(input, playerDataManager);
+                    loginUser(input, playerDataManager, crateManager);
                     break;
 
                 case "3":
@@ -92,26 +97,35 @@ public class Main {
         input.readLine("\nPress Enter to return to the Login Menu...");
     }
 
-    public static void loginUser(InputHandling input, PlayerDataManager playerDataManager) {
-        System.out.println("===========================================");
-        System.out.println("               PLAYER LOGIN");
-        System.out.println("===========================================");
+    public static void loginUser(InputHandling input, PlayerDataManager playerDataManager, CrateManager crateManager) {
+        while (true) {
+            System.out.println("===========================================");
+            System.out.println("               PLAYER LOGIN");
+            System.out.println("===========================================");
 
-        String username = input.readLine("Enter username: ");
-        String password = input.readLine("Enter password: ");
+            String username = input.readLine("Enter username: ");
+            if (username.equals("0")) {
+                break;
+            }
+            String password = input.readLine("Enter password: ");
 
-        boolean success = playerDataManager.loginPlayer(username, password);
-        if (success) {
-            PlayerAcc player = playerDataManager.getPlayer(username);
-            System.out.println("Login successful! Welcome, " + player.getUsername() + "!");
-            playerHomescreen(input, playerDataManager, player);
-        } else {
-            System.out.println("Invalid username or password. Please try again.");
-            input.readLine("\nPress Enter to return to the Login Menu...");
+            boolean success = playerDataManager.loginPlayer(username, password);
+            if (success) {
+                PlayerAcc player = playerDataManager.getPlayer(username);
+                System.out.println("Login successful! Welcome, " + player.getUsername() + "!");
+                playerHomescreen(input, playerDataManager, crateManager, player);
+                break;
+            } else {
+                System.out.println("Invalid username or password. Please try again.");
+                String opt = input.readLine("\nPress Enter to try again (or '0' to return)...");
+                if (opt.equals("0")) {
+                    break;
+                }
+            }
         }
     }
 
-    public static void playerHomescreen(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+    public static void playerHomescreen(InputHandling input, PlayerDataManager playerDataManager, CrateManager crateManager, PlayerAcc player) {
         String choice;
 
         do {
@@ -138,7 +152,7 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    // Open Crates
+                    openingCrates(input, playerDataManager, crateManager, player);
                     break;
                 case "2":
                     // Characters & Equipment
@@ -183,9 +197,97 @@ public class Main {
                     System.out.println("Invalid option. Please try again.");
             }
 
-            if (!choice.equals("7")) {
+            if (!choice.equals("7") && !choice.equals("1")) {
                 input.readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("7"));
+    }
+
+    public static void openingCrates(InputHandling input, PlayerDataManager playerDataManager,
+                                      CrateManager crateManager, PlayerAcc player) {
+        String choice;
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("                  OPEN CRATES");
+            System.out.println("==================================================");
+            System.out.println("  Test your luck! Opening crates is free and");
+            System.out.println("  unlimited. Earn coins, shards, and gear!");
+            System.out.println("--------------------------------------------------");
+            System.out.println("  Coins: " + player.getCoins() + "    Shards: " + player.getShards());
+            System.out.println();
+            System.out.println("  Crate Tier Odds:");
+            System.out.println("  [Wooden Crate]   - Chance: 75%  [Shard Bonus: 0.5%]");
+            System.out.println("  [Silver Crate]   - Chance: 18%  [Shard Bonus: 2%]");
+            System.out.println("  [Gold Crate]     - Chance: 6%   [Shard Bonus: 5%]");
+            System.out.println("  [Diamond Crate]  - Chance: 1%   [Shard Bonus: 12%]");
+            System.out.println();
+            System.out.println("--------------------------------------------------");
+            System.out.println("1. Open a Crate");
+            System.out.println("0. Back");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    performCrateOpen(input, crateManager, player);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    input.readLine("\nPress Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    /**
+     * Executes one crate roll, displays an animated result screen, and prints loot.
+     */
+    private static void performCrateOpen(InputHandling input, CrateManager crateManager, PlayerAcc player) {
+        // Suspense animation
+        System.out.print("\n  Rolling crate tier");
+        for (int i = 0; i < 6; i++) {
+            System.out.print(".");
+            try { Thread.sleep(220); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        }
+        System.out.println();
+
+        // Roll the tier
+        String tier = crateManager.rollCrateTier();
+
+        // Banner per tier
+        System.out.println();
+        System.out.println("  =============================================");
+        System.out.println("  [ " + tier.toUpperCase() + " OPENED ]");
+        System.out.println("  =============================================");
+
+        // Open and get result
+        CrateManager.CrateResult result = crateManager.openCrate(tier, player);
+
+        // Display rewards
+        System.out.println();
+        System.out.println("  [REWARDS]");
+        System.out.println("  Coins earned   : +" + result.getCoinsEarned());
+        if (result.hasShards()) {
+            System.out.println("  Shards earned  : +" + result.getShardsEarned());
+        }
+        if (!result.getItems().isEmpty()) {
+            System.out.println("  Items obtained :");
+            for (Item item : result.getItems()) {
+                System.out.println("   - " + item.toString());
+                System.out.println("     " + item.getSummary().trim());
+            }
+        }
+        System.out.println();
+        System.out.println("  New Balance -> Coins: " + player.getCoins() + "  |  Shards: " + player.getShards());
+        System.out.println();
+
+        System.out.println("  Returning to Open Crates...");
+        try {
+            Thread.sleep(1400);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
