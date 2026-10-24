@@ -1,0 +1,11 @@
+set_name,bonus_title,bonus_defense,bonus_hp_percent,bonus_description
+Iron,Iron Resolve,5,0,+5 DEF
+Leather,Hunter's Instinct,0,3,+3% HP
+Chainmail,Steadfast Guard,10,5,+10 DEF & +5% HP
+Studded,Shadow Veil,0,5,+5% HP
+Dragonscale,Dragon's Fortitude,20,15,+20 DEF & +15% HP
+Warden,Warden's Oath,15,10,+15 DEF & +10% HP
+Voidplate,Void Dominion,30,20,+30 DEF & +20% HP
+Celestial,Starborn Grace,0,25,+25% HP
+Godplate,Champion's Legacy,50,30,+50 DEF & +30% HP
+Eternal,Eternal Vigil,40,25,+40 DEF & +25% HP

@@ -1,7 +1,7 @@
-id,name,stars,hp,attack,defense,crit_chance,description
-ASN001,Alley Rogue,1,90,16,5,8,A nimble pickpocket who strikes silently with a rusty shiv.
-ASN002,Shadow Scout,2,160,32,10,12,A stealthy stalker skilled in reconnaissance and surprise ambushes.
-ASN003,Nightblade,3,280,55,18,18,A lethal contract killer specializing in poison-coated daggers.
-ASN004,Phantom Reaper,4,460,95,30,25,A ghost-like assassin who phases through darkness to deliver fatal blows.
-ASN005,Eclipse Master,5,780,155,50,32,A master of the unseen realm whose strikes leave no trace of blood.
-ASN006,Primordial Death,6,1250,245,75,40,The herald of sudden demise whose daggers sever the mortal soul itself.
+id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
+ASN001,Alley Rogue,Shadow Street Thief,Dark,1,90,16,5,8,A nimble pickpocket who strikes silently with a rusty shiv.
+ASN002,Shadow Scout,Night Recon,Wind,2,160,32,10,12,A stealthy stalker skilled in reconnaissance and surprise ambushes.
+ASN003,Nightblade,Silent Executioner,Dark,3,280,55,18,18,A lethal contract killer specializing in poison-coated daggers.
+ASN004,Phantom Reaper,Spectral Harvester,Dark,4,460,95,30,25,A ghost-like assassin who phases through darkness to deliver fatal blows.
+ASN005,Eclipse Master,Lord of the Umbra,Dark,5,780,155,50,32,A master of the unseen realm whose strikes leave no trace of blood.
+ASN006,Primordial Death,Herald of Oblivion,Dark,6,1250,245,75,40,The herald of sudden demise whose daggers sever the mortal soul itself.

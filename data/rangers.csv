@@ -1,7 +1,7 @@
-id,name,stars,hp,attack,defense,crit_chance,description
-RNG001,Forest Trapper,1,100,14,6,6,A woodlander with a simple hunting bow capable of tracking game and foes alike.
-RNG002,Elven Fletcher,2,180,26,12,10,A skilled archer who crafts precise arrows that pierce enemy armor.
-RNG003,Hawkeye Marksman,3,310,48,20,15,A sharp-eyed sniper who can spot and shoot down targets from hundreds of paces.
-RNG004,Stormbow Hunter,4,500,80,32,22,An agile tracker who imbues piercing volleys with crackling gale force.
-RNG005,Celestial Deadeye,5,820,135,52,28,A legendary marksman whose glowing energy arrows never deviate from their mark.
-RNG006,Goddess of the Hunt,6,1350,215,82,35,A divine huntress capable of raining celestial arrows across the entire battlefield.
+id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
+RNG001,Forest Trapper,Wildwood Scout,Wind,1,100,14,6,6,A woodlander with a simple hunting bow capable of tracking game and foes alike.
+RNG002,Elven Fletcher,Woodland Archer,Wind,2,180,26,12,10,A skilled archer who crafts precise arrows that pierce enemy armor.
+RNG003,Hawkeye Marksman,Longshot Deadeye,Wind,3,310,48,20,15,A sharp-eyed sniper who can spot and shoot down targets from hundreds of paces.
+RNG004,Stormbow Hunter,Gale Striker,Lightning,4,500,80,32,22,An agile tracker who imbues piercing volleys with crackling gale force.
+RNG005,Celestial Deadeye,Solar Piercer,Light,5,820,135,52,28,A legendary marksman whose glowing energy arrows never deviate from their mark.
+RNG006,Goddess of the Hunt,Divine Huntress,Light,6,1350,215,82,35,A divine huntress capable of raining celestial arrows across the entire battlefield.

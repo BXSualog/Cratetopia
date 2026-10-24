@@ -1,7 +1,7 @@
-id,name,stars,hp,attack,defense,crit_chance,description
-TNK001,Town Guard,1,160,10,14,2,A sturdy sentinel carrying a heavy wooden barrier to hold back threats.
-TNK002,Iron Shieldbearer,2,300,18,26,3,An armored defender skilled in barricade tactics and absorbing shock.
-TNK003,Fortress Warden,3,520,32,45,5,A disciplined protector who anchors the team with an unyielding shield wall.
-TNK004,Goliath Juggernaut,4,850,52,75,7,A colossal warrior clad in monolithic plate armor who deflects all attacks.
-TNK005,Aegis Sentinel,5,1400,85,120,10,An ancient guardian infused with divine protection that renders him nearly unshakeable.
-TNK006,Immortal Colossus,6,2200,130,190,15,A living mountain of enchanted stone and steel that shields all allies from harm.
+id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
+TNK001,Town Guard,Gate Sentinel,Earth,1,160,10,14,2,A sturdy sentinel carrying a heavy wooden barrier to hold back threats.
+TNK002,Iron Shieldbearer,Iron Barrier,Earth,2,300,18,26,3,An armored defender skilled in barricade tactics and absorbing shock.
+TNK003,Fortress Warden,Stone Bastion,Earth,3,520,32,45,5,A disciplined protector who anchors the team with an unyielding shield wall.
+TNK004,Goliath Juggernaut,Colossal Rampart,Earth,4,850,52,75,7,A colossal warrior clad in monolithic plate armor who deflects all attacks.
+TNK005,Aegis Sentinel,Divine Bulwark,Light,5,1400,85,120,10,An ancient guardian infused with divine protection that renders him nearly unshakeable.
+TNK006,Immortal Colossus,Living Mountain,Earth,6,2200,130,190,15,A living mountain of enchanted stone and steel that shields all allies from harm.

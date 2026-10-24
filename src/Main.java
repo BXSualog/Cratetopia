@@ -2,6 +2,7 @@ import accounts.PlayerAcc;
 import characters.Hero;
 import items.Accessory;
 import items.Armor;
+import items.ArmorSet;
 import items.Item;
 import items.Weapon;
 import managers.CharacterDataManager;
@@ -324,6 +325,8 @@ public class Main {
 
         for (Hero h : result.getSummonedHeroes()) {
             System.out.println("  " + h.toString());
+            System.out.printf("    Title: %-20s | Elemental Power: %s\n",
+                    (h.getTitle().isEmpty() ? "None" : h.getTitle()), h.getElementalPowerDisplay());
             System.out.printf("    HP: %-4d | ATK: %-3d | DEF: %-3d | CRIT: %d%%\n",
                     h.getBaseHp(), h.getBaseAttack(), h.getBaseDefense(), h.getBaseCritChance());
             System.out.println("    \"" + h.getDescription() + "\"");
@@ -334,7 +337,7 @@ public class Main {
         if (!result.getHighestRankPulls().isEmpty()) {
             Hero top = result.getHighestRankPulls().peek();
             System.out.println("--------------------------------------------------");
-            System.out.println("  ★ Top Summon: " + top.getName() + " (" + top.getStarsDisplay() + " " + top.getCharacterClass().getDisplayName() + ")");
+            System.out.println("  ★ Top Summon: " + top.getName() + " - \"" + top.getTitle() + "\" (" + top.getStarsDisplay() + " " + top.getCharacterClass().getDisplayName() + " | " + top.getElementalPowerDisplay() + ")");
         }
 
         System.out.println("--------------------------------------------------");
@@ -393,9 +396,12 @@ public class Main {
             System.out.println("\n==================================================");
             System.out.println("           HERO DETAILS & EQUIPMENT");
             System.out.println("==================================================");
-            System.out.println("  Name  : " + hero.getName());
-            System.out.println("  Class : " + hero.getCharacterClass().getDisplayName() + " [" + hero.getStarsDisplay() + " " + hero.getRarityTitle() + "]");
-            System.out.println("  Bio   : " + hero.getDescription());
+            System.out.println("  Name            : " + hero.getName());
+            System.out.println("  Title           : " + (hero.getTitle().isEmpty() ? "None" : hero.getTitle()));
+            System.out.println("  Class           : " + hero.getCharacterClass().getDisplayName());
+            System.out.println("  Star Level      : " + hero.getStarsDisplay());
+            System.out.println("  Elemental Power : " + hero.getElementalPowerDisplay());
+            System.out.println("  Description     : " + hero.getDescription());
             System.out.println("--------------------------------------------------");
             System.out.printf("  Base Stats  : HP: %-4d | ATK: %-3d | DEF: %-3d | CRIT: %d%%\n",
                     hero.getBaseHp(), hero.getBaseAttack(), hero.getBaseDefense(), hero.getBaseCritChance());
@@ -404,11 +410,18 @@ public class Main {
             System.out.println("--------------------------------------------------");
             System.out.println("  [Equipped Equipment]");
             System.out.println("  Weapon    : " + (hero.getEquippedWeapon() != null ? hero.getEquippedWeapon().getName() + " (" + hero.getEquippedWeapon().getSummary().trim() + ")" : "None"));
-            System.out.println("  Armor     : " + (hero.getEquippedArmor() != null ? hero.getEquippedArmor().getName() + " (" + hero.getEquippedArmor().getSummary().trim() + ")" : "None"));
+            System.out.println("  Helmet    : " + (hero.getEquippedArmor(Hero.SLOT_HELMET) != null ? hero.getEquippedArmor(Hero.SLOT_HELMET).getName() + " (" + hero.getEquippedArmor(Hero.SLOT_HELMET).getSummary().trim() + ")" : "None"));
+            System.out.println("  Chestplate: " + (hero.getEquippedArmor(Hero.SLOT_CHEST) != null ? hero.getEquippedArmor(Hero.SLOT_CHEST).getName() + " (" + hero.getEquippedArmor(Hero.SLOT_CHEST).getSummary().trim() + ")" : "None"));
+            System.out.println("  Leggings  : " + (hero.getEquippedArmor(Hero.SLOT_LEGGINGS) != null ? hero.getEquippedArmor(Hero.SLOT_LEGGINGS).getName() + " (" + hero.getEquippedArmor(Hero.SLOT_LEGGINGS).getSummary().trim() + ")" : "None"));
             System.out.println("  Accessory : " + (hero.getEquippedAccessory() != null ? hero.getEquippedAccessory().getName() + " (" + hero.getEquippedAccessory().getSummary().trim() + ")" : "None"));
+            if (hero.hasFullSetBonus()) {
+                ArmorSet activeSet = hero.getActiveArmorSet();
+                String setDisplay = (activeSet != null) ? activeSet.getDisplayLabel() : "Set Bonus: " + hero.getActiveSetName() + " Complete";
+                System.out.println("  >>> " + setDisplay + " <<<");
+            }
             System.out.println("--------------------------------------------------");
             System.out.println("1. Equip / Change Weapon");
-            System.out.println("2. Equip / Change Armor");
+            System.out.println("2. Equip / Change Armor Piece");
             System.out.println("3. Equip / Change Accessory");
             System.out.println("4. Unequip an Item");
             System.out.println("0. Back to Roster");
@@ -510,16 +523,20 @@ public class Main {
         System.out.println("                   UNEQUIP GEAR");
         System.out.println("==================================================");
         System.out.println("1. Weapon    : " + (hero.getEquippedWeapon() != null ? hero.getEquippedWeapon().getName() : "(Empty)"));
-        System.out.println("2. Armor     : " + (hero.getEquippedArmor() != null ? hero.getEquippedArmor().getName() : "(Empty)"));
-        System.out.println("3. Accessory : " + (hero.getEquippedAccessory() != null ? hero.getEquippedAccessory().getName() : "(Empty)"));
+        System.out.println("2. Helmet    : " + (hero.getEquippedArmor(Hero.SLOT_HELMET) != null ? hero.getEquippedArmor(Hero.SLOT_HELMET).getName() : "(Empty)"));
+        System.out.println("3. Chestplate: " + (hero.getEquippedArmor(Hero.SLOT_CHEST) != null ? hero.getEquippedArmor(Hero.SLOT_CHEST).getName() : "(Empty)"));
+        System.out.println("4. Leggings  : " + (hero.getEquippedArmor(Hero.SLOT_LEGGINGS) != null ? hero.getEquippedArmor(Hero.SLOT_LEGGINGS).getName() : "(Empty)"));
+        System.out.println("5. Accessory : " + (hero.getEquippedAccessory() != null ? hero.getEquippedAccessory().getName() : "(Empty)"));
         System.out.println("0. Cancel");
         System.out.println("--------------------------------------------------");
 
         String choice = input.readLine("Select slot to unequip: ");
         String slot = null;
         if (choice.equals("1")) slot = "weapon";
-        else if (choice.equals("2")) slot = "armor";
-        else if (choice.equals("3")) slot = "accessory";
+        else if (choice.equals("2")) slot = "helmet";
+        else if (choice.equals("3")) slot = "chest";
+        else if (choice.equals("4")) slot = "leggings";
+        else if (choice.equals("5")) slot = "accessory";
         else return;
 
         Item unequipped = hero.unequip(slot);

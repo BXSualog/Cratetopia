@@ -137,7 +137,7 @@ public class ItemDataManager {
     }
 
     private void loadArmors() {
-        // Header: id,name,rarity,type,defense,health_bonus,equippable_classes,description
+        // Header: id,name,rarity,type,set_name,defense,health_bonus,health_percentage_bonus,equippable_classes,description
         try (BufferedReader reader = new BufferedReader(new FileReader(new File(ARMOR_CSV)))) {
             String line;
             boolean first = true;
@@ -145,20 +145,29 @@ public class ItemDataManager {
                 line = line.trim();
                 if (line.isEmpty()) continue;
                 if (first) { first = false; continue; } // skip header
-                String[] p = line.split(",", 8);
-                if (p.length < 7) continue;
+                // Split into at most 10 parts
+                String[] p = line.split(",", 10);
+                if (p.length < 9) continue;
 
-                if (p.length == 7) {
+                // p[0]=id, p[1]=name, p[2]=rarity, p[3]=type, p[4]=set_name,
+                // p[5]=defense, p[6]=health_bonus, p[7]=health_percentage_bonus,
+                // p[8]=equippable_classes, p[9]=description
+                if (p.length == 9) {
+                    // No description column — use empty string
                     armors.add(new Armor(
                             p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
-                            parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
-                            "All", p[6].trim()
+                            p[4].trim(),
+                            parseIntSafe(p[5].trim()), parseIntSafe(p[6].trim()),
+                            parseIntSafe(p[7].trim()),
+                            p[8].trim(), ""
                     ));
                 } else {
                     armors.add(new Armor(
                             p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(),
-                            parseIntSafe(p[4].trim()), parseIntSafe(p[5].trim()),
-                            p[6].trim(), p[7].trim()
+                            p[4].trim(),
+                            parseIntSafe(p[5].trim()), parseIntSafe(p[6].trim()),
+                            parseIntSafe(p[7].trim()),
+                            p[8].trim(), p[9].trim()
                     ));
                 }
             }

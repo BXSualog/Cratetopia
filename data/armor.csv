@@ -1,26 +1,33 @@
-id,name,rarity,type,defense,health_bonus,equippable_classes,description
-A001,Tattered Robe,Common,Robe,5,10,Mage;Support,A fraying robe that barely offers protection.
-A002,Wooden Shield,Common,Shield,8,5,Tank;Warrior,A round shield crudely shaped from oak.
-A003,Cloth Tunic,Common,Chest,6,15,All,A simple linen tunic with no real protection.
-A004,Leather Cap,Common,Helmet,4,8,Ranger;Assassin,A cap of rough leather offering minimal cover.
-A005,Rope Sandals,Common,Boots,3,5,All,Sandals woven from thick rope.
-A006,Chainmail Vest,Uncommon,Chest,18,30,Warrior;Tank;Ranger,Interlocked iron rings providing decent defense.
-A007,Iron Helmet,Uncommon,Helmet,15,20,Warrior;Tank,A solid iron helmet with a full visor.
-A008,Studded Leather,Uncommon,Chest,16,25,Ranger;Assassin,Leather reinforced with iron studs.
-A009,Knight's Shield,Uncommon,Shield,22,15,Tank;Warrior,A heater shield bearing a noble's crest.
-A010,Ranger Boots,Uncommon,Boots,12,18,Ranger;Assassin,Lightweight boots that aid in silent movement.
-A011,Dragonscale Vest,Rare,Chest,35,55,Warrior;Tank,Armor crafted from genuine dragon scales.
-A012,Warden's Helm,Rare,Helmet,30,45,Tank;Warrior;Support,A helm enchanted to resist magical attacks.
-A013,Guardian Shield,Rare,Shield,40,35,Tank,A shield blessed by a war deity.
-A014,Shadowstep Boots,Rare,Boots,25,40,Assassin;Ranger,Enchanted boots that muffle every footstep.
-A015,Runic Gauntlets,Rare,Gloves,28,38,Mage;Support,Gauntlets inscribed with protective runes.
-A016,Voidplate Chest,Epic,Chest,58,90,Warrior;Tank,Forged from void-touched metals of another realm.
-A017,Celestial Helm,Epic,Helmet,52,80,Mage;Support,A helm that glows faintly with starlight.
-A018,Abyss Shield,Epic,Shield,65,70,Tank,A shield that absorbs a portion of all damage.
-A019,Phantom Greaves,Epic,Boots,45,75,Warrior;Tank,Leg armor that phases through minor projectiles.
-A020,Titan Gauntlets,Epic,Gloves,55,85,Warrior;Tank,Gauntlets that amplify grip strength tenfold.
-A021,Godplate Armor,Legendary,Chest,92,150,Warrior;Tank,The legendary armor worn by the first champion.
-A022,Eternal Crown,Legendary,Helmet,85,135,All,A crown said to grant its wearer immortality.
-A023,Aegis of Eternity,Legendary,Shield,100,120,Tank,The greatest shield ever forged by mortal hands.
-A024,Windwalker Boots,Legendary,Boots,75,110,Ranger;Assassin,Boots that allow the wearer to walk on air.
-A025,Dragonlord Gauntlets,Legendary,Gloves,88,130,Warrior;Tank,Gauntlets that command the respect of dragons.
+id,name,rarity,type,set_name,defense,health_bonus,health_percentage_bonus,equippable_classes,description
+A001,Cloth Tunic,Common,Chest,None,4,10,0,All,A simple linen tunic with minimal protection.
+A002,Rope Sandals,Common,Leggings,None,3,5,0,All,Sandals woven from thick rope.
+A003,Leather Cap,Common,Helmet,Leather,5,8,1,Ranger;Assassin;Support,A cap of treated leather offering basic head cover.
+A004,Leather Tunic,Common,Chest,Leather,8,15,2,Ranger;Assassin;Support,A snug leather jerkin that allows easy movement.
+A005,Leather Boots,Common,Leggings,Leather,5,10,1,Ranger;Assassin;Support,Sturdy boots crafted from hardened leather.
+A006,Iron Helmet,Common,Helmet,Iron,8,10,1,Warrior;Tank,A solid iron helmet with a protective brow.
+A007,Iron Chestplate,Common,Chest,Iron,12,20,2,Warrior;Tank,Stout iron breastplate forged for frontline battle.
+A008,Iron Greaves,Common,Leggings,Iron,8,12,1,Warrior;Tank,Heavy iron greaves guarding the lower legs.
+A009,Chainmail Coif,Uncommon,Helmet,Chainmail,14,18,2,Warrior;Tank;Ranger,A flexible hood of interlocked iron rings.
+A010,Chainmail Vest,Uncommon,Chest,Chainmail,18,30,4,Warrior;Tank;Ranger,Interlocked iron rings providing dependable defense.
+A011,Chainmail Greaves,Uncommon,Leggings,Chainmail,14,20,2,Warrior;Tank;Ranger,Reinforced chainmail trousers with knee guards.
+A012,Studded Hood,Uncommon,Helmet,Studded,12,16,2,Ranger;Assassin,Reinforced leather hood with iron studs.
+A013,Studded Leather,Uncommon,Chest,Studded,16,25,3,Ranger;Assassin,Leather armor reinforced with hardened iron studs.
+A014,Studded Boots,Uncommon,Leggings,Studded,12,18,2,Ranger;Assassin,Silent boots studded along the shins.
+A015,Dragonscale Helm,Rare,Helmet,Dragonscale,28,40,4,Warrior;Tank,A horned helm forged from fiery red scales.
+A016,Dragonscale Vest,Rare,Chest,Dragonscale,35,55,6,Warrior;Tank,Armor crafted from genuine ancient dragon scales.
+A017,Dragonscale Greaves,Rare,Leggings,Dragonscale,28,45,4,Warrior;Tank,Impenetrable greaves forged from dragon scales.
+A018,Warden's Helm,Rare,Helmet,Warden,26,38,3,Tank;Warrior;Support,A helm enchanted to resist crushing blows.
+A019,Warden's Cuirass,Rare,Chest,Warden,32,50,5,Tank;Warrior;Support,Heavy cuirass worn by elite sanctuary wardens.
+A020,Warden's Sabatons,Rare,Leggings,Warden,26,42,3,Tank;Warrior;Support,Blessed steel sabatons rooted in defensive strength.
+A021,Voidplate Helm,Epic,Helmet,Voidplate,48,70,6,Warrior;Tank,A visorless helm that peers directly into the void.
+A022,Voidplate Chest,Epic,Chest,Voidplate,58,90,8,Warrior;Tank,Forged from void-touched metals of an ethereal realm.
+A023,Voidplate Greaves,Epic,Leggings,Voidplate,48,75,6,Warrior;Tank,Leg armor that phases through minor kinetic shock.
+A024,Celestial Crown,Epic,Helmet,Celestial,42,65,7,Mage;Support,A crown that radiates radiant starlight.
+A025,Celestial Robe,Epic,Chest,Celestial,52,80,10,Mage;Support,Flowing robes woven from cosmic nebulae.
+A026,Celestial Slippers,Epic,Leggings,Celestial,42,65,7,Mage;Support,Ethereal slippers leaving faint stardust in their wake.
+A027,Godplate Helm,Legendary,Helmet,Godplate,80,120,8,Warrior;Tank,The crowning helm worn by the primordial champion.
+A028,Godplate Armor,Legendary,Chest,Godplate,92,150,12,Warrior;Tank,The legendary armor forged by titan deities.
+A029,Godplate Greaves,Legendary,Leggings,Godplate,80,125,8,Warrior;Tank,Immovable titan greaves anchored by celestial alloy.
+A030,Eternal Crown,Legendary,Helmet,Eternal,75,115,10,All,A mythical crown that channels perpetual vitality.
+A031,Eternal Robes,Legendary,Chest,Eternal,85,135,14,All,Sacred robes said to grant its bearer immortal warding.
+A032,Eternal Treads,Legendary,Leggings,Eternal,75,120,10,All,Treads that effortlessly stride across eternity.
