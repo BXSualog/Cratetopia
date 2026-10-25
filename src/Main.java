@@ -178,7 +178,7 @@ public class Main {
                     inventoryMenu(input, player);
                     break;
                 case "4":
-                    // Shop & Trading
+                    shopAndTradingMenu(input, playerDataManager, player);
                     break;
                 case "5":
                     // Achievements & Statistics
@@ -214,7 +214,7 @@ public class Main {
                     System.out.println("Invalid option. Please try again.");
             }
 
-            if (!choice.equals("7") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3")) {
+            if (!choice.equals("7") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3") && !choice.equals("4")) {
                 input.readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("7"));
@@ -271,16 +271,16 @@ public class Main {
             System.out.println("\n==================================================");
             System.out.println("            PORTAL OF LEGENDS (GACHA)");
             System.out.println("==================================================");
-            System.out.println("  Summon legendary heroes across 6 classes!");
-            System.out.println("  Classes : Warrior, Mage, Assassin, Tank, Ranger, Support");
+            System.out.println("  Summon legendary heroes across 7 classes!");
+            System.out.println("  Classes : Warrior, Mage, Assassin, Tank, Ranger, Support, Brawler");
             System.out.println("  Rarities: 1★ to 6★ (Scaling stats & power)");
             System.out.println("--------------------------------------------------");
             System.out.println("  Current Shards: " + player.getShards());
             System.out.println();
             System.out.println("  Rates: 1★ (45%) | 2★ (30%) | 3★ (15%) | 4★ (7%) | 5★ (2.5%) | 6★ (0.5%)");
             System.out.println("--------------------------------------------------");
-            System.out.println("1. Single Summon (5 Shards)");
-            System.out.println("2. 10x Multi-Summon (45 Shards) [Guaranteed 3★+]");
+            System.out.println("1. Single Summon (1 Shard)");
+            System.out.println("2. 10x Multi-Summon (10 Shards) [Guaranteed 3★+]");
             System.out.println("0. Back");
             System.out.println("==================================================");
 
@@ -594,6 +594,82 @@ public class Main {
     }
 
     // =========================================================================
+    // Shop & Trading Menu
+    // =========================================================================
+
+    public static void shopAndTradingMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        String choice;
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("                 SHOP & TRADING");
+            System.out.println("==================================================");
+            System.out.println("  Convert your hard-earned coins into shards for");
+            System.out.println("  summoning legendary heroes at the Gacha Portal!");
+            System.out.println("--------------------------------------------------");
+            System.out.println("  Coins: " + String.format("%,d", player.getCoins()) + "          Shards: " + String.format("%,d", player.getShards()));
+            System.out.println("--------------------------------------------------");
+            System.out.println("1. Trade 2,000 Coins  -> 1 Shard");
+            System.out.println("2. Trade 10,000 Coins -> 5 Shards");
+            System.out.println("3. Trade 20,000 Coins -> 10 Shards");
+            System.out.println("0. Back to Main Menu");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    convertCoinsToShards(input, playerDataManager, player, 2000, 1);
+                    break;
+                case "2":
+                    convertCoinsToShards(input, playerDataManager, player, 10000, 5);
+                    break;
+                case "3":
+                    convertCoinsToShards(input, playerDataManager, player, 20000, 10);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    input.readLine("\nPress Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    private static void convertCoinsToShards(InputHandling input, PlayerDataManager playerDataManager,
+                                             PlayerAcc player, int coinCost, int shardsGained) {
+        if (player.getCoins() < coinCost) {
+            System.out.println("\n[!] Not enough coins! You need " + String.format("%,d", coinCost) +
+                    " coins, but only have " + String.format("%,d", player.getCoins()) + ".");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        System.out.print("\n  Converting " + String.format("%,d", coinCost) + " coins to " + shardsGained + " shard" + (shardsGained > 1 ? "s" : ""));
+        for (int i = 0; i < 5; i++) {
+            System.out.print(".");
+            try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        }
+        System.out.println();
+
+        player.setCoins(player.getCoins() - coinCost);
+        player.setShards(player.getShards() + shardsGained);
+
+        // Auto-save player balance changes
+        playerDataManager.saveAllPlayersToCsv();
+
+        System.out.println("\n==================================================");
+        System.out.println("              CONVERSION SUCCESSFUL");
+        System.out.println("==================================================");
+        System.out.println("  Coins spent   : -" + String.format("%,d", coinCost));
+        System.out.println("  Shards gained : +" + shardsGained);
+        System.out.println("--------------------------------------------------");
+        System.out.println("  New Balance   -> Coins: " + String.format("%,d", player.getCoins()) +
+                "  |  Shards: " + String.format("%,d", player.getShards()));
+        System.out.println("==================================================");
+        input.readLine("\nPress Enter to continue...");
+    }
+
+    // =========================================================================
     // Crates
     // =========================================================================
 
@@ -675,10 +751,5 @@ public class Main {
         System.out.println();
 
         System.out.println("  Returning to Open Crates...");
-        try {
-            Thread.sleep(1200);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

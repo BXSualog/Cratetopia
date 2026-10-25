@@ -15,20 +15,19 @@ import java.util.Random;
  * Duplicate hero policy:
  * If a rolled hero is already owned by the player it is automatically
  * converted to shards based on the hero's star level:
- * 1-Star → 3 shards
- * 2-Star → 5 shards
- * 3-Star → 10 shards
- * 4-Star → 20 shards
- * 5-Star → 40 shards
- * 6-Star → 80 shards
+ * 1-Star → 1 shard
+ * 2-Star → 2 shards
+ * 3-Star → 5 shards
+ * 4-Star → 10 shards
+ * 5-Star → 20 shards
+ * 6-Star → 40 shards
  */
 public class CharacterGachaManager {
-    public static final int SINGLE_PULL_SHARDS = 5;
-    public static final int MULTI_PULL_SHARDS = 45; // 10x pull with discount
+    public static final int SINGLE_PULL_SHARDS = 1;
+    public static final int MULTI_PULL_SHARDS = 10;
 
-    // Shards awarded when a duplicate hero is rolled, indexed by star level (index
-    // 0 unused)
-    private static final int[] DUP_SHARDS_PER_STAR = { 0, 3, 5, 10, 20, 40, 70 };
+    // Shards awarded when a duplicate hero is rolled, indexed by star level (index 0 unused)
+    private static final int[] DUP_SHARDS_PER_STAR = { 0, 1, 2, 5, 10, 20, 40 };
 
     private final CharacterDataManager charData;
     private final Random rng = new Random();
@@ -39,11 +38,11 @@ public class CharacterGachaManager {
 
     /**
      * Executes a single character gacha draw.
-     * Costs 5 shards.
+     * Costs 1 shard.
      */
     public GachaResult drawSingle(PlayerAcc player) {
         if (player.getShards() < SINGLE_PULL_SHARDS) {
-            return new GachaResult(false, "Not enough shards! You need " + SINGLE_PULL_SHARDS + " shards.");
+            return new GachaResult(false, "Not enough shards! You need " + SINGLE_PULL_SHARDS + " shard.");
         }
 
         player.setShards(player.getShards() - SINGLE_PULL_SHARDS);
@@ -57,7 +56,7 @@ public class CharacterGachaManager {
 
     /**
      * Executes a 10x character gacha draw.
-     * Costs 45 shards and guarantees at least one 3-Star or higher character.
+     * Costs 10 shards and guarantees at least one 3-Star or higher character.
      */
     public GachaResult drawTen(PlayerAcc player) {
         if (player.getShards() < MULTI_PULL_SHARDS) {

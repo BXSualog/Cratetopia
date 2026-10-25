@@ -1,7 +1,7 @@
-﻿package characters;
+package characters;
 
 /**
- * Represents the 6 distinct character classes in Crateopia.
+ * Represents the 7 distinct character classes in Crateopia.
  */
 public enum CharacterClass {
     WARRIOR("Warrior"),
@@ -9,7 +9,8 @@ public enum CharacterClass {
     ASSASSIN("Assassin"),
     TANK("Tank"),
     RANGER("Ranger"),
-    SUPPORT("Support");
+    SUPPORT("Support"),
+    BRAWLER("Brawler");
 
     private final String displayName;
 
