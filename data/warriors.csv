@@ -1,7 +1,1 @@
-id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
-WAR001,Militia Recruit,Frontline Aspirant,Earth,1,120,15,8,3,A fresh recruit wielding a standard sword and eager to prove their worth.
-WAR002,Vanguard Swordsman,Steel Infantryman,Earth,2,220,28,15,5,A disciplined infantryman trained in dual-handed sword techniques.
-WAR003,Blade Captain,Crimson Veteran,Fire,3,380,48,25,8,A battle-tested veteran whose decisive strikes inspire the frontline.
-WAR004,Berserker Lord,Raging Cleaver,Fire,4,620,82,40,12,A fearsome warrior who channels rage to deliver devastating cleaves.
-WAR005,Ares Warmaster,Champion of War,Fire,5,1050,135,68,16,A legendary champion blessed by the god of war, clad in indestructible steel.
-WAR006,Sovereign of Blades,Dimension Render,Lightning,6,1700,210,110,22,An ascended warrior whose sword slashes tear through dimensions.
+﻿id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description

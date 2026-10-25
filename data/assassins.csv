@@ -1,7 +1,3 @@
-id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
-ASN001,Alley Rogue,Shadow Street Thief,Dark,1,90,16,5,8,A nimble pickpocket who strikes silently with a rusty shiv.
-ASN002,Shadow Scout,Night Recon,Wind,2,160,32,10,12,A stealthy stalker skilled in reconnaissance and surprise ambushes.
-ASN003,Nightblade,Silent Executioner,Dark,3,280,55,18,18,A lethal contract killer specializing in poison-coated daggers.
-ASN004,Phantom Reaper,Spectral Harvester,Dark,4,460,95,30,25,A ghost-like assassin who phases through darkness to deliver fatal blows.
-ASN005,Eclipse Master,Lord of the Umbra,Dark,5,780,155,50,32,A master of the unseen realm whose strikes leave no trace of blood.
-ASN006,Primordial Death,Herald of Oblivion,Dark,6,1250,245,75,40,The herald of sudden demise whose daggers sever the mortal soul itself.
+﻿id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
+ASN001,Simulacra,The Ghoul,Air,5,680,150,42,32,"An acrobatic cannibal assassin with momentary stealth giving him enough time to slash through targets with his two daggers in the windy forest at night. Character with the highest movement speed but has the least health."
+ASN002,MoonBlade,Black Barron,Dark,6,1150,238,70,38,"Beneath her quiet, studious appearance lies an assassin who strikes in total silence. Wearing dark rimmed glasses and wielding a lethal dark scythe, MoonBlade moves through the moonlight like a fleeting phantom. She leaves no footprints, no echoes, and no survivors, only a lingering cold twilight in her wake."

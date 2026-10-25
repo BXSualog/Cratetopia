@@ -15,12 +15,13 @@ import java.util.TreeMap;
  * Employs TreeMap and LinkedList strictly adhering to DSA constraints.
  */
 public class CharacterDataManager {
-    private static final String WARRIORS_CSV = "data/warriors.csv";
-    private static final String MAGES_CSV    = "data/mages.csv";
+    private static final String WARRIORS_CSV  = "data/warriors.csv";
+    private static final String MAGES_CSV     = "data/mages.csv";
     private static final String ASSASSINS_CSV = "data/assassins.csv";
-    private static final String TANKS_CSV    = "data/tanks.csv";
-    private static final String RANGERS_CSV  = "data/rangers.csv";
-    private static final String SUPPORTS_CSV = "data/supports.csv";
+    private static final String TANKS_CSV     = "data/tanks.csv";
+    private static final String RANGERS_CSV   = "data/rangers.csv";
+    private static final String SUPPORTS_CSV  = "data/supports.csv";
+    private static final String BRAWLERS_CSV  = "data/brawlers.csv";
 
     private final TreeMap<CharacterClass, LinkedList<Hero>> heroesByClass = new TreeMap<>();
     private final LinkedList<Hero> allHeroes = new LinkedList<>();
@@ -33,12 +34,13 @@ public class CharacterDataManager {
     }
 
     private void loadAllClasses() {
-        loadClassCsv(WARRIORS_CSV, CharacterClass.WARRIOR);
-        loadClassCsv(MAGES_CSV, CharacterClass.MAGE);
+        loadClassCsv(WARRIORS_CSV,  CharacterClass.WARRIOR);
+        loadClassCsv(MAGES_CSV,     CharacterClass.MAGE);
         loadClassCsv(ASSASSINS_CSV, CharacterClass.ASSASSIN);
-        loadClassCsv(TANKS_CSV, CharacterClass.TANK);
-        loadClassCsv(RANGERS_CSV, CharacterClass.RANGER);
-        loadClassCsv(SUPPORTS_CSV, CharacterClass.SUPPORT);
+        loadClassCsv(TANKS_CSV,     CharacterClass.TANK);
+        loadClassCsv(RANGERS_CSV,   CharacterClass.RANGER);
+        loadClassCsv(SUPPORTS_CSV,  CharacterClass.SUPPORT);
+        loadClassCsv(BRAWLERS_CSV,  CharacterClass.BRAWLER);
     }
 
     private void loadClassCsv(String filePath, CharacterClass characterClass) {

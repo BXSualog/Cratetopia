@@ -1,7 +1,3 @@
-id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
-SUP001,Village Herbalist,Meadow Healer,Water,1,110,11,7,3,A gentle healer who uses forest herbs to mend light cuts and wounds.
-SUP002,Shrine Priest,Ward Tender,Light,2,190,20,13,5,A devout devotee capable of blessing allies with protective wards.
-SUP003,Divine Cleric,Holy Revitalizer,Light,3,330,35,22,8,A sacred war priest whose holy light revitalizes exhausted champions.
-SUP004,Radiant Templar,Beacon of Grace,Light,4,540,60,38,12,A beacon of hope who cleanses afflictions and reinforces frontline defense.
-SUP005,High Priestess of Dawn,Herald of the Sun,Light,5,880,105,60,16,A revered herald of morning light who can resurrect fallen comrades in battle.
-SUP006,Avatar of Life,Font of Eternity,Water,6,1450,165,95,22,The sacred incarnation of vitality whose grace bestows eternal rejuvenation.
+﻿id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
+SUP001,St. Tonio de Mischief,Ladies Man,Light,6,1200,120,88,14,"Sir St. Tonio has a question, What if a huge amount of girls like him Sir?"
+SUP002,Guni-Kuni,PE-trified,Light,6,1350,145,92,16,"Was once a dark mage who wreaked havoc, but was defeated by the Brawler named Ironhand, then she turned into light to support the only person who defeated her."
