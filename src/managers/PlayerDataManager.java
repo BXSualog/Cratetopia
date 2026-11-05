@@ -86,7 +86,8 @@ public class PlayerDataManager {
                     int shards = parts.length > 3 ? parseIntOrDefault(parts[3].trim(), 10) : 10;
                     int heroesCollected = parts.length > 4 ? parseIntOrDefault(parts[4].trim(), 0) : 0;
                     int itemsOwned = parts.length > 5 ? parseIntOrDefault(parts[5].trim(), 0) : 0;
-                    playerList.add(new PlayerAcc(username, password, coins, shards, heroesCollected, itemsOwned));
+                    boolean isBanned = parts.length > 6 && Boolean.parseBoolean(parts[6].trim());
+                    playerList.add(new PlayerAcc(username, password, coins, shards, heroesCollected, itemsOwned, isBanned));
                 }
             }
         } catch (IOException e) {
@@ -236,12 +237,23 @@ public class PlayerDataManager {
         savePlayerHeroesFile();
     }
 
+    public boolean deletePlayer(String username) {
+        if (username == null) return false;
+        PlayerAcc target = getPlayer(username);
+        if (target != null) {
+            playerList.remove(target);
+            saveAllPlayersToCsv();
+            return true;
+        }
+        return false;
+    }
+
     private void savePlayersFile() {
         File file = new File(CSV_FILE_PATH);
         ensureParentDir(file);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-            writer.write("username,password,coins,shards,heroesCollected,itemsOwned");
+            writer.write("username,password,coins,shards,heroesCollected,itemsOwned,isBanned");
             writer.newLine();
             for (PlayerAcc player : playerList) {
                 writer.write(player.getUsername() + "," +
@@ -249,7 +261,8 @@ public class PlayerDataManager {
                              player.getCoins() + "," +
                              player.getShards() + "," +
                              player.getHeroesCollected() + "," +
-                             player.getItemsOwned());
+                             player.getItemsOwned() + "," +
+                             player.isBanned());
                 writer.newLine();
             }
         } catch (IOException e) {

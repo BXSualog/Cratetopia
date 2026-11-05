@@ -50,6 +50,9 @@ public abstract class Item {
 
     private final String description; // Flavour text shown on the item card
 
+    // Quantity tracked for inventory display and stacking (defaults to 1)
+    private int quantity = 1;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -118,6 +121,9 @@ public abstract class Item {
     public String getEquippableClassesRaw()                     { return equippableClassesRaw; }
     public TreeSet<CharacterClass> getEquippableClasses()       { return equippableClasses; }
     public String getDescription()                              { return description; }
+    public int getQuantity()                                    { return quantity; }
+    public void setQuantity(int quantity)                       { this.quantity = Math.max(1, quantity); }
+    public void addQuantity(int amount)                         { this.quantity += amount; }
 
     // -------------------------------------------------------------------------
     // Business logic

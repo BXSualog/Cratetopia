@@ -24,6 +24,9 @@ import java.util.LinkedList;
  */
 public class PlayerAcc extends Account {
 
+    // --- Account Status ---
+    private boolean isBanned; // whether the account has been banned by an administrator
+
     // --- Currency ---
     private int coins;   // in-game gold used in the shop
     private int shards;  // premium currency used for hero gacha pulls
@@ -44,14 +47,14 @@ public class PlayerAcc extends Account {
 
     /**
      * Creates a brand-new player account with default starting values:
-     *   500 coins, 10 shards, 0 heroes, 0 items.
+     *   500 coins, 10 shards, 0 heroes, 0 items, active (not banned).
      *
      * @param username  Chosen username.
      * @param password  Chosen password.
      */
     public PlayerAcc(String username, String password) {
         // Delegate to the full constructor with default values.
-        this(username, password, 500, 10, 0, 0);
+        this(username, password, 500, 10, 0, 0, false);
     }
 
     /**
@@ -68,12 +71,38 @@ public class PlayerAcc extends Account {
     public PlayerAcc(String username, String password,
                      int coins, int shards,
                      int heroesCollected, int itemsOwned) {
+        this(username, password, coins, shards, heroesCollected, itemsOwned, false);
+    }
+
+    /**
+     * Full constructor including ban status.
+     *
+     * @param username         The player's username.
+     * @param password         The player's password.
+     * @param coins            Current coin balance.
+     * @param shards           Current shard balance.
+     * @param heroesCollected  Number of heroes collected so far.
+     * @param itemsOwned       Number of items owned so far.
+     * @param isBanned         Whether this account is banned.
+     */
+    public PlayerAcc(String username, String password,
+                     int coins, int shards,
+                     int heroesCollected, int itemsOwned,
+                     boolean isBanned) {
         super(username, password); // pass username & password up to Account
         this.coins           = coins;
         this.shards          = shards;
         this.heroesCollected = heroesCollected;
         this.itemsOwned      = itemsOwned;
+        this.isBanned        = isBanned;
     }
+
+    // -------------------------------------------------------------------------
+    // Status Getters & Setters
+    // -------------------------------------------------------------------------
+
+    public boolean isBanned()               { return isBanned; }
+    public void setBanned(boolean isBanned) { this.isBanned = isBanned; }
 
     // -------------------------------------------------------------------------
     // Currency Getters & Setters
@@ -161,6 +190,23 @@ public class PlayerAcc extends Account {
     }
 
     /**
+     * Retrieves an item from the inventory by its ID.
+     * Uses DSA Linear Search (O(n)) through the inventory LinkedList.
+     *
+     * @param itemId  The unique item ID to find.
+     * @return        The matching Item object, or null if not found.
+     */
+    public Item getItem(String itemId) {
+        if (itemId == null) return null;
+        for (Item it : inventory) {
+            if (it.getId().equalsIgnoreCase(itemId)) {
+                return it;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Adds an item to the inventory ONLY if the player does not already have
      * an item with the same ID (prevents duplicates in the list).
      *
@@ -210,6 +256,23 @@ public class PlayerAcc extends Account {
             }
         }
         return false;
+    }
+
+    /**
+     * Retrieves a hero from the roster by unique ID.
+     * Uses DSA Linear Search (O(n)) through the roster LinkedList.
+     *
+     * @param heroId  The unique hero ID to find.
+     * @return        The matching Hero object, or null if not found.
+     */
+    public Hero getHero(String heroId) {
+        if (heroId == null) return null;
+        for (Hero h : roster) {
+            if (h.getId().equalsIgnoreCase(heroId)) {
+                return h;
+            }
+        }
+        return null;
     }
 
     /**

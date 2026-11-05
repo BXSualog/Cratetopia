@@ -133,12 +133,12 @@ public class CharacterDataManager {
                     String name          = p[1].trim();
                     String title         = p[2].trim();
                     String elementalPower = p[3].trim();
-                    int    stars         = parseIntSafe(p[4].trim(), 1);
+                    int    stars         = parseIntSafe(p[4].trim(), 3);
                     int    hp            = parseIntSafe(p[5].trim(), 100);
                     int    attack        = parseIntSafe(p[6].trim(), 10);
                     int    defense       = parseIntSafe(p[7].trim(), 10);
                     int    critChance    = parseIntSafe(p[8].trim(), 5);
-                    String desc          = p[9].trim();
+                    String desc          = cleanDescription(p[9]);
 
                     hero = new Hero(id, name, title, elementalPower,
                             characterClass, stars, hp, attack, defense, critChance, desc);
@@ -147,12 +147,12 @@ public class CharacterDataManager {
                     // Legacy 8-column format: no title or elemental_power columns
                     String id         = p[0].trim();
                     String name       = p[1].trim();
-                    int    stars      = parseIntSafe(p[2].trim(), 1);
+                    int    stars      = parseIntSafe(p[2].trim(), 3);
                     int    hp         = parseIntSafe(p[3].trim(), 100);
                     int    attack     = parseIntSafe(p[4].trim(), 10);
                     int    defense    = parseIntSafe(p[5].trim(), 10);
                     int    critChance = parseIntSafe(p[6].trim(), 5);
-                    String desc       = p[7].trim();
+                    String desc       = cleanDescription(p[7]);
 
                     // Use empty title and "None" element as defaults
                     hero = new Hero(id, name, "", "None",
@@ -290,5 +290,20 @@ public class CharacterDataManager {
         } catch (NumberFormatException e) {
             return defaultVal;
         }
+    }
+
+    /**
+     * Cleans double quotes and outer quotes from CSV description fields.
+     *
+     * @param raw The raw description string from CSV.
+     * @return Cleaned description without extraneous double quotes.
+     */
+    private String cleanDescription(String raw) {
+        if (raw == null) return "";
+        String s = raw.trim();
+        while (s.startsWith("\"") && s.endsWith("\"") && s.length() >= 2) {
+            s = s.substring(1, s.length() - 1).trim();
+        }
+        return s.replace("\"\"", "\"").replace("\"", "'").trim();
     }
 }

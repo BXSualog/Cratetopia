@@ -35,18 +35,18 @@ import java.util.Random;
  *
  * Duplicate hero policy:
  *   If the rolled hero is already in the player's roster, it converts to shards:
- *     1★ → 3   |  2★ → 5   |  3★ → 10  |  4★ → 20  |  5★ → 40  |  6★ → 70
+ *     3★ → 2   |  4★ → 5   |  5★ → 10  |  6★ → 25
  */
 public class CharacterGachaManager {
 
     // Cost constants (public so Main can display them without magic numbers)
-    public static final int SINGLE_PULL_SHARDS = 5;   // cost for one pull
-    public static final int MULTI_PULL_SHARDS  = 45;  // cost for 10x pull (discounted)
+    public static final int SINGLE_PULL_SHARDS = 1;   // cost for one pull
+    public static final int MULTI_PULL_SHARDS  = 10;  // cost for 10x pull
 
-    // Shards given when a DUPLICATE hero is rolled.
-    // Index = star level (index 0 unused; indices 1-6 are valid).
-    // Example: DUP_SHARDS_PER_STAR[3] = 10 means a duplicate 3★ gives 10 shards.
-    private static final int[] DUP_SHARDS_PER_STAR = { 0, 3, 5, 10, 20, 40, 70 };
+    // Shards given when a DUPLICATE hero is rolled (3★ to 6★).
+    // Index = star level (indices 0–2 unused; indices 3–6 are valid).
+    // 3★ -> 2 shards | 4★ -> 5 shards | 5★ -> 10 shards | 6★ -> 25 shards
+    private static final int[] DUP_SHARDS_PER_STAR = { 0, 0, 0, 2, 5, 10, 25 };
 
     // CharacterDataManager provides the hero pool (all hero templates by class/stars)
     private final CharacterDataManager charData;
@@ -84,7 +84,7 @@ public class CharacterGachaManager {
         // Guard: not enough shards → return a failure result
         if (player.getShards() < SINGLE_PULL_SHARDS) {
             return new GachaResult(false,
-                    "Not enough shards! You need " + SINGLE_PULL_SHARDS + " shards.");
+                    "Not enough shards! You need " + SINGLE_PULL_SHARDS + " shard" + (SINGLE_PULL_SHARDS > 1 ? "s" : "") + ".");
         }
 
         // Deduct cost from the player's shard balance
@@ -123,16 +123,16 @@ public class CharacterGachaManager {
         player.setShards(player.getShards() - MULTI_PULL_SHARDS);
         GachaResult res = new GachaResult(true, "10x Summon successful!");
 
-        boolean guaranteedTriggered = false; // tracks if we've already seen a 3★+
+        boolean guaranteedTriggered = false; // tracks if we've already seen a 4★+
 
         for (int i = 0; i < 10; i++) {
-            // On the LAST pull (i == 9), if no 3★+ was seen yet, force one
+            // On the LAST pull (i == 9), if no 4★+ was seen yet, force one
             boolean guarantee = (i == 9 && !guaranteedTriggered);
 
             Hero hero = rollSingleHero(guarantee);
             if (hero != null) {
-                if (hero.getStars() >= 3) {
-                    guaranteedTriggered = true; // we've satisfied the guarantee
+                if (hero.getStars() >= 4) {
+                    guaranteedTriggered = true; // we've satisfied the 4★+ guarantee
                 }
                 awardHero(player, res, hero);
             }
@@ -145,19 +145,22 @@ public class CharacterGachaManager {
     // =========================================================================
 
     /**
-     * Rolls a random star tier, then picks a random hero from that tier's pool.
+     * Rolls a random star tier (3–6), then picks a random hero from that tier's pool.
      * Returns a NEW hero instance (not the shared template object).
      *
-     * @param guaranteeAtLeast3Star  If true, the star tier is forced to be 3–6.
+     * @param guaranteeAtLeast4Star  If true, the star tier is forced to be 4–6.
      * @return                       A new Hero instance, or null if no pool exists.
      */
-    private Hero rollSingleHero(boolean guaranteeAtLeast3Star) {
-        int stars = rollStarTier(guaranteeAtLeast3Star); // decide rarity first
+    private Hero rollSingleHero(boolean guaranteeAtLeast4Star) {
+        int stars = rollStarTier(guaranteeAtLeast4Star); // decide rarity first (3–6)
 
         // Get the pool of all heroes with exactly 'stars' stars
         LinkedList<Hero> pool = charData.getHeroesByStars(stars);
 
-        // Fallback: if no heroes exist for that tier, use the entire hero pool
+        // Fallback: if no heroes exist for that tier (e.g. 3★), fall back to 4★ or all heroes
+        if (pool.isEmpty()) {
+            pool = charData.getHeroesByStars(4);
+        }
         if (pool.isEmpty()) {
             pool = charData.getAllHeroes();
         }
@@ -171,46 +174,36 @@ public class CharacterGachaManager {
     }
 
     /**
-     * Rolls a star level (1–6) based on weighted probability.
+     * Rolls a star level (3–6) based on weighted probability.
+     * Heroes start at 3★ to 6★ (no 1★ or 2★ heroes).
      *
      * Probability table:
-     *   6★: 0.5%   (roll 0–4)
-     *   5★: 2.5%   (roll 5–29)
-     *   4★: 7.0%   (roll 30–99)
-     *   3★: 15.0%  (roll 100–249)
-     *   2★: 30.0%  (roll 250–549) — only if guaranteeAtLeast3Star is false
-     *   1★: 45.0%  (roll 550–999) — only if guaranteeAtLeast3Star is false
+     *   6★:  2.0%  (roll 0–19)
+     *   5★:  8.0%  (roll 20–99)
+     *   4★: 25.0%  (roll 100–349)
+     *   3★: 65.0%  (roll 350–999)
      *
-     * When guaranteeAtLeast3Star is true, rolls below 3★ are re-rolled
-     * using a separate 3–6★ only probability table.
+     * 10x Pull Guarantee Table (guaranteeAtLeast4Star):
+     *   6★:  5.0%  (roll 0–4)
+     *   5★: 25.0%  (roll 5–29)
+     *   4★: 70.0%  (roll 30–99)
      *
-     * DSA note – this is a simple cumulative-probability check, not a sort.
-     * We roll a number 0–999 and check which bucket it falls in.
-     *
-     * @param guaranteeAtLeast3Star  Enforce 3★ minimum (for 10x pull guarantee).
-     * @return                       A star level between 1 and 6.
+     * @param guaranteeAtLeast4Star  Enforce 4★ minimum (for 10x pull guarantee).
+     * @return                       A star level between 3 and 6.
      */
-    private int rollStarTier(boolean guaranteeAtLeast3Star) {
-        int roll = rng.nextInt(1000); // 0 – 999
-
-        // Check from rarest to most common
-        if (roll < 5)   return 6; // 0.5%
-        if (roll < 30)  return 5; // 2.5%
-        if (roll < 100) return 4; // 7.0%
-        if (roll < 250) return 3; // 15.0%
-
-        // At this point the roll is >= 250, which normally maps to 1★ or 2★.
-        // But if the guarantee is active, we must re-roll at 3★+.
-        if (guaranteeAtLeast3Star) {
-            int gRoll = rng.nextInt(100); // 0–99 for the guarantee sub-roll
-            if (gRoll < 3)  return 6;    // 3%
-            if (gRoll < 15) return 5;    // 12%
-            if (gRoll < 40) return 4;    // 25%
-            return 3;                    // 60%
+    private int rollStarTier(boolean guaranteeAtLeast4Star) {
+        if (guaranteeAtLeast4Star) {
+            int gRoll = rng.nextInt(100); // 0–99 for the 4★+ guarantee sub-roll
+            if (gRoll < 5)  return 6;     // 5.0%
+            if (gRoll < 30) return 5;     // 25.0%
+            return 4;                     // 70.0%
         }
 
-        if (roll < 550) return 2; // 30.0%
-        return 1;                 // 45.0%
+        int roll = rng.nextInt(1000); // 0 – 999
+        if (roll < 20)  return 6; // 2.0%
+        if (roll < 100) return 5; // 8.0%
+        if (roll < 350) return 4; // 25.0%
+        return 3;                 // 65.0%
     }
 
     /**
@@ -234,9 +227,8 @@ public class CharacterGachaManager {
             // New hero — add it to the summon result list and priority queue
             res.addHero(hero);
         } else {
-            // Duplicate — compensate with shards based on the hero's star level
-            // Math.max/min clamp stars to valid array indices [1, 6]
-            int stars  = Math.max(1, Math.min(6, hero.getStars()));
+            // Duplicate — compensate with shards based on the hero's star level (3 to 6)
+            int stars  = Math.max(3, Math.min(6, hero.getStars()));
             int shards = DUP_SHARDS_PER_STAR[stars];
             player.setShards(player.getShards() + shards); // add shards to balance
             res.addDuplicateHero(hero, shards);            // record in result

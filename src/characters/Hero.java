@@ -64,6 +64,9 @@ public class Hero implements Comparable<Hero> {
     private final int baseCritChance;  // base crit % before equipment bonuses
     private final String description;  // flavour text shown on the hero card
 
+    // Quantity tracked for inventory display and stacking (defaults to 1)
+    private int quantity = 1;
+
     // --- Equipment slots (mutable — can change as player equips/unequips) ---
     private Weapon    equippedWeapon;
     private Armor[]   equippedArmors  = new Armor[3]; // DSA: fixed-length array
@@ -105,8 +108,8 @@ public class Hero implements Comparable<Hero> {
         this.elementalPower = (elementalPower != null && !elementalPower.trim().isEmpty())
                 ? elementalPower.trim() : "None";
         this.characterClass = characterClass;
-        // Math.max / Math.min clamp stars to the range [1, 6]
-        this.stars          = Math.max(1, Math.min(6, stars));
+        // Math.max / Math.min clamp stars to the range [3, 6] (heroes start at 3 to 6 stars)
+        this.stars          = Math.max(3, Math.min(6, stars));
         this.baseHp         = baseHp;
         this.baseAttack     = baseAttack;
         this.baseDefense    = baseDefense;
@@ -147,6 +150,9 @@ public class Hero implements Comparable<Hero> {
     public int getBaseDefense()               { return baseDefense; }
     public int getBaseCritChance()            { return baseCritChance; }
     public String getDescription()            { return description; }
+    public int getQuantity()                  { return quantity; }
+    public void setQuantity(int quantity)     { this.quantity = Math.max(1, quantity); }
+    public void addQuantity(int amount)       { this.quantity += amount; }
 
     // Equipment getters
     public Weapon    getEquippedWeapon()      { return equippedWeapon; }

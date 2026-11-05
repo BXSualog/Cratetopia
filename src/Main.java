@@ -1,10 +1,13 @@
+import accounts.AdminAcc;
 import accounts.PlayerAcc;
+import characters.CharacterClass;
 import characters.Hero;
 import items.Accessory;
 import items.Armor;
 import items.ArmorSet;
 import items.Item;
 import items.Weapon;
+import managers.AdminDataManager;
 import managers.CharacterDataManager;
 import managers.CharacterGachaManager;
 import managers.CrateManager;
@@ -20,17 +23,21 @@ public class Main {
         ItemDataManager itemDataManager = new ItemDataManager();
         CharacterDataManager charDataManager = new CharacterDataManager();
         PlayerDataManager playerDataManager = new PlayerDataManager(charDataManager, itemDataManager);
+        AdminDataManager adminDataManager = new AdminDataManager(playerDataManager, itemDataManager, charDataManager);
         CharacterGachaManager gachaManager = new CharacterGachaManager(charDataManager);
         CrateManager crateManager = new CrateManager(itemDataManager);
 
         // Auto-save on JVM shutdown
-        Runtime.getRuntime().addShutdownHook(new Thread(playerDataManager::saveAllPlayersToCsv));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            playerDataManager.saveAllPlayersToCsv();
+            adminDataManager.saveAdminsToCsv();
+        }));
 
         String choice;
 
         do {
             System.out.println("\n============================================");
-            System.out.println("             INFINITE REALMS");
+            System.out.println("             Cratetopia");
             System.out.println("============================================");
             System.out.println("1. Register Player Account");
             System.out.println("2. Player Login");
@@ -50,18 +57,20 @@ public class Main {
                     break;
 
                 case "3":
+                    loginAdmin(input, adminDataManager);
                     break;
 
                 case "0":
                     playerDataManager.saveAllPlayersToCsv();
-                    System.out.println("\nThank you for playing Infinite Realms!");
+                    adminDataManager.saveAdminsToCsv();
+                    System.out.println("\nThank you for playing Cratetopia!");
                     break;
 
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
 
-            if (!choice.equals("0") && !choice.equals("1") && !choice.equals("2")) {
+            if (!choice.equals("0") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3")) {
                 input.readLine("\nPress Enter to continue...");
             }
 
@@ -127,6 +136,18 @@ public class Main {
             boolean success = playerDataManager.loginPlayer(username, password);
             if (success) {
                 PlayerAcc player = playerDataManager.getPlayer(username);
+                if (player.isBanned()) {
+                    System.out.println("\n===========================================");
+                    System.out.println("              ACCESS DENIED");
+                    System.out.println("===========================================");
+                    System.out.println("  Your account has been SUSPENDED / BANNED");
+                    System.out.println("  by an administrator.");
+                    System.out.println("  Please contact administration if you believe");
+                    System.out.println("  this was done in error.");
+                    System.out.println("===========================================");
+                    input.readLine("\nPress Enter to return to Login Menu...");
+                    break;
+                }
                 System.out.println("Login successful! Welcome, " + player.getUsername() + "!");
                 playerHomescreen(input, playerDataManager, crateManager, gachaManager, player);
                 break;
@@ -138,6 +159,749 @@ public class Main {
                 }
             }
         }
+    }
+
+    // =========================================================================
+    // Admin Login & Dashboard Implementation
+    // =========================================================================
+
+    /**
+     * Admin login handler executed from case "3" in the start menu.
+     * Authenticates administrator credentials using AdminDataManager.
+     *
+     * @param input             Input handler for reading console inputs.
+     * @param adminDataManager  Administrator manager for authentication & operations.
+     */
+    public static void loginAdmin(InputHandling input, AdminDataManager adminDataManager) {
+        while (true) {
+            System.out.println("===========================================");
+            System.out.println("               ADMIN LOGIN");
+            System.out.println("===========================================");
+
+            String username = input.readLine("Enter admin username (or '0' to return): ");
+            if (username.equals("0")) {
+                break;
+            }
+            String password = input.readLine("Enter admin password: ");
+
+            AdminAcc admin = adminDataManager.loginAdmin(username, password);
+            if (admin != null) {
+                System.out.println("\n[SUCCESS] Login successful! Welcome, Administrator "
+                        + admin.getUsername() + " [" + admin.getRole() + "]!");
+                adminHomescreen(input, adminDataManager, admin);
+                break;
+            } else {
+                System.out.println("\n[!] Invalid admin credentials. Access denied.");
+                String opt = input.readLine("\nPress Enter to try again (or '0' to return)...");
+                if (opt.equals("0")) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Administrator Dashboard / Home Menu interface.
+     * Provides system metrics, player account management, catalogs inspection,
+     * admin account registration, and persistent data saves.
+     *
+     * @param input             Input handler.
+     * @param adminDataManager  Administrator data manager.
+     * @param admin             The currently authenticated admin account.
+     */
+    public static void adminHomescreen(InputHandling input, AdminDataManager adminDataManager, AdminAcc admin) {
+        String choice;
+
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("              CRATETOPIA - ADMIN DASHBOARD");
+            System.out.println("==================================================");
+            System.out.println("  Logged in as : " + admin.getUsername() + " (" + admin.getRole() + ")");
+            System.out.println("--------------------------------------------------");
+            System.out.println("  Registered Players : " + adminDataManager.getTotalPlayersCount()
+                    + " (Active: " + adminDataManager.getActivePlayersCount()
+                    + " | Banned: " + adminDataManager.getBannedPlayersCount() + ")");
+            System.out.println("  Catalog Heroes     : " + adminDataManager.getTotalHeroesCatalogCount());
+            System.out.println("  Catalog Items      : " + adminDataManager.getTotalItemsCatalogCount());
+            System.out.println("--------------------------------------------------");
+            System.out.println("1. System Overview & Economy Analytics");
+            System.out.println("2. Player Account Management");
+            System.out.println("3. Game Content Catalogs (Heroes & Items)");
+            System.out.println("4. Admin Credential Management");
+            System.out.println("5. Save All Game Data");
+            System.out.println("0. Logout");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    adminSystemOverview(input, adminDataManager);
+                    break;
+
+                case "2":
+                    adminPlayerManagement(input, adminDataManager);
+                    break;
+
+                case "3":
+                    adminCatalogsMenu(input, adminDataManager);
+                    break;
+
+                case "4":
+                    adminAccountsMenu(input, adminDataManager, admin);
+                    break;
+
+                case "5":
+                    System.out.print("\nSaving all system data");
+                    for (int i = 0; i < 5; i++) {
+                        System.out.print(".");
+                        try {
+                            Thread.sleep(250);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    System.out.println();
+                    adminDataManager.saveAllSystemData();
+                    System.out.println("[SUCCESS] All system, player, and administrator records saved!");
+                    input.readLine("\nPress Enter to continue...");
+                    break;
+
+                case "0":
+                    System.out.println("\nLogging out from Admin Dashboard. Returning to Login Menu...");
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    break;
+
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    input.readLine("\nPress Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    /**
+     * Submenu 1: System Overview & Economy Analytics
+     */
+    private static void adminSystemOverview(InputHandling input, AdminDataManager adminDataManager) {
+        int totalPlayers = adminDataManager.getTotalPlayersCount();
+        long totalCoins = adminDataManager.getTotalEconomyCoins();
+        long totalShards = adminDataManager.getTotalEconomyShards();
+        long avgCoins = (totalPlayers > 0) ? (totalCoins / totalPlayers) : 0;
+        long avgShards = (totalPlayers > 0) ? (totalShards / totalPlayers) : 0;
+
+        System.out.println("\n==================================================");
+        System.out.println("       SYSTEM OVERVIEW & ECONOMY ANALYTICS");
+        System.out.println("==================================================");
+        System.out.printf("  Total Registered Players  : %,d (Active: %,d | Banned: %,d)\n",
+                totalPlayers, adminDataManager.getActivePlayersCount(), adminDataManager.getBannedPlayersCount());
+        System.out.printf("  Total Coins in Economy    : %,d\n", totalCoins);
+        System.out.printf("  Total Shards in Economy   : %,d\n", totalShards);
+        System.out.printf("  Average Coins per Player  : %,d\n", avgCoins);
+        System.out.printf("  Average Shards per Player : %,d\n", avgShards);
+        System.out.println("--------------------------------------------------");
+        System.out.printf("  Catalog Hero Templates    : %,d\n", adminDataManager.getTotalHeroesCatalogCount());
+        System.out.printf("  Catalog Item Templates    : %,d\n", adminDataManager.getTotalItemsCatalogCount());
+        if (adminDataManager.getItemDataManager() != null) {
+            System.out.printf("    - Weapons     : %,d\n", adminDataManager.getItemDataManager().getWeapons().size());
+            System.out.printf("    - Armors      : %,d\n", adminDataManager.getItemDataManager().getArmors().size());
+            System.out.printf("    - Accessories : %,d\n", adminDataManager.getItemDataManager().getAccessories().size());
+        }
+        System.out.println("==================================================");
+        input.readLine("\nPress Enter to return...");
+    }
+
+    /**
+     * Submenu 2: Player Account Management (1.3 Requirement)
+     */
+    private static void adminPlayerManagement(InputHandling input, AdminDataManager adminDataManager) {
+        String choice;
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("             PLAYER ACCOUNT MANAGEMENT");
+            System.out.println("==================================================");
+            System.out.println("1. View All Registered Players & Statistics");
+            System.out.println("2. Search Player by Username");
+            System.out.println("3. Ban / Unban Player Account");
+            System.out.println("4. Delete Player Account");
+            System.out.println("5. Modify Player Currencies (Coins / Shards)");
+            System.out.println("6. Reset Player Account Progress");
+            System.out.println("0. Back to Admin Dashboard");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    adminViewAllPlayers(input, adminDataManager);
+                    break;
+                case "2":
+                    adminSearchPlayer(input, adminDataManager);
+                    break;
+                case "3":
+                    adminBanUnbanPlayer(input, adminDataManager);
+                    break;
+                case "4":
+                    adminDeletePlayer(input, adminDataManager);
+                    break;
+                case "5":
+                    adminModifyCurrencyMenu(input, adminDataManager);
+                    break;
+                case "6":
+                    adminResetPlayer(input, adminDataManager);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    input.readLine("\nPress Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    /**
+     * Requirement: View all registered players and their statistics.
+     */
+    private static void adminViewAllPlayers(InputHandling input, AdminDataManager adminDataManager) {
+        LinkedList<PlayerAcc> players = (adminDataManager.getPlayerDataManager() != null)
+                ? adminDataManager.getPlayerDataManager().getPlayerList()
+                : new LinkedList<>();
+
+        System.out.println("\n==========================================================================");
+        System.out.println("                   ALL REGISTERED PLAYERS & STATISTICS");
+        System.out.println("==========================================================================");
+        if (players.isEmpty()) {
+            System.out.println("  No registered players found in the system.");
+        } else {
+            System.out.printf("  %-4s %-16s %-10s %-10s %-8s %-7s %-6s\n",
+                    "#", "Username", "Status", "Coins", "Shards", "Heroes", "Items");
+            System.out.println("  --------------------------------------------------------------------------");
+            int idx = 1;
+            for (PlayerAcc p : players) {
+                String status = p.isBanned() ? "[BANNED]" : "[ACTIVE]";
+                System.out.printf("  [%2d] %-16s %-10s %-10s %-8s %-7d %-6d\n",
+                        idx++,
+                        p.getUsername(),
+                        status,
+                        String.format("%,d", p.getCoins()),
+                        String.format("%,d", p.getShards()),
+                        p.getRoster().size(),
+                        p.getInventory().size());
+            }
+            System.out.println("  --------------------------------------------------------------------------");
+            System.out.printf("  Total: %d Players (Active: %d | Banned: %d)\n",
+                    players.size(),
+                    adminDataManager.getActivePlayersCount(),
+                    adminDataManager.getBannedPlayersCount());
+            System.out.printf("  Total Economy: %,d Coins | %,d Shards\n",
+                    adminDataManager.getTotalEconomyCoins(),
+                    adminDataManager.getTotalEconomyShards());
+        }
+        System.out.println("==========================================================================");
+        input.readLine("\nPress Enter to return...");
+    }
+
+    /**
+     * Requirement: Search for a player by username.
+     */
+    private static void adminSearchPlayer(InputHandling input, AdminDataManager adminDataManager) {
+        System.out.println("\n==================================================");
+        System.out.println("            SEARCH PLAYER BY USERNAME");
+        System.out.println("==================================================");
+        String query = input.readLine("Enter username or search query (or '0' to cancel): ");
+        if (query.equals("0") || query.trim().isEmpty()) return;
+
+        LinkedList<PlayerAcc> matches = adminDataManager.searchPlayers(query.trim());
+        if (matches.isEmpty()) {
+            System.out.println("\n[!] No player found matching '" + query + "'.");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        PlayerAcc selectedPlayer;
+        if (matches.size() == 1) {
+            selectedPlayer = matches.getFirst();
+        } else {
+            System.out.println("\nFound " + matches.size() + " matching players:");
+            int idx = 1;
+            for (PlayerAcc p : matches) {
+                String status = p.isBanned() ? "[BANNED]" : "[ACTIVE]";
+                System.out.printf("  [%d] %-16s %-10s (Coins: %,d | Shards: %,d)\n",
+                        idx++, p.getUsername(), status, p.getCoins(), p.getShards());
+            }
+            String choice = input.readLine("\nSelect player number to inspect (or '0' to cancel): ");
+            if (choice.equals("0")) return;
+            try {
+                int selectedIdx = Integer.parseInt(choice) - 1;
+                if (selectedIdx >= 0 && selectedIdx < matches.size()) {
+                    selectedPlayer = matches.get(selectedIdx);
+                } else {
+                    System.out.println("Invalid selection.");
+                    input.readLine("Press Enter to continue...");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number.");
+                input.readLine("Press Enter to continue...");
+                return;
+            }
+        }
+
+        displayPlayerFullProfile(input, adminDataManager, selectedPlayer);
+    }
+
+    /**
+     * Displays a full player profile and offers interactive admin actions.
+     */
+    private static void displayPlayerFullProfile(InputHandling input, AdminDataManager adminDataManager, PlayerAcc player) {
+        String choice;
+        do {
+            String status = player.isBanned() ? "[BANNED / SUSPENDED]" : "[ACTIVE]";
+            System.out.println("\n==================================================");
+            System.out.println("              PLAYER PROFILE: " + player.getUsername());
+            System.out.println("==================================================");
+            System.out.println("  Account Status   : " + status);
+            System.out.printf("  Coins            : %,d\n", player.getCoins());
+            System.out.printf("  Shards           : %,d\n", player.getShards());
+            System.out.printf("  Heroes Summoned  : %d\n", player.getRoster().size());
+            System.out.printf("  Inventory Items  : %d\n", player.getInventory().size());
+            System.out.println("--------------------------------------------------");
+
+            System.out.println("  [HERO ROSTER]");
+            if (player.getRoster().isEmpty()) {
+                System.out.println("    (No heroes in roster)");
+            } else {
+                int hIdx = 1;
+                for (Hero h : player.getRoster()) {
+                    System.out.printf("    [%d] %s (%s | %s) HP:%d ATK:%d DEF:%d\n",
+                            hIdx++, h.getName(), h.getCharacterClass().getDisplayName(),
+                            h.getStarsDisplay(), h.getTotalHp(), h.getTotalAttack(), h.getTotalDefense());
+                    String weaponName = (h.getEquippedWeapon() != null) ? h.getEquippedWeapon().getName() : "None";
+                    String helmetName = (h.getEquippedArmor(Hero.SLOT_HELMET) != null) ? h.getEquippedArmor(Hero.SLOT_HELMET).getName() : "None";
+                    String chestName = (h.getEquippedArmor(Hero.SLOT_CHEST) != null) ? h.getEquippedArmor(Hero.SLOT_CHEST).getName() : "None";
+                    String leggingsName = (h.getEquippedArmor(Hero.SLOT_LEGGINGS) != null) ? h.getEquippedArmor(Hero.SLOT_LEGGINGS).getName() : "None";
+                    String accName = (h.getEquippedAccessory() != null) ? h.getEquippedAccessory().getName() : "None";
+                    System.out.printf("        Gear: [W: %s | H: %s | C: %s | L: %s | Acc: %s]\n",
+                            weaponName, helmetName, chestName, leggingsName, accName);
+                }
+            }
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("  [INVENTORY ITEMS]");
+            if (player.getInventory().isEmpty()) {
+                System.out.println("    (Inventory is empty)");
+            } else {
+                int iIdx = 1;
+                for (Item item : player.getInventory()) {
+                    System.out.printf("    [%d] %s (%s, Qty: %d)\n",
+                            iIdx++, item.toString(), item.getType(), item.getQuantity());
+                }
+            }
+            System.out.println("==================================================");
+            System.out.println("Actions: [1] " + (player.isBanned() ? "Unban Account" : "Ban Account")
+                    + " | [2] Delete Account | [3] Modify Coins/Shards | [0] Return");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select action: ");
+            switch (choice) {
+                case "1":
+                    adminDataManager.togglePlayerBan(player.getUsername());
+                    System.out.println("\n[SUCCESS] Player '" + player.getUsername() + "' status changed to: "
+                            + (player.isBanned() ? "[BANNED]" : "[ACTIVE]"));
+                    input.readLine("Press Enter to continue...");
+                    break;
+                case "2":
+                    System.out.println("\n[DANGER] This will PERMANENTLY delete account '" + player.getUsername() + "'!");
+                    String confirm = input.readLine("Type 'DELETE' to confirm: ");
+                    if (confirm.equals("DELETE")) {
+                        adminDataManager.deletePlayer(player.getUsername());
+                        System.out.println("\n[SUCCESS] Player account permanently deleted.");
+                        input.readLine("Press Enter to return...");
+                        return;
+                    } else {
+                        System.out.println("\nOperation cancelled.");
+                        input.readLine("Press Enter to continue...");
+                    }
+                    break;
+                case "3":
+                    adminModifyCurrencyMenu(input, adminDataManager, player.getUsername());
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("Invalid option.");
+                    input.readLine("Press Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    /**
+     * Requirement: Ban or unban a player account.
+     */
+    private static void adminBanUnbanPlayer(InputHandling input, AdminDataManager adminDataManager) {
+        System.out.println("\n==================================================");
+        System.out.println("             BAN / UNBAN PLAYER ACCOUNT");
+        System.out.println("==================================================");
+        String username = input.readLine("Enter player username (or '0' to cancel): ");
+        if (username.equals("0") || username.trim().isEmpty()) return;
+
+        PlayerAcc player = adminDataManager.findPlayer(username);
+        if (player == null) {
+            System.out.println("\n[!] Player '" + username + "' not found.");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        boolean currentStatus = player.isBanned();
+        System.out.println("\nPlayer: " + player.getUsername() + " | Current Status: "
+                + (currentStatus ? "[BANNED]" : "[ACTIVE]"));
+
+        if (!currentStatus) {
+            String confirm = input.readLine("Do you want to BAN player '" + player.getUsername() + "'? (y/N): ");
+            if (confirm.equalsIgnoreCase("y")) {
+                adminDataManager.banPlayer(player.getUsername());
+                System.out.println("\n[SUCCESS] Player '" + player.getUsername() + "' has been BANNED. Login access is now revoked.");
+            } else {
+                System.out.println("\nOperation cancelled.");
+            }
+        } else {
+            String confirm = input.readLine("Do you want to UNBAN player '" + player.getUsername() + "'? (y/N): ");
+            if (confirm.equalsIgnoreCase("y")) {
+                adminDataManager.unbanPlayer(player.getUsername());
+                System.out.println("\n[SUCCESS] Player '" + player.getUsername() + "' has been UNBANNED. Login access restored.");
+            } else {
+                System.out.println("\nOperation cancelled.");
+            }
+        }
+        input.readLine("\nPress Enter to continue...");
+    }
+
+    /**
+     * Requirement: Delete a player account.
+     */
+    private static void adminDeletePlayer(InputHandling input, AdminDataManager adminDataManager) {
+        System.out.println("\n==================================================");
+        System.out.println("             DELETE PLAYER ACCOUNT");
+        System.out.println("==================================================");
+        String username = input.readLine("Enter player username to PERMANENTLY DELETE (or '0' to cancel): ");
+        if (username.equals("0") || username.trim().isEmpty()) return;
+
+        PlayerAcc player = adminDataManager.findPlayer(username);
+        if (player == null) {
+            System.out.println("\n[!] Player '" + username + "' not found.");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        System.out.println("\n[DANGER] This will PERMANENTLY delete account '" + player.getUsername()
+                + "' and remove all associated hero roster and inventory data!");
+        String confirm = input.readLine("Type 'DELETE' to confirm: ");
+        if (confirm.equals("DELETE")) {
+            boolean success = adminDataManager.deletePlayer(player.getUsername());
+            if (success) {
+                System.out.println("\n[SUCCESS] Player account '" + player.getUsername() + "' was permanently deleted.");
+            } else {
+                System.out.println("\n[!] Failed to delete player account.");
+            }
+        } else {
+            System.out.println("\nConfirmation mismatch. Operation cancelled.");
+        }
+        input.readLine("\nPress Enter to continue...");
+    }
+
+    private static void adminModifyCurrencyMenu(InputHandling input, AdminDataManager adminDataManager) {
+        String username = input.readLine("\nEnter player username to modify currencies (or '0' to cancel): ");
+        if (username.equals("0") || username.trim().isEmpty()) return;
+        adminModifyCurrencyMenu(input, adminDataManager, username);
+    }
+
+    private static void adminModifyCurrencyMenu(InputHandling input, AdminDataManager adminDataManager, String username) {
+        PlayerAcc player = adminDataManager.findPlayer(username);
+        if (player == null) {
+            System.out.println("\n[!] Player '" + username + "' not found.");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        System.out.println("\nSelect currency to modify for '" + player.getUsername() + "':");
+        System.out.println("1. Coins (Current: " + String.format("%,d", player.getCoins()) + ")");
+        System.out.println("2. Shards (Current: " + String.format("%,d", player.getShards()) + ")");
+        System.out.println("0. Cancel");
+        String opt = input.readLine("Select: ");
+
+        if (opt.equals("1")) {
+            adminModifyCurrency(input, adminDataManager, player.getUsername(), false);
+        } else if (opt.equals("2")) {
+            adminModifyCurrency(input, adminDataManager, player.getUsername(), true);
+        }
+    }
+
+    private static void adminModifyCurrency(InputHandling input, AdminDataManager adminDataManager,
+                                            String username, boolean isShards) {
+        String currencyLabel = isShards ? "Shards" : "Coins";
+        PlayerAcc player = adminDataManager.findPlayer(username);
+        if (player == null) return;
+
+        int currentBalance = isShards ? player.getShards() : player.getCoins();
+        System.out.printf("\nCurrent %s for %s: %,d\n", currencyLabel, player.getUsername(), currentBalance);
+        String amountStr = input.readLine("Enter amount to ADD (positive) or DEDUCT (negative): ");
+
+        try {
+            int delta = Integer.parseInt(amountStr);
+            boolean success = isShards
+                    ? adminDataManager.modifyPlayerShards(username, delta)
+                    : adminDataManager.modifyPlayerCoins(username, delta);
+
+            if (success) {
+                int newBalance = isShards ? player.getShards() : player.getCoins();
+                System.out.printf("\n[SUCCESS] Updated %s for %s! New Balance: %,d %s\n",
+                        currencyLabel, player.getUsername(), newBalance, currencyLabel);
+            } else {
+                System.out.println("\n[!] Failed to update currency.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("\n[!] Invalid number format.");
+        }
+        input.readLine("\nPress Enter to continue...");
+    }
+
+    private static void adminResetPlayer(InputHandling input, AdminDataManager adminDataManager) {
+        String username = input.readLine("\nEnter player username to RESET progress (or '0' to cancel): ");
+        if (username.equals("0") || username.trim().isEmpty()) return;
+
+        PlayerAcc player = adminDataManager.findPlayer(username);
+        if (player == null) {
+            System.out.println("\n[!] Player '" + username + "' not found.");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        System.out.println("\n[WARNING] This will reset coins to 500, shards to 10, and wipe all items & heroes!");
+        String confirm = input.readLine("Are you sure you want to proceed? (y/N): ");
+        if (confirm.equalsIgnoreCase("y")) {
+            boolean success = adminDataManager.resetPlayerProgress(username);
+            if (success) {
+                System.out.println("\n[SUCCESS] Player '" + username + "' progress has been reset.");
+            } else {
+                System.out.println("\n[!] Failed to reset player progress.");
+            }
+        } else {
+            System.out.println("\nOperation cancelled.");
+        }
+        input.readLine("\nPress Enter to continue...");
+    }
+
+    /**
+     * Submenu 3: Game Content Catalogs
+     */
+    private static void adminCatalogsMenu(InputHandling input, AdminDataManager adminDataManager) {
+        String choice;
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("              GAME CONTENT CATALOGS");
+            System.out.println("==================================================");
+            System.out.println("1. View Hero Templates Catalog");
+            System.out.println("2. View Equipment & Item Catalog");
+            System.out.println("0. Back to Admin Dashboard");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    adminViewHeroesCatalog(input, adminDataManager);
+                    break;
+                case "2":
+                    adminViewItemsCatalog(input, adminDataManager);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("Invalid option.");
+                    input.readLine("\nPress Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    private static void adminViewHeroesCatalog(InputHandling input, AdminDataManager adminDataManager) {
+        CharacterDataManager cdm = adminDataManager.getCharDataManager();
+        if (cdm == null) {
+            System.out.println("\n[!] Character Data Manager is not available.");
+            input.readLine("Press Enter to return...");
+            return;
+        }
+
+        System.out.println("\nSelect Hero Class to filter (or 'all' for all heroes):");
+        System.out.println("Classes: Warrior, Mage, Assassin, Tank, Ranger, Support, Brawler");
+        String filter = input.readLine("Class / 'all' (or '0' to cancel): ");
+        if (filter.equals("0")) return;
+
+        LinkedList<Hero> heroes;
+        if (filter.equalsIgnoreCase("all") || filter.isEmpty()) {
+            heroes = cdm.getAllHeroes();
+        } else {
+            CharacterClass cc = null;
+            for (CharacterClass c : CharacterClass.values()) {
+                if (c.name().equalsIgnoreCase(filter.trim()) || c.getDisplayName().equalsIgnoreCase(filter.trim())) {
+                    cc = c;
+                    break;
+                }
+            }
+            if (cc == null) {
+                System.out.println("\n[!] Unknown character class.");
+                input.readLine("Press Enter to return...");
+                return;
+            }
+            heroes = cdm.getHeroesByClass(cc);
+        }
+
+        System.out.println("\n==================================================");
+        System.out.println("                  HERO CATALOG (" + heroes.size() + " Found)");
+        System.out.println("==================================================");
+        int idx = 1;
+        for (Hero h : heroes) {
+            System.out.printf("  [%d] %-4s %-20s %-10s %s (%s)\n",
+                    idx++, h.getId(), h.getName(), h.getCharacterClass().getDisplayName(),
+                    h.getStarsDisplay(), h.getElementalPowerDisplay());
+            System.out.printf("      Stats -> HP:%d | ATK:%d | DEF:%d | CRIT:%d%%\n",
+                    h.getBaseHp(), h.getBaseAttack(), h.getBaseDefense(), h.getBaseCritChance());
+        }
+        System.out.println("==================================================");
+        input.readLine("\nPress Enter to return...");
+    }
+
+    private static void adminViewItemsCatalog(InputHandling input, AdminDataManager adminDataManager) {
+        ItemDataManager idm = adminDataManager.getItemDataManager();
+        if (idm == null) {
+            System.out.println("\n[!] Item Data Manager is not available.");
+            input.readLine("Press Enter to return...");
+            return;
+        }
+
+        System.out.println("\nSelect Item Category to view:");
+        System.out.println("1. Weapons (" + idm.getWeapons().size() + ")");
+        System.out.println("2. Armor Pieces (" + idm.getArmors().size() + ")");
+        System.out.println("3. Accessories (" + idm.getAccessories().size() + ")");
+        System.out.println("0. Cancel");
+        String cat = input.readLine("Select: ");
+
+        LinkedList<? extends Item> list;
+        String catName;
+        if (cat.equals("1")) {
+            list = idm.getWeapons();
+            catName = "WEAPONS";
+        } else if (cat.equals("2")) {
+            list = idm.getArmors();
+            catName = "ARMOR";
+        } else if (cat.equals("3")) {
+            list = idm.getAccessories();
+            catName = "ACCESSORIES";
+        } else {
+            return;
+        }
+
+        System.out.println("\n==================================================");
+        System.out.println("             ITEM CATALOG: " + catName + " (" + list.size() + ")");
+        System.out.println("==================================================");
+        int idx = 1;
+        for (Item it : list) {
+            System.out.printf("  [%d] %-6s %-25s [%s]\n", idx++, it.getId(), it.getName(), it.getRarity());
+            System.out.println("      Classes : " + it.getEquippableClassesDisplay());
+            System.out.println("      Summary : " + it.getSummary().trim());
+        }
+        System.out.println("==================================================");
+        input.readLine("\nPress Enter to return...");
+    }
+
+    /**
+     * Submenu 4: Admin Accounts & Credentials
+     */
+    private static void adminAccountsMenu(InputHandling input, AdminDataManager adminDataManager, AdminAcc currentAdmin) {
+        String choice;
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("             ADMIN CREDENTIAL SYSTEM");
+            System.out.println("==================================================");
+            System.out.println("1. View Administrator Accounts");
+            System.out.println("2. Register New Administrator Account");
+            System.out.println("0. Back to Admin Dashboard");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    System.out.println("\n==================================================");
+                    System.out.println("             REGISTERED ADMINISTRATORS");
+                    System.out.println("==================================================");
+                    int idx = 1;
+                    for (AdminAcc a : adminDataManager.getAdminList()) {
+                        String currentTag = a.getUsername().equalsIgnoreCase(currentAdmin.getUsername()) ? " (YOU)" : "";
+                        System.out.printf("  [%d] %-16s | Role: %s%s\n", idx++, a.getUsername(), a.getRole(), currentTag);
+                    }
+                    System.out.println("==================================================");
+                    input.readLine("\nPress Enter to return...");
+                    break;
+
+                case "2":
+                    adminRegisterAccount(input, adminDataManager);
+                    break;
+
+                case "0":
+                    break;
+
+                default:
+                    System.out.println("Invalid option.");
+                    input.readLine("\nPress Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    private static void adminRegisterAccount(InputHandling input, AdminDataManager adminDataManager) {
+        System.out.println("\n==================================================");
+        System.out.println("          REGISTER NEW ADMINISTRATOR");
+        System.out.println("==================================================");
+
+        String username;
+        while (true) {
+            username = input.readLine("Enter new admin username (or '0' to cancel): ");
+            if (username.equals("0")) return;
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty.");
+            } else if (username.contains(",")) {
+                System.out.println("Username cannot contain commas.");
+            } else if (adminDataManager.isAdminUsernameTaken(username)) {
+                System.out.println("That admin username is already in use.");
+            } else {
+                break;
+            }
+        }
+
+        String password;
+        while (true) {
+            password = input.readLine("Enter new admin password: ");
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty.");
+            } else if (password.contains(",")) {
+                System.out.println("Password cannot contain commas.");
+            } else {
+                break;
+            }
+        }
+
+        String role = input.readLine("Enter role / title [Default: Administrator]: ");
+        if (role.isEmpty()) role = "Administrator";
+
+        boolean success = adminDataManager.registerAdmin(username, password, role);
+        if (success) {
+            System.out.println("\n[SUCCESS] Administrator account '" + username + "' created successfully!");
+        } else {
+            System.out.println("\n[!] Failed to register administrator account.");
+        }
+        input.readLine("\nPress Enter to continue...");
     }
 
     public static void playerHomescreen(InputHandling input, PlayerDataManager playerDataManager,
