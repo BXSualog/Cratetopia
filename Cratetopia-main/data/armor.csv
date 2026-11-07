@@ -1,0 +1,33 @@
+id,name,rarity,type,set_name,defense,health_bonus,health_percentage_bonus,equippable_classes,description
+A001,Cloth Tunic,Common,Chest,None,4,10,0,All,A simple linen tunic with minimal protection.
+A002,Rope Sandals,Common,Leggings,None,3,5,0,All,Sandals woven from thick rope.
+A003,Leather Cap,Common,Helmet,Leather,5,8,1,Ranger;Assassin;Support,A cap of treated leather offering basic head cover.
+A004,Leather Tunic,Common,Chest,Leather,8,15,2,Ranger;Assassin;Support,A snug leather jerkin that allows easy movement.
+A005,Leather Boots,Common,Leggings,Leather,5,10,1,Ranger;Assassin;Support,Sturdy boots crafted from hardened leather.
+A006,Iron Helmet,Common,Helmet,Iron,8,10,1,Warrior;Tank,A solid iron helmet with a protective brow.
+A007,Iron Chestplate,Common,Chest,Iron,12,20,2,Warrior;Tank,Stout iron breastplate forged for frontline battle.
+A008,Iron Greaves,Common,Leggings,Iron,8,12,1,Warrior;Tank,Heavy iron greaves guarding the lower legs.
+A009,Chainmail Coif,Uncommon,Helmet,Chainmail,14,18,2,Warrior;Tank;Ranger,A flexible hood of interlocked iron rings.
+A010,Chainmail Vest,Uncommon,Chest,Chainmail,18,30,4,Warrior;Tank;Ranger,Interlocked iron rings providing dependable defense.
+A011,Chainmail Greaves,Uncommon,Leggings,Chainmail,14,20,2,Warrior;Tank;Ranger,Reinforced chainmail trousers with knee guards.
+A012,Studded Hood,Uncommon,Helmet,Studded,12,16,2,Ranger;Assassin,Reinforced leather hood with iron studs.
+A013,Studded Leather,Uncommon,Chest,Studded,16,25,3,Ranger;Assassin,Leather armor reinforced with hardened iron studs.
+A014,Studded Boots,Uncommon,Leggings,Studded,12,18,2,Ranger;Assassin,Silent boots studded along the shins.
+A015,Dragonscale Helm,Rare,Helmet,Dragonscale,28,40,4,Warrior;Tank,A horned helm forged from fiery red scales.
+A016,Dragonscale Vest,Rare,Chest,Dragonscale,35,55,6,Warrior;Tank,Armor crafted from genuine ancient dragon scales.
+A017,Dragonscale Greaves,Rare,Leggings,Dragonscale,28,45,4,Warrior;Tank,Impenetrable greaves forged from dragon scales.
+A018,Warden's Helm,Rare,Helmet,Warden,26,38,3,Tank;Warrior;Support,A helm enchanted to resist crushing blows.
+A019,Warden's Cuirass,Rare,Chest,Warden,32,50,5,Tank;Warrior;Support,Heavy cuirass worn by elite sanctuary wardens.
+A020,Warden's Sabatons,Rare,Leggings,Warden,26,42,3,Tank;Warrior;Support,Blessed steel sabatons rooted in defensive strength.
+A021,Voidplate Helm,Epic,Helmet,Voidplate,48,70,6,Warrior;Tank,A visorless helm that peers directly into the void.
+A022,Voidplate Chest,Epic,Chest,Voidplate,58,90,8,Warrior;Tank,Forged from void-touched metals of an ethereal realm.
+A023,Voidplate Greaves,Epic,Leggings,Voidplate,48,75,6,Warrior;Tank,Leg armor that phases through minor kinetic shock.
+A024,Celestial Crown,Epic,Helmet,Celestial,42,65,7,Mage;Support,A crown that radiates radiant starlight.
+A025,Celestial Robe,Epic,Chest,Celestial,52,80,10,Mage;Support,Flowing robes woven from cosmic nebulae.
+A026,Celestial Slippers,Epic,Leggings,Celestial,42,65,7,Mage;Support,Ethereal slippers leaving faint stardust in their wake.
+A027,Godplate Helm,Legendary,Helmet,Godplate,80,120,8,Warrior;Tank,The crowning helm worn by the primordial champion.
+A028,Godplate Armor,Legendary,Chest,Godplate,92,150,12,Warrior;Tank,The legendary armor forged by titan deities.
+A029,Godplate Greaves,Legendary,Leggings,Godplate,80,125,8,Warrior;Tank,Immovable titan greaves anchored by celestial alloy.
+A030,Eternal Crown,Legendary,Helmet,Eternal,75,115,10,All,A mythical crown that channels perpetual vitality.
+A031,Eternal Robes,Legendary,Chest,Eternal,85,135,14,All,Sacred robes said to grant its bearer immortal warding.
+A032,Eternal Treads,Legendary,Leggings,Eternal,75,120,10,All,Treads that effortlessly stride across eternity.
