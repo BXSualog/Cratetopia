@@ -1,2 +1,6 @@
 id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
-TNK001,Glicerita Biskleta,The Unstoppable Wheel,Air,5,1380,82,118,8,Built with relentless kinetic force, Glicerita charges headfirst into enemy frontlines like a runaway engine. Utilizing his mountain bike he draws all enemy fire toward himself while continuously gaining momentum, turning every incoming blow into explosive forward energy.
+TNK001,Anub'arak,Traitor King of Azjol-Nerub,Earth,3,550,46,38,5,A heavily armored nerubian lord who burrows under ground fronts, bursting upward to disrupt lines and absorb frontal punishment.
+TNK002,Arthas Minithil,Crown Prince of Lordaeron,Light,4,720,62,52,5,A frontline paladin juggernaut wrapped in enchanted holy plate armor, converting taking damage into unbreakable protective barriers.
+TNK003,Glicerita Biskleta,The Unstoppable Wheel,Air,5,1380,82,118,8,Built with relentless kinetic force, Glicerita charges headfirst into enemy frontlines like a runaway engine. Utilizing his mountain bike he draws all enemy fire toward himself while continuously gaining momentum, turning every incoming blow into explosive forward energy. 
+TNK004,Sheer O' Thavi,The Nut Cracker,Earth,6,1350,110,98,10,A continental colossus able to use the earth and shape it into mud reshaping it into any structure limited only by his imagination.
+

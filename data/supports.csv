@@ -1,3 +1,6 @@
 id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
-SUP001,St. Tonio de Mischief,Ladies Man,Light,6,1200,120,88,14,Sir St. Tonio has a question, What if a huge amount of girls like him Sir?
-SUP002,Guni-Kuni,PE-trified,Light,6,1350,145,92,16,Was once a dark mage who wreaked havoc, but was defeated by the Brawler named Ironhand, then she turned into light to support the only person who defeated her.
+SUP001,Tyrande Whisperwind,High Priestess of Elune,Light,3,440,54,26,5,Channels radiant lunar grace to mend wounded frontline allies while increasing squad-wide critical hit rates.
+SUP002,Vol'jin,Shadow Hunter,Wind,4,560,72,34,10,A versatile voodoo strategist who deploys swift healing totems and grants wind-boosted movement speed to the entire party.
+SUP003,5SOS,She Looks So Perfect,Light,5,740,98,46,12,Electrifying rhythms and high energy anthems, 5SOS amplifies the morale and power of the entire team. Wielding sound waves that echo through the arena, they disrupt enemy positions with explosive chorus blasts while granting allies temporary shields and attack boosts that keep the battle moving at full speed. 
+SUP004,St. Tonio de Mischief,Ladies Man,Light,6,1200,120,88,14,Sir St. Tonio has a question, What if a huge amount of girls like him Sir?
+SUP005,Guni-Kuni,PE-trified,Light,6,1350,145,92,16,Was once a dark mage who wreaked havoc, but was defeated by the Brawler named Ironhand, then she turned into light to support the only person who defeated her.
