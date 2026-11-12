@@ -4,39 +4,29 @@ import characters.CharacterClass;
 import characters.Hero;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
 /**
  * CharacterDataManager – loads all hero templates from CSV files and provides
- * lookup / filtering methods for the rest of the game.
+ * lookup / filtering / editing methods for the rest of the game.
  *
- * OOP Concept – SINGLE RESPONSIBILITY
- * -------------------------------------
- * This class has one job: be the central data source for heroes.
- * CharacterGachaManager asks it "give me a random 3-star hero";
- * PlayerDataManager asks it "recreate hero X from a save file".
- * Neither of those classes needs to know how heroes are stored internally.
+ * OOP Concept – SINGLE RESPONSIBILITY & ENCAPSULATION
+ * ---------------------------------------------------
+ * Central data source and catalog manager for heroes across all 7 classes.
  *
  * DSA Concepts used here
  * -----------------------
- * TreeMap<CharacterClass, LinkedList<Hero>>  heroesByClass
- *   Maps each class enum to a list of its heroes.
- *   TreeMap: ordered by CharacterClass enum order; O(log n) lookup per class.
- *
- * LinkedList<Hero>  allHeroes
- *   Flat list of every hero across all classes.
- *   Used when we need to search without knowing the class upfront.
- *
- * CSV files (one per class):
- *   data/warriors.csv, data/mages.csv, data/assassins.csv,
- *   data/tanks.csv, data/rangers.csv, data/supports.csv
- *
- * CSV header per file:
- *   id, name, title, elemental_power, stars, hp, attack, defense, crit_chance, description
+ * TreeMap<CharacterClass, LinkedList<Hero>> heroesByClass:
+ *   Maps each class enum to a list of its heroes with O(log n) class lookup.
+ * LinkedList<Hero> allHeroes:
+ *   Flat list of every hero across all classes for linear search and iteration.
  */
 public class CharacterDataManager {
 
@@ -47,31 +37,23 @@ public class CharacterDataManager {
     private static final String TANKS_CSV     = "data/tanks.csv";
     private static final String RANGERS_CSV   = "data/rangers.csv";
     private static final String SUPPORTS_CSV  = "data/supports.csv";
+    private static final String BRAWLERS_CSV  = "data/brawlers.csv";
 
     // DSA: TreeMap stores heroes organized by their CharacterClass.
-    // Key = CharacterClass enum value, Value = LinkedList of heroes for that class.
-    // TreeMap gives us O(log n) lookup when we want "all warriors", etc.
     private final TreeMap<CharacterClass, LinkedList<Hero>> heroesByClass = new TreeMap<>();
 
     // DSA: Flat LinkedList of all heroes regardless of class.
-    // Used for star-tier filtering or ID lookup across all classes.
     private final LinkedList<Hero> allHeroes = new LinkedList<>();
 
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
-    /**
-     * Initialises the manager by:
-     *   1. Pre-creating an empty LinkedList in heroesByClass for every class.
-     *   2. Loading all six class CSV files.
-     */
     public CharacterDataManager() {
-        // Make sure every CharacterClass has a list to add heroes into
         for (CharacterClass cc : CharacterClass.values()) {
             heroesByClass.put(cc, new LinkedList<>());
         }
-        loadAllClasses(); // read CSV files and fill the lists
+        loadAllClasses();
     }
 
     // -------------------------------------------------------------------------
@@ -79,15 +61,21 @@ public class CharacterDataManager {
     // -------------------------------------------------------------------------
 
     /**
-     * Loads all six character class CSV files in one go.
+     * Loads all seven character class CSV files in one go.
      */
-    private void loadAllClasses() {
+    public void loadAllClasses() {
+        for (CharacterClass cc : CharacterClass.values()) {
+            heroesByClass.get(cc).clear();
+        }
+        allHeroes.clear();
+
         loadClassCsv(WARRIORS_CSV,  CharacterClass.WARRIOR);
         loadClassCsv(MAGES_CSV,     CharacterClass.MAGE);
         loadClassCsv(ASSASSINS_CSV, CharacterClass.ASSASSIN);
         loadClassCsv(TANKS_CSV,     CharacterClass.TANK);
         loadClassCsv(RANGERS_CSV,   CharacterClass.RANGER);
         loadClassCsv(SUPPORTS_CSV,  CharacterClass.SUPPORT);
+        loadClassCsv(BRAWLERS_CSV,  CharacterClass.BRAWLER);
     }
 
     /**
@@ -112,7 +100,7 @@ public class CharacterDataManager {
         }
 
         // try-with-resources: reader closes itself even if an exception occurs
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             String line;
             boolean first = true; // flag to skip the header row
 
@@ -305,5 +293,166 @@ public class CharacterDataManager {
             s = s.substring(1, s.length() - 1).trim();
         }
         return s.replace("\"\"", "\"").replace("\"", "'").trim();
+    }
+
+    // -------------------------------------------------------------------------
+    // Admin Catalog Management (Add / Edit / Remove / Save)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the CSV file path corresponding to the given CharacterClass.
+     */
+    public String getCsvPathForClass(CharacterClass characterClass) {
+        if (characterClass == null) return null;
+        switch (characterClass) {
+            case WARRIOR:  return WARRIORS_CSV;
+            case MAGE:     return MAGES_CSV;
+            case ASSASSIN: return ASSASSINS_CSV;
+            case TANK:     return TANKS_CSV;
+            case RANGER:   return RANGERS_CSV;
+            case SUPPORT:  return SUPPORTS_CSV;
+            case BRAWLER:  return BRAWLERS_CSV;
+            default:       return null;
+        }
+    }
+
+    /**
+     * Saves all heroes of a specific class back to their respective CSV file.
+     *
+     * @param characterClass The class to persist.
+     * @return true if written successfully; false otherwise.
+     */
+    public boolean saveClassCsv(CharacterClass characterClass) {
+        String path = getCsvPathForClass(characterClass);
+        if (path == null) return false;
+
+        LinkedList<Hero> list = heroesByClass.get(characterClass);
+        if (list == null) list = new LinkedList<>();
+
+        File file = new File(path);
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8, false))) {
+            writer.write("id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description");
+            writer.newLine();
+
+            for (Hero h : list) {
+                writer.write(h.getId() + "," +
+                        escapeCsv(h.getName()) + "," +
+                        escapeCsv(h.getTitle()) + "," +
+                        escapeCsv(h.getElementalPower()) + "," +
+                        h.getStars() + "," +
+                        h.getBaseHp() + "," +
+                        h.getBaseAttack() + "," +
+                        h.getBaseDefense() + "," +
+                        h.getBaseCritChance() + "," +
+                        escapeCsv(h.getDescription()));
+                writer.newLine();
+            }
+            return true;
+        } catch (IOException e) {
+            System.err.println("[CharacterDataManager] Failed to save " + path + ": " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Saves all hero classes to their respective CSV files.
+     */
+    public void saveAllHeroesToCsv() {
+        for (CharacterClass cc : CharacterClass.values()) {
+            saveClassCsv(cc);
+        }
+    }
+
+    /**
+     * Adds a new hero template to the catalog and saves to CSV.
+     *
+     * @param hero The new hero template.
+     * @return true if added; false if hero ID is duplicate or invalid.
+     */
+    public boolean addHero(Hero hero) {
+        if (hero == null || hero.getId() == null || hero.getId().trim().isEmpty()) {
+            return false;
+        }
+        if (getHeroTemplateById(hero.getId()) != null) {
+            return false; // duplicate ID
+        }
+
+        CharacterClass cc = hero.getCharacterClass();
+        heroesByClass.get(cc).add(hero);
+        allHeroes.add(hero);
+        saveClassCsv(cc);
+        return true;
+    }
+
+    /**
+     * Updates an existing hero template in the catalog and rewrites the CSV.
+     *
+     * @param oldHeroId  The ID of the hero to update.
+     * @param updatedHero The updated Hero object.
+     * @return true if updated successfully; false if old hero was not found.
+     */
+    public boolean updateHero(String oldHeroId, Hero updatedHero) {
+        if (oldHeroId == null || updatedHero == null) return false;
+
+        Hero oldHero = getHeroTemplateById(oldHeroId);
+        if (oldHero == null) return false;
+
+        CharacterClass oldClass = oldHero.getCharacterClass();
+        CharacterClass newClass = updatedHero.getCharacterClass();
+
+        // Update in allHeroes
+        int allIdx = allHeroes.indexOf(oldHero);
+        if (allIdx >= 0) {
+            allHeroes.set(allIdx, updatedHero);
+        } else {
+            allHeroes.add(updatedHero);
+        }
+
+        // Update in class list
+        LinkedList<Hero> oldList = heroesByClass.get(oldClass);
+        if (oldList != null) {
+            oldList.remove(oldHero);
+        }
+        heroesByClass.get(newClass).add(updatedHero);
+
+        saveClassCsv(oldClass);
+        if (oldClass != newClass) {
+            saveClassCsv(newClass);
+        }
+        return true;
+    }
+
+    /**
+     * Removes a hero template from the catalog and updates the CSV.
+     *
+     * @param id The hero ID to remove.
+     * @return true if found and removed; false otherwise.
+     */
+    public boolean removeHero(String id) {
+        if (id == null) return false;
+        Hero hero = getHeroTemplateById(id);
+        if (hero == null) return false;
+
+        CharacterClass cc = hero.getCharacterClass();
+        allHeroes.remove(hero);
+        LinkedList<Hero> classList = heroesByClass.get(cc);
+        if (classList != null) {
+            classList.remove(hero);
+        }
+        saveClassCsv(cc);
+        return true;
+    }
+
+    private String escapeCsv(String s) {
+        if (s == null) return "";
+        if (s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r")) {
+            return "\"" + s.replace("\"", "\"\"") + "\"";
+        }
+        return s;
     }
 }

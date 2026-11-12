@@ -43,6 +43,29 @@ public class CharacterGachaManager {
     public static final int SINGLE_PULL_SHARDS = 1;   // cost for one pull
     public static final int MULTI_PULL_SHARDS  = 10;  // cost for 10x pull
 
+    // Default single-pull probabilities (per mille out of 1000)
+    // 6★: 2.0% (20), 5★: 8.0% (80), 4★: 25.0% (250), 3★: 65.0% (650)
+    public static final int DEFAULT_RATE_6_STAR = 20;
+    public static final int DEFAULT_RATE_5_STAR = 80;
+    public static final int DEFAULT_RATE_4_STAR = 250;
+    public static final int DEFAULT_RATE_3_STAR = 650;
+
+    // Default 10x guarantee probabilities (percent out of 100)
+    // 6★: 5%, 5★: 25%, 4★: 70%
+    public static final int DEFAULT_GUARANTEE_6_STAR = 5;
+    public static final int DEFAULT_GUARANTEE_5_STAR = 25;
+    public static final int DEFAULT_GUARANTEE_4_STAR = 70;
+
+    // Configurable gacha rate variables
+    private int rate6Star = DEFAULT_RATE_6_STAR;
+    private int rate5Star = DEFAULT_RATE_5_STAR;
+    private int rate4Star = DEFAULT_RATE_4_STAR;
+    private int rate3Star = DEFAULT_RATE_3_STAR;
+
+    private int guarantee6Star = DEFAULT_GUARANTEE_6_STAR;
+    private int guarantee5Star = DEFAULT_GUARANTEE_5_STAR;
+    private int guarantee4Star = DEFAULT_GUARANTEE_4_STAR;
+
     // Shards given when a DUPLICATE hero is rolled (3★ to 6★).
     // Index = star level (indices 0–2 unused; indices 3–6 are valid).
     // 3★ -> 2 shards | 4★ -> 5 shards | 5★ -> 10 shards | 6★ -> 25 shards
@@ -175,35 +198,77 @@ public class CharacterGachaManager {
 
     /**
      * Rolls a star level (3–6) based on weighted probability.
-     * Heroes start at 3★ to 6★ (no 1★ or 2★ heroes).
-     *
-     * Probability table:
-     *   6★:  2.0%  (roll 0–19)
-     *   5★:  8.0%  (roll 20–99)
-     *   4★: 25.0%  (roll 100–349)
-     *   3★: 65.0%  (roll 350–999)
-     *
-     * 10x Pull Guarantee Table (guaranteeAtLeast4Star):
-     *   6★:  5.0%  (roll 0–4)
-     *   5★: 25.0%  (roll 5–29)
-     *   4★: 70.0%  (roll 30–99)
-     *
-     * @param guaranteeAtLeast4Star  Enforce 4★ minimum (for 10x pull guarantee).
-     * @return                       A star level between 3 and 6.
      */
     private int rollStarTier(boolean guaranteeAtLeast4Star) {
         if (guaranteeAtLeast4Star) {
-            int gRoll = rng.nextInt(100); // 0–99 for the 4★+ guarantee sub-roll
-            if (gRoll < 5)  return 6;     // 5.0%
-            if (gRoll < 30) return 5;     // 25.0%
-            return 4;                     // 70.0%
+            int gRoll = rng.nextInt(100); // 0–99
+            if (gRoll < guarantee6Star) return 6;
+            if (gRoll < guarantee6Star + guarantee5Star) return 5;
+            return 4;
         }
 
         int roll = rng.nextInt(1000); // 0 – 999
-        if (roll < 20)  return 6; // 2.0%
-        if (roll < 100) return 5; // 8.0%
-        if (roll < 350) return 4; // 25.0%
-        return 3;                 // 65.0%
+        if (roll < rate6Star) return 6;
+        if (roll < rate6Star + rate5Star) return 5;
+        if (roll < rate6Star + rate5Star + rate4Star) return 4;
+        return 3;
+    }
+
+    // -------------------------------------------------------------------------
+    // Gacha Rate Configuration (Admin)
+    // -------------------------------------------------------------------------
+
+    public int getRate6Star() { return rate6Star; }
+    public int getRate5Star() { return rate5Star; }
+    public int getRate4Star() { return rate4Star; }
+    public int getRate3Star() { return rate3Star; }
+
+    public double getRate6StarPercent() { return rate6Star / 10.0; }
+    public double getRate5StarPercent() { return rate5Star / 10.0; }
+    public double getRate4StarPercent() { return rate4Star / 10.0; }
+    public double getRate3StarPercent() { return rate3Star / 10.0; }
+
+    public int getGuarantee6Star() { return guarantee6Star; }
+    public int getGuarantee5Star() { return guarantee5Star; }
+    public int getGuarantee4Star() { return guarantee4Star; }
+
+    /**
+     * Updates the single pull star rates (per mille out of 1000). Must sum to 1000.
+     */
+    public boolean setSinglePullRates(int perMille3, int perMille4, int perMille5, int perMille6) {
+        if (perMille3 < 0 || perMille4 < 0 || perMille5 < 0 || perMille6 < 0) return false;
+        if (perMille3 + perMille4 + perMille5 + perMille6 != 1000) return false;
+        this.rate3Star = perMille3;
+        this.rate4Star = perMille4;
+        this.rate5Star = perMille5;
+        this.rate6Star = perMille6;
+        return true;
+    }
+
+    /**
+     * Updates the 10x guarantee rates (percent out of 100). Must sum to 100.
+     */
+    public boolean setGuaranteeRates(int pct4, int pct5, int pct6) {
+        if (pct4 < 0 || pct5 < 0 || pct6 < 0) return false;
+        if (pct4 + pct5 + pct6 != 100) return false;
+        this.guarantee4Star = pct4;
+        this.guarantee5Star = pct5;
+        this.guarantee6Star = pct6;
+        return true;
+    }
+
+    /**
+     * Resets all gacha rates to standard defaults.
+     */
+    public void resetAllGachaRatesToDefault() {
+        this.rate6Star = DEFAULT_RATE_6_STAR;
+        this.rate5Star = DEFAULT_RATE_5_STAR;
+        this.rate4Star = DEFAULT_RATE_4_STAR;
+        this.rate3Star = DEFAULT_RATE_3_STAR;
+
+        this.guarantee6Star = DEFAULT_GUARANTEE_6_STAR;
+        this.guarantee5Star = DEFAULT_GUARANTEE_5_STAR;
+        this.guarantee4Star = DEFAULT_GUARANTEE_4_STAR;
     }
 
     /**

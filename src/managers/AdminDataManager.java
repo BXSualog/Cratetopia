@@ -2,6 +2,8 @@ package managers;
 
 import accounts.AdminAcc;
 import accounts.PlayerAcc;
+import characters.Hero;
+import items.Item;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,7 +11,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 /**
  * AdminDataManager – manages administrator accounts, credentials, and data operations.
@@ -46,27 +51,38 @@ public class AdminDataManager {
     private PlayerDataManager playerDataManager;
     private ItemDataManager itemDataManager;
     private CharacterDataManager charDataManager;
+    private CrateManager crateManager;
+    private CharacterGachaManager gachaManager;
 
     /**
      * Default constructor. Loads admin credentials from CSV or hardcoded fallback.
      */
     public AdminDataManager() {
-        this(null, null, null);
+        this(null, null, null, null, null);
     }
 
     /**
-     * Full constructor with references to other game managers.
-     *
-     * @param playerDataManager  Manager for player accounts and progress.
-     * @param itemDataManager    Manager for weapons, armor, accessories.
-     * @param charDataManager    Manager for character hero templates.
+     * Constructor with 3 primary data managers.
      */
     public AdminDataManager(PlayerDataManager playerDataManager,
                             ItemDataManager itemDataManager,
                             CharacterDataManager charDataManager) {
+        this(playerDataManager, itemDataManager, charDataManager, null, null);
+    }
+
+    /**
+     * Full constructor with references to all game managers.
+     */
+    public AdminDataManager(PlayerDataManager playerDataManager,
+                            ItemDataManager itemDataManager,
+                            CharacterDataManager charDataManager,
+                            CrateManager crateManager,
+                            CharacterGachaManager gachaManager) {
         this.playerDataManager = playerDataManager;
         this.itemDataManager   = itemDataManager;
         this.charDataManager   = charDataManager;
+        this.crateManager       = crateManager;
+        this.gachaManager       = gachaManager;
         loadAdminsFromCsv();
     }
 
@@ -76,15 +92,24 @@ public class AdminDataManager {
 
     public void setManagers(PlayerDataManager playerDataManager,
                             ItemDataManager itemDataManager,
-                            CharacterDataManager charDataManager) {
+                            CharacterDataManager charDataManager,
+                            CrateManager crateManager,
+                            CharacterGachaManager gachaManager) {
         this.playerDataManager = playerDataManager;
         this.itemDataManager   = itemDataManager;
         this.charDataManager   = charDataManager;
+        this.crateManager       = crateManager;
+        this.gachaManager       = gachaManager;
     }
 
-    public PlayerDataManager getPlayerDataManager()     { return playerDataManager; }
-    public ItemDataManager getItemDataManager()         { return itemDataManager; }
-    public CharacterDataManager getCharDataManager()   { return charDataManager; }
+    public PlayerDataManager getPlayerDataManager()         { return playerDataManager; }
+    public ItemDataManager getItemDataManager()             { return itemDataManager; }
+    public CharacterDataManager getCharDataManager()       { return charDataManager; }
+    public CrateManager getCrateManager()                   { return crateManager; }
+    public CharacterGachaManager getGachaManager()           { return gachaManager; }
+
+    public void setCrateManager(CrateManager cm)            { this.crateManager = cm; }
+    public void setGachaManager(CharacterGachaManager gm)   { this.gachaManager = gm; }
 
     public LinkedList<AdminAcc> getAdminList() {
         return adminList;
@@ -467,13 +492,139 @@ public class AdminDataManager {
                itemDataManager.getAccessories().size();
     }
 
+    public int getTotalHeroesOwnedAcrossPlayers() {
+        if (playerDataManager == null) return 0;
+        int sum = 0;
+        for (PlayerAcc p : playerDataManager.getPlayerList()) {
+            sum += p.getRoster().size();
+        }
+        return sum;
+    }
+
+    public int getTotalItemsOwnedAcrossPlayers() {
+        if (playerDataManager == null) return 0;
+        int sum = 0;
+        for (PlayerAcc p : playerDataManager.getPlayerList()) {
+            sum += p.getInventory().size();
+        }
+        return sum;
+    }
+
     /**
-     * Saves both admin credentials and player game progress.
+     * Grants coins and/or shards to a specific player account.
+     *
+     * @param username The player's username.
+     * @param coins    Coins to grant (positive integer).
+     * @param shards   Shards to grant (positive integer).
+     * @return true if player was found and currencies updated; false otherwise.
+     */
+    public boolean grantPlayerCurrency(String username, int coins, int shards) {
+        PlayerAcc player = findPlayer(username);
+        if (player == null) return false;
+
+        if (coins > 0) {
+            player.setCoins(player.getCoins() + coins);
+        }
+        if (shards > 0) {
+            player.setShards(player.getShards() + shards);
+        }
+        playerDataManager.saveAllPlayersToCsv();
+        return true;
+    }
+
+    /**
+     * Returns top players sorted by coins descending.
+     */
+    public LinkedList<PlayerAcc> getTopPlayersByCoins(int limit) {
+        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        if (playerDataManager != null) {
+            copy.addAll(playerDataManager.getPlayerList());
+        }
+        copy.sort((a, b) -> Integer.compare(b.getCoins(), a.getCoins()));
+        LinkedList<PlayerAcc> result = new LinkedList<>();
+        for (int i = 0; i < copy.size() && i < limit; i++) {
+            result.add(copy.get(i));
+        }
+        return result;
+    }
+
+    /**
+     * Returns top players sorted by shards descending.
+     */
+    public LinkedList<PlayerAcc> getTopPlayersByShards(int limit) {
+        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        if (playerDataManager != null) {
+            copy.addAll(playerDataManager.getPlayerList());
+        }
+        copy.sort((a, b) -> Integer.compare(b.getShards(), a.getShards()));
+        LinkedList<PlayerAcc> result = new LinkedList<>();
+        for (int i = 0; i < copy.size() && i < limit; i++) {
+            result.add(copy.get(i));
+        }
+        return result;
+    }
+
+    /**
+     * Returns top players sorted by hero roster size descending.
+     */
+    public LinkedList<PlayerAcc> getTopPlayersByHeroes(int limit) {
+        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        if (playerDataManager != null) {
+            copy.addAll(playerDataManager.getPlayerList());
+        }
+        copy.sort((a, b) -> Integer.compare(b.getRoster().size(), a.getRoster().size()));
+        LinkedList<PlayerAcc> result = new LinkedList<>();
+        for (int i = 0; i < copy.size() && i < limit; i++) {
+            result.add(copy.get(i));
+        }
+        return result;
+    }
+
+    /**
+     * Returns top players sorted by inventory item count descending.
+     */
+    public LinkedList<PlayerAcc> getTopPlayersByItems(int limit) {
+        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        if (playerDataManager != null) {
+            copy.addAll(playerDataManager.getPlayerList());
+        }
+        copy.sort((a, b) -> Integer.compare(b.getInventory().size(), a.getInventory().size()));
+        LinkedList<PlayerAcc> result = new LinkedList<>();
+        for (int i = 0; i < copy.size() && i < limit; i++) {
+            result.add(copy.get(i));
+        }
+        return result;
+    }
+
+    /**
+     * Calculates the frequency of ownership for each hero across all registered player accounts.
+     * Uses DSA TreeMap for sorted hero display.
+     */
+    public TreeMap<String, Integer> getHeroOwnershipDistribution() {
+        TreeMap<String, Integer> dist = new TreeMap<>();
+        if (playerDataManager == null) return dist;
+
+        for (PlayerAcc p : playerDataManager.getPlayerList()) {
+            for (Hero h : p.getRoster()) {
+                dist.put(h.getName(), dist.getOrDefault(h.getName(), 0) + 1);
+            }
+        }
+        return dist;
+    }
+
+    /**
+     * Saves admin credentials, player records, character catalog, and item catalog.
      */
     public void saveAllSystemData() {
         saveAdminsToCsv();
         if (playerDataManager != null) {
             playerDataManager.saveAllPlayersToCsv();
+        }
+        if (charDataManager != null) {
+            charDataManager.saveAllHeroesToCsv();
+        }
+        if (itemDataManager != null) {
+            itemDataManager.saveAllItems();
         }
     }
 }

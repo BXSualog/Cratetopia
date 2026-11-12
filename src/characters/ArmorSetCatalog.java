@@ -24,7 +24,7 @@ import java.util.TreeMap;
  * A TreeMap stores key-value pairs in sorted order by key (alphabetical for
  * Strings) and is backed by a Red-Black Tree (a type of self-balancing BST).
  *
- *   Lookup by key (getSet):  O(log n)  ← faster than linear search through a list
+ *   Lookup by key (getSet):  O(log n)  -> faster than linear search through a list
  *   Insertion (registerSet): O(log n)
  *
  * The constructor is given String.CASE_INSENSITIVE_ORDER so "dragon" and

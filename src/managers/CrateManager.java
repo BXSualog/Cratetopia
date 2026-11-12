@@ -38,11 +38,49 @@ import java.util.Random;
 public class CrateManager {
 
     // Crate tier name constants — used as both display strings and switch keys.
-    // Using constants avoids typos like "wooden crate" vs "Wooden Crate".
     public static final String WOODEN  = "Wooden Crate";
     public static final String SILVER  = "Silver Crate";
     public static final String GOLD    = "Gold Crate";
     public static final String DIAMOND = "Diamond Crate";
+
+    // Default crate tier drop rates (percentage out of 100)
+    public static final int DEFAULT_WOODEN_RATE  = 75;
+    public static final int DEFAULT_SILVER_RATE  = 18;
+    public static final int DEFAULT_GOLD_RATE    = 6;
+    public static final int DEFAULT_DIAMOND_RATE = 1;
+
+    // Configurable crate tier drop rates
+    private int woodenRate  = DEFAULT_WOODEN_RATE;
+    private int silverRate  = DEFAULT_SILVER_RATE;
+    private int goldRate    = DEFAULT_GOLD_RATE;
+    private int diamondRate = DEFAULT_DIAMOND_RATE;
+
+    // Configurable Wooden Crate loot parameters
+    private int woodenMinCoins = 200;
+    private int woodenMaxCoins = 700;
+    private int woodenRareChance = 15;
+    private int woodenShardChance = 2;
+
+    // Configurable Silver Crate loot parameters
+    private int silverMinCoins = 800;
+    private int silverMaxCoins = 1000;
+    private int silverRareWeaponChance = 20;
+    private int silverRareArmorChance = 25;
+    private int silverShardChance = 10;
+
+    // Configurable Gold Crate loot parameters
+    private int goldMinCoins = 1500;
+    private int goldMaxCoins = 2500;
+    private int goldEpicArmorChance = 45;
+    private int goldEpicWeaponChance = 50;
+    private int goldShardChance = 40;
+
+    // Configurable Diamond Crate loot parameters
+    private int diamondMinCoins = 5000;
+    private int diamondMaxCoins = 10000;
+    private int diamondLegArmorChance = 50;
+    private int diamondLegWeaponChance = 60;
+    private int diamondShardChance = 50;
 
     // Coin compensation for duplicate items (private = only used inside this class)
     private static final int DUP_COINS_COMMON    = 500;
@@ -82,10 +120,115 @@ public class CrateManager {
      */
     public String rollCrateTier() {
         int roll = rng.nextInt(100); // 0–99
-        if (roll < 1)  return DIAMOND; // 1%
-        if (roll < 7)  return GOLD;    // 6%
-        if (roll < 25) return SILVER;  // 18%
-        return WOODEN;                  // 75%
+        if (roll < diamondRate) return DIAMOND;
+        if (roll < diamondRate + goldRate) return GOLD;
+        if (roll < diamondRate + goldRate + silverRate) return SILVER;
+        return WOODEN;
+    }
+
+    // -------------------------------------------------------------------------
+    // Crate Drop Rate & Loot Table Configuration (Admin)
+    // -------------------------------------------------------------------------
+
+    public int getWoodenRate()  { return woodenRate; }
+    public int getSilverRate()  { return silverRate; }
+    public int getGoldRate()    { return goldRate; }
+    public int getDiamondRate() { return diamondRate; }
+
+    /**
+     * Updates the crate tier drop rates. The rates must sum to 100.
+     */
+    public boolean setCrateTierRates(int wooden, int silver, int gold, int diamond) {
+        if (wooden < 0 || silver < 0 || gold < 0 || diamond < 0) return false;
+        if (wooden + silver + gold + diamond != 100) return false;
+        this.woodenRate  = wooden;
+        this.silverRate  = silver;
+        this.goldRate    = gold;
+        this.diamondRate = diamond;
+        return true;
+    }
+
+    public int getWoodenMinCoins() { return woodenMinCoins; }
+    public int getWoodenMaxCoins() { return woodenMaxCoins; }
+    public int getWoodenRareChance() { return woodenRareChance; }
+    public int getWoodenShardChance() { return woodenShardChance; }
+    public void setWoodenLoot(int minCoins, int maxCoins, int rareChance, int shardChance) {
+        this.woodenMinCoins = Math.max(0, minCoins);
+        this.woodenMaxCoins = Math.max(this.woodenMinCoins, maxCoins);
+        this.woodenRareChance = Math.max(0, Math.min(100, rareChance));
+        this.woodenShardChance = Math.max(0, Math.min(100, shardChance));
+    }
+
+    public int getSilverMinCoins() { return silverMinCoins; }
+    public int getSilverMaxCoins() { return silverMaxCoins; }
+    public int getSilverRareWeaponChance() { return silverRareWeaponChance; }
+    public int getSilverRareArmorChance() { return silverRareArmorChance; }
+    public int getSilverShardChance() { return silverShardChance; }
+    public void setSilverLoot(int minCoins, int maxCoins, int weaponChance, int armorChance, int shardChance) {
+        this.silverMinCoins = Math.max(0, minCoins);
+        this.silverMaxCoins = Math.max(this.silverMinCoins, maxCoins);
+        this.silverRareWeaponChance = Math.max(0, Math.min(100, weaponChance));
+        this.silverRareArmorChance = Math.max(0, Math.min(100, armorChance));
+        this.silverShardChance = Math.max(0, Math.min(100, shardChance));
+    }
+
+    public int getGoldMinCoins() { return goldMinCoins; }
+    public int getGoldMaxCoins() { return goldMaxCoins; }
+    public int getGoldEpicArmorChance() { return goldEpicArmorChance; }
+    public int getGoldEpicWeaponChance() { return goldEpicWeaponChance; }
+    public int getGoldShardChance() { return goldShardChance; }
+    public void setGoldLoot(int minCoins, int maxCoins, int armorChance, int weaponChance, int shardChance) {
+        this.goldMinCoins = Math.max(0, minCoins);
+        this.goldMaxCoins = Math.max(this.goldMinCoins, maxCoins);
+        this.goldEpicArmorChance = Math.max(0, Math.min(100, armorChance));
+        this.goldEpicWeaponChance = Math.max(0, Math.min(100, weaponChance));
+        this.goldShardChance = Math.max(0, Math.min(100, shardChance));
+    }
+
+    public int getDiamondMinCoins() { return diamondMinCoins; }
+    public int getDiamondMaxCoins() { return diamondMaxCoins; }
+    public int getDiamondLegArmorChance() { return diamondLegArmorChance; }
+    public int getDiamondLegWeaponChance() { return diamondLegWeaponChance; }
+    public int getDiamondShardChance() { return diamondShardChance; }
+    public void setDiamondLoot(int minCoins, int maxCoins, int armorChance, int weaponChance, int shardChance) {
+        this.diamondMinCoins = Math.max(0, minCoins);
+        this.diamondMaxCoins = Math.max(this.diamondMinCoins, maxCoins);
+        this.diamondLegArmorChance = Math.max(0, Math.min(100, armorChance));
+        this.diamondLegWeaponChance = Math.max(0, Math.min(100, weaponChance));
+        this.diamondShardChance = Math.max(0, Math.min(100, shardChance));
+    }
+
+    /**
+     * Resets all crate tier rates and loot tables back to factory default values.
+     */
+    public void resetAllCrateRatesToDefault() {
+        this.woodenRate  = DEFAULT_WOODEN_RATE;
+        this.silverRate  = DEFAULT_SILVER_RATE;
+        this.goldRate    = DEFAULT_GOLD_RATE;
+        this.diamondRate = DEFAULT_DIAMOND_RATE;
+
+        this.woodenMinCoins = 200;
+        this.woodenMaxCoins = 700;
+        this.woodenRareChance = 15;
+        this.woodenShardChance = 2;
+
+        this.silverMinCoins = 800;
+        this.silverMaxCoins = 1000;
+        this.silverRareWeaponChance = 20;
+        this.silverRareArmorChance = 25;
+        this.silverShardChance = 10;
+
+        this.goldMinCoins = 1500;
+        this.goldMaxCoins = 2500;
+        this.goldEpicArmorChance = 45;
+        this.goldEpicWeaponChance = 50;
+        this.goldShardChance = 40;
+
+        this.diamondMinCoins = 5000;
+        this.diamondMaxCoins = 10000;
+        this.diamondLegArmorChance = 50;
+        this.diamondLegWeaponChance = 60;
+        this.diamondShardChance = 50;
     }
 
     /**
@@ -128,7 +271,7 @@ public class CrateManager {
      */
     private void rollWoodenCrate(CrateResult result, PlayerAcc player) {
         // Coins — always awarded
-        int coins = randInt(200, 700);
+        int coins = randInt(woodenMinCoins, woodenMaxCoins);
         awardCoins(player, result, coins);
 
         // Common weapon — always awarded
@@ -139,37 +282,33 @@ public class CrateManager {
         Item armor = pickRandom(itemData.getArmorsByRarity("Common"));
         awardItem(player, result, armor);
 
-        // Rare item — 15% chance
-        if (chance(15)) {
+        // Rare item
+        if (chance(woodenRareChance)) {
             Item rare = pickRandom(itemData.getAllEquipmentByRarity("Rare"));
             awardItem(player, result, rare);
         }
 
-        // Shard bonus — 2% chance
-        if (chance(2)) {
+        // Shard bonus
+        if (chance(woodenShardChance)) {
             awardShards(player, result, 1);
         }
     }
 
     /**
      * Silver Crate loot table.
-     *   – Always: 800–1 000 coins
-     *   – 20% chance: 1 Rare weapon
-     *   – 25% chance: 1 Rare armor or accessory
-     *   – 10% chance: 1–3 shards
      */
     private void rollSilverCrate(CrateResult result, PlayerAcc player) {
-        int coins = randInt(800, 1000);
+        int coins = randInt(silverMinCoins, silverMaxCoins);
         awardCoins(player, result, coins);
 
         // Rare weapon
-        if (chance(20)) {
+        if (chance(silverRareWeaponChance)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Rare"));
             awardItem(player, result, weapon);
         }
 
         // Rare armor or accessory
-        if (chance(25)) {
+        if (chance(silverRareArmorChance)) {
             Item equip = pickRandom(itemData.getArmorsByRarity("Rare"));
             if (equip == null) {
                 // If no Rare armors exist, try accessories as fallback
@@ -179,61 +318,53 @@ public class CrateManager {
         }
 
         // Shards bonus
-        if (chance(10)) {
+        if (chance(silverShardChance)) {
             awardShards(player, result, randInt(1, 3));
         }
     }
 
     /**
      * Gold Crate loot table.
-     *   – Always: 1 500–2 500 coins
-     *   – 45% chance: 1 Epic armor or accessory
-     *   – 50% chance: 1 Epic weapon
-     *   – 40% chance: 3–5 shards
      */
     private void rollGoldCrate(CrateResult result, PlayerAcc player) {
-        int coins = randInt(1500, 2500);
+        int coins = randInt(goldMinCoins, goldMaxCoins);
         awardCoins(player, result, coins);
 
-        if (chance(45)) {
+        if (chance(goldEpicArmorChance)) {
             Item equip = pickRandom(itemData.getArmorsByRarity("Epic"));
             if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Epic"));
             awardItem(player, result, equip);
         }
 
-        if (chance(50)) {
+        if (chance(goldEpicWeaponChance)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Epic"));
             awardItem(player, result, weapon);
         }
 
-        if (chance(40)) {
+        if (chance(goldShardChance)) {
             awardShards(player, result, randInt(3, 5));
         }
     }
 
     /**
      * Diamond Crate loot table.
-     *   – Always: 5 000–10 000 coins
-     *   – 50% chance: 1 Legendary armor or accessory
-     *   – 60% chance: 1 Legendary weapon
-     *   – 50% chance: 5–9 shards
      */
     private void rollDiamondCrate(CrateResult result, PlayerAcc player) {
-        int coins = randInt(5000, 10000);
+        int coins = randInt(diamondMinCoins, diamondMaxCoins);
         awardCoins(player, result, coins);
 
-        if (chance(50)) {
+        if (chance(diamondLegArmorChance)) {
             Item equip = pickRandom(itemData.getArmorsByRarity("Legendary"));
             if (equip == null) equip = pickRandom(itemData.getAccessoriesByRarity("Legendary"));
             awardItem(player, result, equip);
         }
 
-        if (chance(60)) {
+        if (chance(diamondLegWeaponChance)) {
             Item weapon = pickRandom(itemData.getWeaponsByRarity("Legendary"));
             awardItem(player, result, weapon);
         }
 
-        if (chance(50)) {
+        if (chance(diamondShardChance)) {
             awardShards(player, result, randInt(5, 9));
         }
     }
