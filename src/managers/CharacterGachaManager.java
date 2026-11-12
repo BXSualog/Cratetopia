@@ -107,7 +107,7 @@ public class CharacterGachaManager {
         // Guard: not enough shards → return a failure result
         if (player.getShards() < SINGLE_PULL_SHARDS) {
             return new GachaResult(false,
-                    "Not enough shards! You need " + SINGLE_PULL_SHARDS + " shard" + (SINGLE_PULL_SHARDS > 1 ? "s" : "") + ".");
+                    "Not enough shards! You need " + SINGLE_PULL_SHARDS + " shard.");
         }
 
         // Deduct cost from the player's shard balance
