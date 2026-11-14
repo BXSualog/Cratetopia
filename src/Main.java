@@ -30,11 +30,6 @@ public class Main {
         CrateManager crateManager = new CrateManager(itemDataManager);
         AdminDataManager adminDataManager = new AdminDataManager(playerDataManager, itemDataManager, charDataManager, crateManager, gachaManager);
 
-        // Auto-save on JVM shutdown
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            adminDataManager.saveAllSystemData();
-        }));
-
         String choice;
 
         do {
@@ -85,16 +80,26 @@ public class Main {
         System.out.println("===========================================");
         System.out.println("          REGISTER PLAYER ACCOUNT");
         System.out.println("===========================================");
+        System.out.println("  Username rules: 3–20 characters, must contain");
+        System.out.println("  at least one letter (a-z / A-Z), no commas.");
+        System.out.println("  Password rules: 4–30 characters, no commas.");
+        System.out.println("===========================================");
 
         String username;
         while (true) {
             username = input.readLine("Enter username: ");
             if (username.isEmpty()) {
-                System.out.println("Username cannot be empty. Please try again.");
+                System.out.println("[!] Username cannot be empty. Please try again.");
+            } else if (username.length() < 3) {
+                System.out.println("[!] Username must be at least 3 characters long.");
+            } else if (username.length() > 20) {
+                System.out.println("[!] Username cannot exceed 20 characters.");
             } else if (username.contains(",")) {
-                System.out.println("Username cannot contain commas. Please try again.");
+                System.out.println("[!] Username cannot contain commas.");
+            } else if (!hasLetter(username)) {
+                System.out.println("[!] Username must contain at least one letter (a-z or A-Z).");
             } else if (playerDataManager.isUsernameTaken(username)) {
-                System.out.println("Username is already taken. Please choose another username.");
+                System.out.println("[!] Username is already taken. Please choose another.");
             } else {
                 break;
             }
@@ -104,9 +109,13 @@ public class Main {
         while (true) {
             password = input.readLine("Enter password: ");
             if (password.isEmpty()) {
-                System.out.println("Password cannot be empty. Please try again.");
+                System.out.println("[!] Password cannot be empty.");
+            } else if (password.length() < 4) {
+                System.out.println("[!] Password must be at least 4 characters long.");
+            } else if (password.length() > 30) {
+                System.out.println("[!] Password cannot exceed 30 characters.");
             } else if (password.contains(",")) {
-                System.out.println("Password cannot contain commas. Please try again.");
+                System.out.println("[!] Password cannot contain commas.");
             } else {
                 break;
             }
@@ -114,12 +123,22 @@ public class Main {
 
         boolean success = playerDataManager.registerPlayer(username, password);
         if (success) {
-            System.out.println("Account registered successfully!\nYou can now log in with your credentials.");
+            System.out.println("\n[SUCCESS] Account registered successfully!");
+            System.out.println("  You can now log in with your credentials.");
         } else {
-            System.out.println("Failed to register account. Please try again.");
+            System.out.println("[!] Failed to register account. Please try again.");
         }
 
         input.readLine("\nPress Enter to return to the Login Menu...");
+    }
+
+    /** Returns true if the string contains at least one ASCII letter (a-z or A-Z). */
+    private static boolean hasLetter(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) return true;
+        }
+        return false;
     }
 
     public static void loginUser(InputHandling input, PlayerDataManager playerDataManager,
@@ -137,7 +156,7 @@ public class Main {
 
             boolean success = playerDataManager.loginPlayer(username, password);
             if (success) {
-                PlayerAcc player = playerDataManager.getPlayer(username);
+                PlayerAcc player = playerDataManager.getPlayerExact(username);
                 if (player.isBanned()) {
                     System.out.println("\n===========================================");
                     System.out.println("              ACCESS DENIED");
@@ -2030,7 +2049,9 @@ public class Main {
             System.out.println("  Classes : Warrior, Mage, Assassin, Tank, Ranger, Support, Brawler");
             System.out.println("  Rarities: 3★ to 6★ (Scaling stats & power)");
             System.out.println("--------------------------------------------------");
-            System.out.println("  Current Shards: " + player.getShards());
+            System.out.println("  Current Shards : " + player.getShards());
+            System.out.printf("  Heroes Unlocked: %d/%d heroes unlocked!%n",
+                    player.getRoster().size(), gachaManager.getTotalHeroCount());
             System.out.println();
             System.out.println("  Single Summon : 1 Shard  |  10x Multi-Summon: 10 Shards (Guaranteed 4★+)");
             System.out.println("--------------------------------------------------");
@@ -2124,22 +2145,55 @@ public class Main {
             System.out.println("--------------------------------------------------");
             System.out.println("  [DUPLICATE HEROES CONVERTED TO SHARDS]");
             for (CharacterGachaManager.GachaResult.DuplicateHeroEntry d : result.getDuplicateHeroes()) {
-                System.out.printf("   - %s -> Converted to +%d Shards\n",
-                        d.getHero().getName() + " (" + d.getHero().getStarsDisplay() + ")",
+                System.out.printf("  You already have the hero: \"%s\"! Hero has been converted into %d shards!%n",
+                        d.getHero().getName(),
                         d.getShardsAwarded());
+                System.out.printf("   (%s — %s %s)%n",
+                        d.getHero().getStarsDisplay(),
+                        d.getHero().getCharacterClass().getDisplayName(),
+                        d.getHero().getElementalPowerDisplay());
             }
         }
 
         // Use PriorityQueue to announce highest tier summoned
+        // Drain the max-heap to find ALL heroes at the top star level
         if (!result.getHighestRankPulls().isEmpty()) {
-            Hero top = result.getHighestRankPulls().peek();
             System.out.println("--------------------------------------------------");
-            System.out.println("  ★ Top Summon: " + top.getName() + " - \"" + top.getTitle() + "\" ("
-                    + top.getStarsDisplay() + " " + top.getCharacterClass().getDisplayName() + " | " + top.getElementalPowerDisplay() + ")");
+            // Peek to find the highest star level in this session
+            int topStars = result.getHighestRankPulls().peek().getStars();
+            // Collect all heroes matching the top tier by draining the heap into a LinkedList
+            LinkedList<Hero> topHeroes = new LinkedList<>();
+            java.util.PriorityQueue<Hero> tempHeap = new java.util.PriorityQueue<>(result.getHighestRankPulls());
+            while (!tempHeap.isEmpty()) {
+                Hero h = tempHeap.poll();
+                if (h.getStars() == topStars) {
+                    topHeroes.add(h);
+                } else {
+                    break; // heap is sorted descending by stars, so once stars differ we're done
+                }
+            }
+            if (topHeroes.size() == 1) {
+                Hero top = topHeroes.getFirst();
+                System.out.println("  ★ Top Summon: " + top.getName() + " - \"" + top.getTitle() + "\" ("
+                        + top.getStarsDisplay() + " " + top.getCharacterClass().getDisplayName()
+                        + " | " + top.getElementalPowerDisplay() + ")");
+            } else {
+                System.out.println("  ★ Top Summons (" + topHeroes.size() + "x " + "★".repeat(topStars) + "):");
+                for (Hero top : topHeroes) {
+                    System.out.println("    • " + top.getName() + " - \"" + top.getTitle() + "\" ("
+                            + top.getCharacterClass().getDisplayName()
+                            + " | " + top.getElementalPowerDisplay() + ")");
+                }
+            }
         }
 
         System.out.println("--------------------------------------------------");
-        System.out.println("  Remaining Shards: " + player.getShards());
+        if (dupeShardsGained > 0) {
+            System.out.println("  Shards from Duplicates: +" + dupeShardsGained);
+        }
+        int netShardsSpent = cost - dupeShardsGained;
+        System.out.println("  Net Shards Spent : " + (netShardsSpent > 0 ? "-" + netShardsSpent : "0 (duplicates refunded all!)"));
+        System.out.println("  Remaining Shards : " + player.getShards());
         System.out.println("==================================================");
 
         announceUnlockedAchievements(newUnlocks);

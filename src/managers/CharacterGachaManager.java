@@ -232,6 +232,11 @@ public class CharacterGachaManager {
     public int getGuarantee5Star() { return guarantee5Star; }
     public int getGuarantee4Star() { return guarantee4Star; }
 
+    /** Returns the total number of heroes in the summon pool (catalog size). */
+    public int getTotalHeroCount() {
+        return charData.getAllHeroes().size();
+    }
+
     /**
      * Updates the single pull star rates (per mille out of 1000). Must sum to 1000.
      */

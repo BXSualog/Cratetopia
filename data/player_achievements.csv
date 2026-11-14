@@ -8,9 +8,9 @@ BX,SUMMON_010,false,,false
 BX,SUMMON_050,false,,false
 BX,HERO_5STAR,false,,false
 BX,HERO_6STAR,false,,false
-BX,ROSTER_005,true,2026-11-14 15:25:57,false
+BX,ROSTER_005,true,2026-11-14 15:25:57,true
 BX,ROSTER_010,false,,false
-BX,ITEMS_010,true,2026-11-14 15:25:57,false
+BX,ITEMS_010,true,2026-11-14 15:25:57,true
 BX,ITEMS_030,false,,false
 BX,COINS_10K,false,,false
 BX,COINS_50K,false,,false

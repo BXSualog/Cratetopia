@@ -1,7 +1,5 @@
-﻿id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
-WRR001,Garithos,Grand Marshal,Earth,3,450,58,32,5,A stubborn frontline commander who relies on heavy plate armor, martial discipline, and unyielding physical endurance to hold the vanguard.
-WRR002,Muradin Bronzebeard,Mountain King,Lightning,4,590,80,36,10,A legendary dwarven warrior who leaps into the fray with dual-wielded hammers, unleashing crackling thunder and storm energy to shatter enemy formations.
-WRR003,Retardo Felizardo,The Unfazed Pioneer of Household Stress,Earth,5,760,104,52,12,Dressed in his "SORRY, FAMILY PROBLEMS" shirt, sweatpants, and running shoes, Retardo Felizardo enters every battle with a boulder tied to a metal pipe. Powered by the endurance of surviving endless group chat drama and family problems, his stoic stare and heavy stone hammer can crush enemy defenses. 
-WRR004,Es Jes Es Elle,The Counter-Verdict,Dark,6,1050,142,74,15,Whenever Glicerita Biskleta executes a headlong bike charge into the enemy frontline, Retardo Felizardo intentionally hurls or slams his boulder right into Glicerita's path to trip him up—causing a catastrophic Earth-Wind explosion that knocks back all nearby enemies and deals massive area-of-effect damage. 
-
-
+id,name,title,elemental_power,stars,hp,attack,defense,crit_chance,description
+WRR001,Garithos,Grand Marshal,Earth,3,450,58,32,5,"A stubborn frontline commander who relies on heavy plate armor, martial discipline, and unyielding physical endurance to hold the vanguard."
+WRR002,Muradin Bronzebeard,Mountain King,Lightning,4,590,80,36,10,"A legendary dwarven warrior who leaps into the fray with dual-wielded hammers, unleashing crackling thunder and storm energy to shatter enemy formations."
+WRR003,Retardo Felizardo,The Unfazed Pioneer of Household Stress,Earth,5,760,104,52,12,"Dressed in his 'SORRY, FAMILY PROBLEMS' shirt, sweatpants, and running shoes, Retardo Felizardo enters every battle with a boulder tied to a metal pipe. Powered by the endurance of surviving endless group chat drama and family problems, his stoic stare and heavy stone hammer can crush enemy defenses."
+WRR004,Es Jes Es Elle,The Counter-Verdict,Dark,6,1050,142,74,15,"Whenever Glicerita Biskleta executes a headlong bike charge into the enemy frontline, Retardo Felizardo intentionally hurls or slams his boulder right into Glicerita's path to trip him up—causing a catastrophic Earth-Wind explosion that knocks back all nearby enemies and deals massive area-of-effect damage."

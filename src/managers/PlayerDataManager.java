@@ -229,7 +229,7 @@ public class PlayerDataManager {
 
     public boolean authenticate(String username, String password) {
         for (PlayerAcc player : playerList) {
-            if (player.getUsername().equalsIgnoreCase(username) && player.getPassword().equals(password)) {
+            if (player.getUsername().equals(username) && player.getPassword().equals(password)) {
                 return true;
             }
         }
@@ -244,6 +244,17 @@ public class PlayerDataManager {
         if (username == null) return null;
         for (PlayerAcc player : playerList) {
             if (player.getUsername().equalsIgnoreCase(username)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    /** Case-sensitive player lookup — used for login. */
+    public PlayerAcc getPlayerExact(String username) {
+        if (username == null) return null;
+        for (PlayerAcc player : playerList) {
+            if (player.getUsername().equals(username)) {
                 return player;
             }
         }
