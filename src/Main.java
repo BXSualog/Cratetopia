@@ -2,11 +2,14 @@ import accounts.AdminAcc;
 import accounts.PlayerAcc;
 import characters.CharacterClass;
 import characters.Hero;
+import characters.HeroSort;
 import items.Accessory;
 import items.Armor;
 import items.ArmorSet;
 import items.Item;
 import items.Weapon;
+import managers.Achievement;
+import managers.AchievementManager;
 import managers.AdminDataManager;
 import managers.CharacterDataManager;
 import managers.CharacterGachaManager;
@@ -1901,13 +1904,13 @@ public class Main {
                     charactersAndEquipmentMenu(input, playerDataManager, gachaManager, player);
                     break;
                 case "3":
-                    inventoryMenu(input, player);
+                    inventoryMenu(input, playerDataManager, player);
                     break;
                 case "4":
                     shopAndTradingMenu(input, playerDataManager, player);
                     break;
                 case "5":
-                    // Achievements & Statistics
+                    achievementsAndStatisticsMenu(input, playerDataManager, player);
                     break;
                 case "6":
                     // Account Settings
@@ -1940,14 +1943,35 @@ public class Main {
                     System.out.println("Invalid option. Please try again.");
             }
 
-            if (!choice.equals("7") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3") && !choice.equals("4")) {
+            if (!choice.equals("7") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3") && !choice.equals("4") && !choice.equals("5")) {
                 input.readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("7"));
     }
 
     // =========================================================================
-    // Characters & Equipment Menu
+    // =========================================================================
+    // Achievement Announcement Helper
+    // =========================================================================
+
+    public static void announceUnlockedAchievements(LinkedList<Achievement> newUnlocks) {
+        if (newUnlocks == null || newUnlocks.isEmpty()) return;
+
+        System.out.println("\n**************************************************");
+        System.out.println("          ★ ACHIEVEMENT(S) UNLOCKED! ★");
+        System.out.println("**************************************************");
+        for (Achievement a : newUnlocks) {
+            System.out.println("  [★] " + a.getTitle() + " (" + a.getCategory().getDisplayName() + ")");
+            System.out.println("      " + a.getDescription());
+            System.out.println("      Reward: " + a.getRewardsDisplay());
+        }
+        System.out.println("--------------------------------------------------");
+        System.out.println("  Claim your rewards in Menu Option 5 (Achievements & Statistics)!");
+        System.out.println("**************************************************\n");
+    }
+
+    // =========================================================================
+    // Characters & Equipment Menu (2.2)
     // =========================================================================
 
     public static void charactersAndEquipmentMenu(InputHandling input, PlayerDataManager playerDataManager,
@@ -1961,10 +1985,12 @@ public class Main {
             System.out.println("  class-specific weapons, armors, and accessories.");
             System.out.println("--------------------------------------------------");
             System.out.println("  Heroes in Roster : " + player.getRoster().size());
-            System.out.println("  Shards Available : " + player.getShards());
+            System.out.println("  Equipped Gear    : " + player.getEquippedItemsCount() + " items");
+            System.out.println("  Shards Available : " + String.format("%,d", player.getShards()));
             System.out.println("--------------------------------------------------");
-            System.out.println("1. View Character Roster & Equip Gear");
-            System.out.println("2. Character Gacha Summon (Portal of Legends)");
+            System.out.println("1. View Character Roster & Equip Gear (Sort & Filter)");
+            System.out.println("2. Manage Equipment & Quick Loadouts");
+            System.out.println("3. Character Gacha Summon (Portal of Legends)");
             System.out.println("0. Back to Main Menu");
             System.out.println("==================================================");
 
@@ -1975,6 +2001,9 @@ public class Main {
                     viewRosterMenu(input, playerDataManager, player);
                     break;
                 case "2":
+                    manageEquipmentMenu(input, playerDataManager, player);
+                    break;
+                case "3":
                     characterGachaMenu(input, playerDataManager, gachaManager, player);
                     break;
                 case "0":
@@ -1999,14 +2028,14 @@ public class Main {
             System.out.println("==================================================");
             System.out.println("  Summon legendary heroes across 7 classes!");
             System.out.println("  Classes : Warrior, Mage, Assassin, Tank, Ranger, Support, Brawler");
-            System.out.println("  Rarities: 1★ to 6★ (Scaling stats & power)");
+            System.out.println("  Rarities: 3★ to 6★ (Scaling stats & power)");
             System.out.println("--------------------------------------------------");
             System.out.println("  Current Shards: " + player.getShards());
             System.out.println();
-            System.out.println("  Rates: 1★ (45%) | 2★ (30%) | 3★ (15%) | 4★ (7%) | 5★ (2.5%) | 6★ (0.5%)");
+            System.out.println("  Single Summon : 1 Shard  |  10x Multi-Summon: 10 Shards (Guaranteed 4★+)");
             System.out.println("--------------------------------------------------");
             System.out.println("1. Single Summon (1 Shard)");
-            System.out.println("2. 10x Multi-Summon (10 Shards) [Guaranteed 3★+]");
+            System.out.println("2. 10x Multi-Summon (10 Shards) [Guaranteed 4★+]");
             System.out.println("0. Back");
             System.out.println("==================================================");
 
@@ -2052,6 +2081,28 @@ public class Main {
             return;
         }
 
+        // Track statistics: summons performed, shards spent, highest hero rarity
+        int highestStars = 0;
+        for (Hero h : result.getSummonedHeroes()) {
+            if (h.getStars() > highestStars) highestStars = h.getStars();
+        }
+        for (CharacterGachaManager.GachaResult.DuplicateHeroEntry d : result.getDuplicateHeroes()) {
+            if (d.getHero().getStars() > highestStars) highestStars = d.getHero().getStars();
+        }
+        player.getStats().recordSummon(isMulti ? 10 : 1, cost, highestStars);
+
+        int dupeShardsGained = 0;
+        for (CharacterGachaManager.GachaResult.DuplicateHeroEntry d : result.getDuplicateHeroes()) {
+            dupeShardsGained += d.getShardsAwarded();
+        }
+        if (dupeShardsGained > 0) {
+            player.getStats().recordShardsEarned(dupeShardsGained);
+        }
+
+        // Synchronize counters and check achievements
+        player.syncCounters();
+        LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
+
         // Auto-save shards spent & summoned heroes
         playerDataManager.saveAllPlayersToCsv();
 
@@ -2069,61 +2120,451 @@ public class Main {
             System.out.println();
         }
 
+        if (!result.getDuplicateHeroes().isEmpty()) {
+            System.out.println("--------------------------------------------------");
+            System.out.println("  [DUPLICATE HEROES CONVERTED TO SHARDS]");
+            for (CharacterGachaManager.GachaResult.DuplicateHeroEntry d : result.getDuplicateHeroes()) {
+                System.out.printf("   - %s -> Converted to +%d Shards\n",
+                        d.getHero().getName() + " (" + d.getHero().getStarsDisplay() + ")",
+                        d.getShardsAwarded());
+            }
+        }
+
         // Use PriorityQueue to announce highest tier summoned
         if (!result.getHighestRankPulls().isEmpty()) {
             Hero top = result.getHighestRankPulls().peek();
             System.out.println("--------------------------------------------------");
-            System.out.println("  ★ Top Summon: " + top.getName() + " - \"" + top.getTitle() + "\" (" + top.getStarsDisplay() + " " + top.getCharacterClass().getDisplayName() + " | " + top.getElementalPowerDisplay() + ")");
+            System.out.println("  ★ Top Summon: " + top.getName() + " - \"" + top.getTitle() + "\" ("
+                    + top.getStarsDisplay() + " " + top.getCharacterClass().getDisplayName() + " | " + top.getElementalPowerDisplay() + ")");
         }
 
         System.out.println("--------------------------------------------------");
         System.out.println("  Remaining Shards: " + player.getShards());
         System.out.println("==================================================");
+
+        announceUnlockedAchievements(newUnlocks);
+
         input.readLine("\nPress Enter to continue...");
     }
 
     // =========================================================================
-    // View Roster & Equipment
+    // View Roster & Equipment (Sorting & Filtering)
     // =========================================================================
 
     private static void viewRosterMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
-        LinkedList<Hero> roster = player.getRoster();
-        if (roster.isEmpty()) {
+        LinkedList<Hero> rawRoster = player.getRoster();
+        if (rawRoster.isEmpty()) {
             System.out.println("\n[!] Your hero roster is empty!");
             System.out.println("    Use Shards in the 'Portal of Legends' to summon your first hero.");
             input.readLine("\nPress Enter to return...");
             return;
         }
 
+        // Active sorting and filtering state
+        HeroSort currentSort = HeroSort.RARITY_DESC;
+        CharacterClass filterClass = null;
+        Integer filterStars = null;
+        String filterElement = null;
+
         String choice;
         do {
+            // Apply filtering then sorting
+            LinkedList<Hero> displayList = HeroSort.filter(rawRoster, filterClass, filterStars, filterElement);
+            displayList = HeroSort.sort(displayList, currentSort);
+
+            String classBadge = (filterClass == null) ? "ALL" : filterClass.getDisplayName();
+            String starBadge = (filterStars == null) ? "ALL" : (filterStars + "★");
+            String elemBadge = (filterElement == null || filterElement.isEmpty()) ? "ALL" : filterElement;
+
             System.out.println("\n==================================================");
             System.out.println("                   HERO ROSTER");
             System.out.println("==================================================");
-            int idx = 1;
-            for (Hero h : roster) {
-                System.out.printf("  [%d] %-30s | HP:%-4d ATK:%-3d DEF:%-3d\n",
-                        idx++, h.toString(), h.getTotalHp(), h.getTotalAttack(), h.getTotalDefense());
-            }
+            System.out.println("  Filters : [Class: " + classBadge + " | Rarity: " + starBadge + " | Element: " + elemBadge + "]");
+            System.out.println("  Sort By : [" + currentSort.getDisplayName() + "]");
+            System.out.println("  Displaying " + displayList.size() + " of " + rawRoster.size() + " heroes");
             System.out.println("--------------------------------------------------");
-            System.out.println("Select a hero number to inspect and equip gear (or 0 to return):");
+
+            if (displayList.isEmpty()) {
+                System.out.println("  No heroes match the active filter criteria.");
+                System.out.println("  Type 'C' to clear all filters.");
+            } else {
+                int idx = 1;
+                for (Hero h : displayList) {
+                    System.out.printf("  [%d] %-32s | HP:%-4d ATK:%-3d DEF:%-3d CRIT:%d%%\n",
+                            idx++, h.toString(), h.getTotalHp(), h.getTotalAttack(), h.getTotalDefense(), h.getTotalCritChance());
+
+                    String weaponName = (h.getEquippedWeapon() != null) ? h.getEquippedWeapon().getName() : "None";
+                    String helmName = (h.getEquippedArmor(Hero.SLOT_HELMET) != null) ? h.getEquippedArmor(Hero.SLOT_HELMET).getName() : "None";
+                    String chestName = (h.getEquippedArmor(Hero.SLOT_CHEST) != null) ? h.getEquippedArmor(Hero.SLOT_CHEST).getName() : "None";
+                    String legName = (h.getEquippedArmor(Hero.SLOT_LEGGINGS) != null) ? h.getEquippedArmor(Hero.SLOT_LEGGINGS).getName() : "None";
+                    String accName = (h.getEquippedAccessory() != null) ? h.getEquippedAccessory().getName() : "None";
+                    System.out.printf("      Gear: [W: %s | H: %s | C: %s | L: %s | Acc: %s]\n",
+                            weaponName, helmName, chestName, legName, accName);
+                    if (h.hasFullSetBonus()) {
+                        System.out.println("      >>> Active Armor Set: " + h.getActiveSetName() + " Complete! <<<");
+                    }
+                }
+            }
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("Commands: [1-" + displayList.size() + "] Select Hero  |  [S] Change Sort  |  [F] Change Filter  |  [C] Clear Filters  |  [0] Return");
+            System.out.println("==================================================");
 
             choice = input.readLine("Select: ");
             if (choice.equals("0")) break;
 
-            try {
-                int heroIdx = Integer.parseInt(choice) - 1;
-                if (heroIdx >= 0 && heroIdx < roster.size()) {
-                    heroDetailAndEquipMenu(input, playerDataManager, player, roster.get(heroIdx));
-                } else {
-                    System.out.println("Invalid hero selection.");
+            if (choice.equalsIgnoreCase("S")) {
+                currentSort = selectHeroSortOrder(input, currentSort);
+            } else if (choice.equalsIgnoreCase("F")) {
+                Object[] filters = selectHeroFilters(input, filterClass, filterStars, filterElement);
+                filterClass = (CharacterClass) filters[0];
+                filterStars = (Integer) filters[1];
+                filterElement = (String) filters[2];
+            } else if (choice.equalsIgnoreCase("C")) {
+                filterClass = null;
+                filterStars = null;
+                filterElement = null;
+                System.out.println("\n[✓] All roster filters cleared.");
+            } else {
+                try {
+                    int heroIdx = Integer.parseInt(choice) - 1;
+                    if (heroIdx >= 0 && heroIdx < displayList.size()) {
+                        heroDetailAndEquipMenu(input, playerDataManager, player, displayList.get(heroIdx));
+                    } else {
+                        System.out.println("Invalid selection.");
+                        input.readLine("Press Enter to continue...");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input.");
                     input.readLine("Press Enter to continue...");
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid number.");
-                input.readLine("Press Enter to continue...");
             }
         } while (!choice.equals("0"));
+    }
+
+    private static HeroSort selectHeroSortOrder(InputHandling input, HeroSort current) {
+        System.out.println("\n==================================================");
+        System.out.println("              HERO ROSTER SORTING");
+        System.out.println("==================================================");
+        HeroSort[] values = HeroSort.values();
+        for (int i = 0; i < values.length; i++) {
+            String marker = (values[i] == current) ? " [ACTIVE]" : "";
+            System.out.printf("  [%d] %s%s\n", (i + 1), values[i].getDisplayName(), marker);
+        }
+        System.out.println("  [0] Keep Current");
+        System.out.println("--------------------------------------------------");
+        String opt = input.readLine("Select sort option: ");
+        try {
+            int idx = Integer.parseInt(opt) - 1;
+            if (idx >= 0 && idx < values.length) {
+                return values[idx];
+            }
+        } catch (NumberFormatException ignored) {}
+        return current;
+    }
+
+    private static Object[] selectHeroFilters(InputHandling input, CharacterClass currentClass,
+                                              Integer currentStars, String currentElem) {
+        System.out.println("\n==================================================");
+        System.out.println("              HERO ROSTER FILTERING");
+        System.out.println("==================================================");
+        System.out.println("1. Filter by Class");
+        System.out.println("2. Filter by Star Rarity (3★ to 6★)");
+        System.out.println("3. Filter by Elemental Power");
+        System.out.println("4. Clear All Filters");
+        System.out.println("0. Return");
+        System.out.println("--------------------------------------------------");
+        String opt = input.readLine("Select filter type: ");
+
+        CharacterClass newClass = currentClass;
+        Integer newStars = currentStars;
+        String newElem = currentElem;
+
+        if (opt.equals("1")) {
+            System.out.println("\n--- [FILTER BY CLASS] ---");
+            System.out.println("0. All Classes (Reset)");
+            CharacterClass[] classes = CharacterClass.values();
+            for (int i = 0; i < classes.length; i++) {
+                System.out.printf("%d. %s\n", (i + 1), classes[i].getDisplayName());
+            }
+            String cOpt = input.readLine("Select class: ");
+            if (cOpt.equals("0")) {
+                newClass = null;
+            } else {
+                try {
+                    int cIdx = Integer.parseInt(cOpt) - 1;
+                    if (cIdx >= 0 && cIdx < classes.length) newClass = classes[cIdx];
+                } catch (NumberFormatException ignored) {}
+            }
+        } else if (opt.equals("2")) {
+            System.out.println("\n--- [FILTER BY STAR RARITY] ---");
+            System.out.println("0. All Rarities (Reset)");
+            System.out.println("3. 3★ Heroes");
+            System.out.println("4. 4★ Heroes");
+            System.out.println("5. 5★ Heroes");
+            System.out.println("6. 6★ Heroes");
+            String sOpt = input.readLine("Select star rating: ");
+            if (sOpt.equals("0")) {
+                newStars = null;
+            } else {
+                try {
+                    int s = Integer.parseInt(sOpt);
+                    if (s >= 3 && s <= 6) newStars = s;
+                } catch (NumberFormatException ignored) {}
+            }
+        } else if (opt.equals("3")) {
+            System.out.println("\n--- [FILTER BY ELEMENT] ---");
+            System.out.println("0. All Elements (Reset)");
+            characters.Element[] elements = characters.Element.values();
+            for (int i = 0; i < elements.length; i++) {
+                System.out.printf("%d. %s\n", (i + 1), elements[i].getDisplayName());
+            }
+            String eOpt = input.readLine("Select element: ");
+            if (eOpt.equals("0")) {
+                newElem = null;
+            } else {
+                try {
+                    int eIdx = Integer.parseInt(eOpt) - 1;
+                    if (eIdx >= 0 && eIdx < elements.length) newElem = elements[eIdx].getDisplayName();
+                } catch (NumberFormatException ignored) {}
+            }
+        } else if (opt.equals("4")) {
+            newClass = null;
+            newStars = null;
+            newElem = null;
+        }
+
+        return new Object[] { newClass, newStars, newElem };
+    }
+
+    // =========================================================================
+    // Equipment Management Submenu (2.2)
+    // =========================================================================
+
+    private static void manageEquipmentMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        String choice;
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("           EQUIPMENT & LOADOUT MANAGEMENT");
+            System.out.println("==================================================");
+            System.out.println("  Manage gear across your entire hero roster.");
+            System.out.println("--------------------------------------------------");
+            System.out.println("  Total Items Owned : " + player.getItemsOwned());
+            System.out.println("  Unequipped in Bag : " + player.getInventory().size());
+            System.out.println("  Equipped on Heroes: " + player.getEquippedItemsCount());
+            System.out.println("--------------------------------------------------");
+            System.out.println("1. Select a Hero to Equip Gear");
+            System.out.println("2. View All Equipped Gear Across All Heroes");
+            System.out.println("3. Auto-Equip Best Gear on All Heroes");
+            System.out.println("4. Unequip All Gear From a Hero");
+            System.out.println("0. Back to Characters Menu");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    viewRosterMenu(input, playerDataManager, player);
+                    break;
+                case "2":
+                    viewAllEquippedGear(input, player);
+                    break;
+                case "3":
+                    autoEquipAllHeroes(input, playerDataManager, player);
+                    break;
+                case "4":
+                    unequipAllHeroGearFlow(input, playerDataManager, player);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("Invalid option.");
+                    input.readLine("Press Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    private static void viewAllEquippedGear(InputHandling input, PlayerAcc player) {
+        System.out.println("\n==================================================");
+        System.out.println("        ALL EQUIPPED GEAR ACROSS HEROES");
+        System.out.println("==================================================");
+        if (player.getRoster().isEmpty()) {
+            System.out.println("  No heroes in roster.");
+        } else {
+            boolean anyEquipped = false;
+            for (Hero h : player.getRoster()) {
+                String weaponName = (h.getEquippedWeapon() != null) ? h.getEquippedWeapon().getName() + " (" + h.getEquippedWeapon().getSummary().trim() + ")" : "Empty";
+                String helmName = (h.getEquippedArmor(Hero.SLOT_HELMET) != null) ? h.getEquippedArmor(Hero.SLOT_HELMET).getName() + " (" + h.getEquippedArmor(Hero.SLOT_HELMET).getSummary().trim() + ")" : "Empty";
+                String chestName = (h.getEquippedArmor(Hero.SLOT_CHEST) != null) ? h.getEquippedArmor(Hero.SLOT_CHEST).getName() + " (" + h.getEquippedArmor(Hero.SLOT_CHEST).getSummary().trim() + ")" : "Empty";
+                String legName = (h.getEquippedArmor(Hero.SLOT_LEGGINGS) != null) ? h.getEquippedArmor(Hero.SLOT_LEGGINGS).getName() + " (" + h.getEquippedArmor(Hero.SLOT_LEGGINGS).getSummary().trim() + ")" : "Empty";
+                String accName = (h.getEquippedAccessory() != null) ? h.getEquippedAccessory().getName() + " (" + h.getEquippedAccessory().getSummary().trim() + ")" : "Empty";
+
+                boolean hasGear = (h.getEquippedWeapon() != null || h.getEquippedArmor(Hero.SLOT_HELMET) != null
+                        || h.getEquippedArmor(Hero.SLOT_CHEST) != null || h.getEquippedArmor(Hero.SLOT_LEGGINGS) != null
+                        || h.getEquippedAccessory() != null);
+
+                if (hasGear) anyEquipped = true;
+
+                System.out.println("  Hero: " + h.getName() + " (" + h.getCharacterClass().getDisplayName() + " " + h.getStarsDisplay() + ")");
+                System.out.println("    Weapon    : " + weaponName);
+                System.out.println("    Helmet    : " + helmName);
+                System.out.println("    Chestplate: " + chestName);
+                System.out.println("    Leggings  : " + legName);
+                System.out.println("    Accessory : " + accName);
+                if (h.hasFullSetBonus()) {
+                    System.out.println("    >>> Set Bonus: " + h.getActiveSetName() + " Complete! <<<");
+                }
+                System.out.println("  ------------------------------------------------");
+            }
+            if (!anyEquipped) {
+                System.out.println("  No gear is currently equipped on any heroes.");
+            }
+        }
+        System.out.println("==================================================");
+        input.readLine("\nPress Enter to return...");
+    }
+
+    private static void autoEquipAllHeroes(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        System.out.println("\n[!] Automatically equipping the best available gear onto all heroes...");
+        int equippedCount = 0;
+        for (Hero h : player.getRoster()) {
+            equippedCount += autoEquipHero(player, h);
+        }
+        player.syncCounters();
+        LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
+        playerDataManager.saveAllPlayersToCsv();
+        System.out.println("[SUCCESS] Auto-equip complete! " + equippedCount + " item(s) equipped across roster.");
+        announceUnlockedAchievements(newUnlocks);
+        input.readLine("Press Enter to continue...");
+    }
+
+    private static int autoEquipHero(PlayerAcc player, Hero hero) {
+        int count = 0;
+        // Weapon
+        if (hero.getEquippedWeapon() == null) {
+            Weapon best = null;
+            for (Item item : player.getInventory()) {
+                if (item instanceof Weapon && hero.canEquip(item)) {
+                    Weapon w = (Weapon) item;
+                    if (best == null || w.getAttack() > best.getAttack()) {
+                        best = w;
+                    }
+                }
+            }
+            if (best != null) {
+                player.removeItem(best);
+                hero.equip(best);
+                count++;
+            }
+        }
+        // Helmet
+        if (hero.getEquippedArmor(Hero.SLOT_HELMET) == null) {
+            Armor best = null;
+            for (Item item : player.getInventory()) {
+                if (item instanceof Armor && hero.canEquip(item) && Hero.armorSlotFor((Armor) item) == Hero.SLOT_HELMET) {
+                    Armor a = (Armor) item;
+                    if (best == null || a.getDefense() > best.getDefense()) best = a;
+                }
+            }
+            if (best != null) {
+                player.removeItem(best);
+                hero.equip(best);
+                count++;
+            }
+        }
+        // Chest
+        if (hero.getEquippedArmor(Hero.SLOT_CHEST) == null) {
+            Armor best = null;
+            for (Item item : player.getInventory()) {
+                if (item instanceof Armor && hero.canEquip(item) && Hero.armorSlotFor((Armor) item) == Hero.SLOT_CHEST) {
+                    Armor a = (Armor) item;
+                    if (best == null || a.getDefense() > best.getDefense()) best = a;
+                }
+            }
+            if (best != null) {
+                player.removeItem(best);
+                hero.equip(best);
+                count++;
+            }
+        }
+        // Leggings
+        if (hero.getEquippedArmor(Hero.SLOT_LEGGINGS) == null) {
+            Armor best = null;
+            for (Item item : player.getInventory()) {
+                if (item instanceof Armor && hero.canEquip(item) && Hero.armorSlotFor((Armor) item) == Hero.SLOT_LEGGINGS) {
+                    Armor a = (Armor) item;
+                    if (best == null || a.getDefense() > best.getDefense()) best = a;
+                }
+            }
+            if (best != null) {
+                player.removeItem(best);
+                hero.equip(best);
+                count++;
+            }
+        }
+        // Accessory
+        if (hero.getEquippedAccessory() == null) {
+            Accessory best = null;
+            for (Item item : player.getInventory()) {
+                if (item instanceof Accessory && hero.canEquip(item)) {
+                    Accessory acc = (Accessory) item;
+                    if (best == null || acc.getStatBonus() > best.getStatBonus()) best = acc;
+                }
+            }
+            if (best != null) {
+                player.removeItem(best);
+                hero.equip(best);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static void unequipAllHeroGearFlow(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        if (player.getRoster().isEmpty()) {
+            System.out.println("\n[!] No heroes in roster.");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        System.out.println("\n==================================================");
+        System.out.println("              UNEQUIP ALL HERO GEAR");
+        System.out.println("==================================================");
+        int idx = 1;
+        for (Hero h : player.getRoster()) {
+            System.out.printf("  [%d] %s (%s)\n", idx++, h.getName(), h.getCharacterClass().getDisplayName());
+        }
+        System.out.println("  [0] Cancel");
+        System.out.println("--------------------------------------------------");
+        String choice = input.readLine("Select hero number: ");
+        if (choice.equals("0")) return;
+
+        try {
+            int heroIdx = Integer.parseInt(choice) - 1;
+            if (heroIdx >= 0 && heroIdx < player.getRoster().size()) {
+                Hero hero = player.getRoster().get(heroIdx);
+                int removed = 0;
+                Item w = hero.unequip("weapon");
+                if (w != null) { player.addItem(w); removed++; }
+                Item h = hero.unequip("helmet");
+                if (h != null) { player.addItem(h); removed++; }
+                Item c = hero.unequip("chest");
+                if (c != null) { player.addItem(c); removed++; }
+                Item l = hero.unequip("leggings");
+                if (l != null) { player.addItem(l); removed++; }
+                Item acc = hero.unequip("accessory");
+                if (acc != null) { player.addItem(acc); removed++; }
+
+                player.syncCounters();
+                playerDataManager.saveAllPlayersToCsv();
+                System.out.println("\n[SUCCESS] Unequipped " + removed + " gear pieces from " + hero.getName() + ".");
+            } else {
+                System.out.println("Invalid hero selection.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input.");
+        }
+        input.readLine("Press Enter to continue...");
     }
 
     private static void heroDetailAndEquipMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
@@ -2160,6 +2601,7 @@ public class Main {
             System.out.println("2. Equip / Change Armor Piece");
             System.out.println("3. Equip / Change Accessory");
             System.out.println("4. Unequip an Item");
+            System.out.println("5. Auto-Equip Best Gear for this Hero");
             System.out.println("0. Back to Roster");
             System.out.println("==================================================");
 
@@ -2177,6 +2619,15 @@ public class Main {
                     break;
                 case "4":
                     unequipFlow(input, playerDataManager, player, hero);
+                    break;
+                case "5":
+                    int eq = autoEquipHero(player, hero);
+                    player.syncCounters();
+                    LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
+                    playerDataManager.saveAllPlayersToCsv();
+                    System.out.println("\n[SUCCESS] Auto-equipped " + eq + " best items on " + hero.getName() + "!");
+                    announceUnlockedAchievements(newUnlocks);
+                    input.readLine("Press Enter to continue...");
                     break;
                 case "0":
                     break;
@@ -2243,10 +2694,16 @@ public class Main {
                     System.out.println("\n[SWAP] Returned previous item to inventory: " + oldItem.getName());
                 }
 
+                // Record statistics and check achievements
+                player.getStats().recordEquipmentEquipped();
+                player.syncCounters();
+                LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
+
                 // Auto-save equipped gear & inventory state
                 playerDataManager.saveAllPlayersToCsv();
 
                 System.out.println("\n[SUCCESS] Successfully equipped " + chosenItem.getName() + " on " + hero.getName() + "!");
+                announceUnlockedAchievements(newUnlocks);
                 input.readLine("Press Enter to continue...");
             } else {
                 System.out.println("Invalid selection.");
@@ -2282,6 +2739,7 @@ public class Main {
         Item unequipped = hero.unequip(slot);
         if (unequipped != null) {
             player.addItem(unequipped);
+            player.syncCounters();
 
             // Auto-save unequipped gear & inventory state
             playerDataManager.saveAllPlayersToCsv();
@@ -2294,33 +2752,325 @@ public class Main {
     }
 
     // =========================================================================
-    // Inventory Menu
+    // Inventory Menu (2.3)
     // =========================================================================
 
-    public static void inventoryMenu(InputHandling input, PlayerAcc player) {
-        LinkedList<Item> inv = player.getInventory();
-        System.out.println("\n==================================================");
-        System.out.println("                 PLAYER INVENTORY");
-        System.out.println("==================================================");
-        System.out.println("  Total Items Owned: " + inv.size());
-        System.out.println("--------------------------------------------------");
+    public static void inventoryMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        // View modes: 1=Bag Only (Unequipped), 2=All Items (Bag+Equipped), 3=Equipped Only
+        int viewMode = 1;
+        String typeFilter = "ALL"; // ALL, WEAPON, ARMOR, ACCESSORY
+        InventorySort currentSort = InventorySort.TYPE;
 
-        if (inv.isEmpty()) {
-            System.out.println("  Your inventory is empty!");
-            System.out.println("  Open crates in Option 1 to get weapons, armor, and accessories.");
-        } else {
-            int idx = 1;
-            for (Item item : inv) {
-                System.out.printf("  [%d] %s\n", idx++, item.toString());
-                System.out.println("      " + item.getSummary().trim());
+        String choice;
+        do {
+            // Build the base item list based on view mode
+            LinkedList<ItemDisplayEntry> itemsToDisplay = new LinkedList<>();
+
+            if (viewMode == 1 || viewMode == 2) {
+                // Add unequipped items from bag
+                for (Item item : player.getInventory()) {
+                    itemsToDisplay.add(new ItemDisplayEntry(item, null));
+                }
             }
+
+            if (viewMode == 2 || viewMode == 3) {
+                // Add equipped items from heroes
+                for (Hero h : player.getRoster()) {
+                    if (h.getEquippedWeapon() != null) {
+                        itemsToDisplay.add(new ItemDisplayEntry(h.getEquippedWeapon(), h));
+                    }
+                    for (Armor a : h.getEquippedArmors()) {
+                        if (a != null) {
+                            itemsToDisplay.add(new ItemDisplayEntry(a, h));
+                        }
+                    }
+                    if (h.getEquippedAccessory() != null) {
+                        itemsToDisplay.add(new ItemDisplayEntry(h.getEquippedAccessory(), h));
+                    }
+                }
+            }
+
+            // Apply type filtering
+            LinkedList<ItemDisplayEntry> filtered = new LinkedList<>();
+            for (ItemDisplayEntry entry : itemsToDisplay) {
+                if (matchesTypeFilter(entry.item, typeFilter)) {
+                    filtered.add(entry);
+                }
+            }
+
+            // Apply sorting
+            sortItemEntries(filtered, currentSort);
+
+            String modeLabel = (viewMode == 1) ? "Bag Only (Unequipped)" : (viewMode == 2) ? "All Items (Bag + Equipped)" : "Equipped Only";
+
+            System.out.println("\n==================================================");
+            System.out.println("                 PLAYER INVENTORY");
+            System.out.println("==================================================");
+            System.out.println("  Display Mode : [" + modeLabel + "]");
+            System.out.println("  Type Filter  : [" + typeFilter.toUpperCase() + "]");
+            System.out.println("  Sort Strategy: [" + currentSort.getDisplayName() + "]");
+            System.out.println("  Showing " + filtered.size() + " items (Total Owned: " + player.getItemsOwned() + " | In Bag: " + player.getInventory().size() + " | Equipped: " + player.getEquippedItemsCount() + ")");
+            System.out.println("--------------------------------------------------");
+
+            if (filtered.isEmpty()) {
+                System.out.println("  No items match the current view and filter.");
+            } else {
+                int idx = 1;
+                for (ItemDisplayEntry entry : filtered) {
+                    Item item = entry.item;
+                    String statusBadge = entry.isEquipped()
+                            ? "[EQUIPPED on " + entry.equippedHero.getName() + "]"
+                            : "[BAG]";
+                    System.out.printf("  [%d] %-34s %s\n", idx++, item.toString(), statusBadge);
+                    System.out.println("      " + item.getSummary().trim());
+                }
+            }
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("Commands: [1-" + filtered.size() + "] Inspect Item Details & Equip/Unequip");
+            System.out.println("          [V] Switch View Mode  |  [F] Filter by Item Type  |  [S] Sort Items  |  [0] Return");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select: ");
+            if (choice.equals("0")) break;
+
+            if (choice.equalsIgnoreCase("V")) {
+                viewMode = selectInventoryViewMode(input, viewMode);
+            } else if (choice.equalsIgnoreCase("F")) {
+                typeFilter = selectInventoryTypeFilter(input, typeFilter);
+            } else if (choice.equalsIgnoreCase("S")) {
+                currentSort = selectInventorySortStrategy(input, currentSort);
+            } else {
+                try {
+                    int itemIdx = Integer.parseInt(choice) - 1;
+                    if (itemIdx >= 0 && itemIdx < filtered.size()) {
+                        ItemDisplayEntry selected = filtered.get(itemIdx);
+                        itemDetailsView(input, playerDataManager, player, selected.item, selected.equippedHero);
+                    } else {
+                        System.out.println("Invalid item number.");
+                        input.readLine("Press Enter to continue...");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input.");
+                    input.readLine("Press Enter to continue...");
+                }
+            }
+        } while (!choice.equals("0"));
+    }
+
+    private static class ItemDisplayEntry {
+        final Item item;
+        final Hero equippedHero; // null if in bag
+
+        ItemDisplayEntry(Item item, Hero equippedHero) {
+            this.item = item;
+            this.equippedHero = equippedHero;
         }
-        System.out.println("==================================================");
-        input.readLine("\nPress Enter to continue...");
+
+        boolean isEquipped() {
+            return equippedHero != null;
+        }
+    }
+
+    private static boolean matchesTypeFilter(Item item, String filter) {
+        if (filter == null || filter.equalsIgnoreCase("ALL")) return true;
+        String f = filter.toLowerCase().trim();
+        if (f.equals("weapon") && item instanceof Weapon) return true;
+        if (f.equals("armor") && item instanceof Armor) return true;
+        if (f.equals("accessory") && item instanceof Accessory) return true;
+        return item.getType().toLowerCase().contains(f);
+    }
+
+    private static void sortItemEntries(LinkedList<ItemDisplayEntry> list, InventorySort sort) {
+        if (sort == null || sort == InventorySort.RECENT || list == null || list.size() <= 1) return;
+        java.util.Comparator<Item> itemComp = InventorySort.getComparator(sort);
+        LinkedList<ItemDisplayEntry> sorted = TreeSort.sort(list, (a, b) -> itemComp.compare(a.item, b.item));
+        list.clear();
+        list.addAll(sorted);
+    }
+
+    private static int selectInventoryViewMode(InputHandling input, int current) {
+        System.out.println("\n--- [SWITCH INVENTORY VIEW MODE] ---");
+        System.out.println("1. Bag Only (Unequipped items only) [Default]");
+        System.out.println("2. All Items (Unequipped Bag + Hero Equipped Gear)");
+        System.out.println("3. Equipped Only (Items currently equipped on heroes)");
+        System.out.println("0. Keep Current (" + current + ")");
+        String opt = input.readLine("Select mode: ");
+        if (opt.equals("1")) return 1;
+        if (opt.equals("2")) return 2;
+        if (opt.equals("3")) return 3;
+        return current;
+    }
+
+    private static String selectInventoryTypeFilter(InputHandling input, String current) {
+        System.out.println("\n--- [FILTER BY ITEM TYPE] ---");
+        System.out.println("1. All Items");
+        System.out.println("2. Weapons Only");
+        System.out.println("3. Armor Only (Helmets, Chestplates, Leggings)");
+        System.out.println("4. Accessories Only");
+        System.out.println("0. Keep Current (" + current + ")");
+        String opt = input.readLine("Select filter: ");
+        if (opt.equals("1")) return "ALL";
+        if (opt.equals("2")) return "WEAPON";
+        if (opt.equals("3")) return "ARMOR";
+        if (opt.equals("4")) return "ACCESSORY";
+        return current;
+    }
+
+    private static InventorySort selectInventorySortStrategy(InputHandling input, InventorySort current) {
+        System.out.println("\n--- [INVENTORY SORTING STRATEGY] ---");
+        InventorySort[] values = InventorySort.values();
+        for (int i = 0; i < values.length; i++) {
+            String marker = (values[i] == current) ? " [ACTIVE]" : "";
+            System.out.printf("%d. %s%s\n", (i + 1), values[i].getDisplayName(), marker);
+        }
+        System.out.println("0. Keep Current");
+        String opt = input.readLine("Select sort: ");
+        try {
+            int idx = Integer.parseInt(opt) - 1;
+            if (idx >= 0 && idx < values.length) return values[idx];
+        } catch (NumberFormatException ignored) {}
+        return current;
     }
 
     // =========================================================================
-    // Shop & Trading Menu
+    // Item Details View (2.3)
+    // =========================================================================
+
+    private static void itemDetailsView(InputHandling input, PlayerDataManager playerDataManager,
+                                       PlayerAcc player, Item item, Hero equippedOnHero) {
+        String choice;
+        do {
+            System.out.println("\n==================================================");
+            System.out.println("                   ITEM DETAILS");
+            System.out.println("==================================================");
+            System.out.println("  Name             : " + item.getName());
+            System.out.println("  ID               : " + item.getId());
+            System.out.println("  Rarity           : " + item.getRarity());
+            System.out.println("  Item Type        : " + item.getType());
+            System.out.println("  Equippable By    : " + item.getEquippableClassesDisplay());
+            System.out.println("  Status           : " + (equippedOnHero != null ? "[EQUIPPED on " + equippedOnHero.getName() + "]" : "[IN BAG - Unequipped]"));
+            System.out.println("--------------------------------------------------");
+
+            if (item instanceof Weapon) {
+                Weapon w = (Weapon) item;
+                System.out.println("  [WEAPON STATISTICS]");
+                System.out.printf("  Attack Bonus     : +%d ATK\n", w.getAttack());
+                System.out.printf("  Critical Chance  : +%d%% CRIT\n", w.getCritChance());
+            } else if (item instanceof Armor) {
+                Armor a = (Armor) item;
+                System.out.println("  [ARMOR STATISTICS]");
+                System.out.printf("  Defense Bonus    : +%d DEF\n", a.getDefense());
+                System.out.printf("  Health Bonus     : +%d Flat HP\n", a.getHealthBonus());
+                System.out.printf("  Health % Bonus   : +%d%% Max HP\n", a.getHealthPercentBonus());
+                System.out.println("  Armor Set Name   : " + a.getSetName());
+                if (a.hasSetName()) {
+                    System.out.println("  Set Requirement  : 3 Matching Pieces (" + a.getSetName() + ")");
+                }
+            } else if (item instanceof Accessory) {
+                Accessory acc = (Accessory) item;
+                System.out.println("  [ACCESSORY STATISTICS]");
+                System.out.printf("  Stat Boost       : +%d to %s\n", acc.getStatBonus(), acc.getBonusType().toUpperCase());
+            }
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("  Description      : \"" + item.getDescription() + "\"");
+            System.out.println("--------------------------------------------------");
+
+            if (equippedOnHero == null) {
+                System.out.println("1. Equip this Item to a Hero");
+            } else {
+                System.out.println("1. Unequip this Item from " + equippedOnHero.getName());
+            }
+            System.out.println("0. Return to Inventory");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select action: ");
+
+            if (choice.equals("1")) {
+                if (equippedOnHero == null) {
+                    // Equip to hero flow
+                    LinkedList<Hero> eligibleHeroes = new LinkedList<>();
+                    for (Hero h : player.getRoster()) {
+                        if (h.canEquip(item)) {
+                            eligibleHeroes.add(h);
+                        }
+                    }
+
+                    if (eligibleHeroes.isEmpty()) {
+                        System.out.println("\n[!] No heroes in your roster can equip this item.");
+                        System.out.println("    Allowed classes: " + item.getEquippableClassesDisplay());
+                        input.readLine("Press Enter to continue...");
+                    } else {
+                        System.out.println("\n--- [SELECT HERO TO EQUIP " + item.getName() + "] ---");
+                        int hIdx = 1;
+                        for (Hero h : eligibleHeroes) {
+                            System.out.printf("  [%d] %s (%s, %s)\n", hIdx++, h.getName(),
+                                    h.getCharacterClass().getDisplayName(), h.getStarsDisplay());
+                        }
+                        System.out.println("  [0] Cancel");
+                        String hChoice = input.readLine("Select hero: ");
+                        if (!hChoice.equals("0")) {
+                            try {
+                                int selectedHeroIdx = Integer.parseInt(hChoice) - 1;
+                                if (selectedHeroIdx >= 0 && selectedHeroIdx < eligibleHeroes.size()) {
+                                    Hero targetHero = eligibleHeroes.get(selectedHeroIdx);
+
+                                    player.removeItem(item);
+                                    Item oldItem = targetHero.equip(item);
+                                    if (oldItem != null) {
+                                        player.addItem(oldItem);
+                                        System.out.println("[SWAP] Replaced " + oldItem.getName() + " and returned it to your bag.");
+                                    }
+
+                                    player.getStats().recordEquipmentEquipped();
+                                    player.syncCounters();
+                                    LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
+                                    playerDataManager.saveAllPlayersToCsv();
+
+                                    System.out.println("\n[SUCCESS] Successfully equipped " + item.getName() + " onto " + targetHero.getName() + "!");
+                                    announceUnlockedAchievements(newUnlocks);
+                                    input.readLine("Press Enter to continue...");
+                                    return; // Return to inventory
+                                } else {
+                                    System.out.println("Invalid selection.");
+                                    input.readLine("Press Enter to continue...");
+                                }
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid number.");
+                                input.readLine("Press Enter to continue...");
+                            }
+                        }
+                    }
+                } else {
+                    // Unequip flow
+                    String slot = null;
+                    if (item instanceof Weapon) slot = "weapon";
+                    else if (item instanceof Armor) {
+                        int s = Hero.armorSlotFor((Armor) item);
+                        if (s == Hero.SLOT_HELMET) slot = "helmet";
+                        else if (s == Hero.SLOT_CHEST) slot = "chest";
+                        else if (s == Hero.SLOT_LEGGINGS) slot = "leggings";
+                    } else if (item instanceof Accessory) slot = "accessory";
+
+                    if (slot != null) {
+                        Item unequipped = equippedOnHero.unequip(slot);
+                        if (unequipped != null) {
+                            player.addItem(unequipped);
+                            player.syncCounters();
+                            playerDataManager.saveAllPlayersToCsv();
+                            System.out.println("\n[SUCCESS] Unequipped " + unequipped.getName() + " from " + equippedOnHero.getName() + " and returned to bag.");
+                            input.readLine("Press Enter to continue...");
+                            return;
+                        }
+                    }
+                }
+            }
+        } while (!choice.equals("0"));
+    }
+
+    // =========================================================================
+    // Shop & Trading Menu (2.4)
     // =========================================================================
 
     public static void shopAndTradingMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
@@ -2337,6 +3087,7 @@ public class Main {
             System.out.println("1. Trade 2,000 Coins  -> 1 Shard");
             System.out.println("2. Trade 10,000 Coins -> 5 Shards");
             System.out.println("3. Trade 20,000 Coins -> 10 Shards");
+            System.out.println("4. Custom Shard Purchase (2,000 Coins per Shard)");
             System.out.println("0. Back to Main Menu");
             System.out.println("==================================================");
 
@@ -2352,6 +3103,9 @@ public class Main {
                 case "3":
                     convertCoinsToShards(input, playerDataManager, player, 20000, 10);
                     break;
+                case "4":
+                    convertCoinsToShardsCustom(input, playerDataManager, player);
+                    break;
                 case "0":
                     break;
                 default:
@@ -2359,6 +3113,31 @@ public class Main {
                     input.readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
+    }
+
+    private static void convertCoinsToShardsCustom(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        System.out.println("\n--- [CUSTOM SHARD PURCHASE] ---");
+        System.out.println("  Conversion Rate: 2,000 Coins = 1 Shard");
+        System.out.println("  Your Balance   : " + String.format("%,d", player.getCoins()) + " Coins");
+        int maxShardsAffordable = player.getCoins() / 2000;
+        System.out.println("  Maximum shards affordable: " + String.format("%,d", maxShardsAffordable));
+        System.out.println("--------------------------------------------------");
+        String opt = input.readLine("Enter number of shards to purchase (or 0 to cancel): ");
+        if (opt.equals("0") || opt.trim().isEmpty()) return;
+
+        try {
+            int desiredShards = Integer.parseInt(opt);
+            if (desiredShards <= 0) {
+                System.out.println("Amount must be greater than 0.");
+                input.readLine("Press Enter to continue...");
+                return;
+            }
+            int coinCost = desiredShards * 2000;
+            convertCoinsToShards(input, playerDataManager, player, coinCost, desiredShards);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number.");
+            input.readLine("Press Enter to continue...");
+        }
     }
 
     private static void convertCoinsToShards(InputHandling input, PlayerDataManager playerDataManager,
@@ -2380,7 +3159,12 @@ public class Main {
         player.setCoins(player.getCoins() - coinCost);
         player.setShards(player.getShards() + shardsGained);
 
-        // Auto-save player balance changes
+        // Record statistics
+        player.getStats().recordCoinsSpent(coinCost);
+        player.getStats().recordShardsEarned(shardsGained);
+
+        // Check achievements and save
+        LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
         playerDataManager.saveAllPlayersToCsv();
 
         System.out.println("\n==================================================");
@@ -2392,11 +3176,14 @@ public class Main {
         System.out.println("  New Balance   -> Coins: " + String.format("%,d", player.getCoins()) +
                 "  |  Shards: " + String.format("%,d", player.getShards()));
         System.out.println("==================================================");
+
+        announceUnlockedAchievements(newUnlocks);
+
         input.readLine("\nPress Enter to continue...");
     }
 
     // =========================================================================
-    // Crates
+    // Open Crates (2.5 Statistics tracking hook)
     // =========================================================================
 
     public static void openingCrates(InputHandling input, PlayerDataManager playerDataManager,
@@ -2409,7 +3196,7 @@ public class Main {
             System.out.println("  Test your luck! Opening crates is free and");
             System.out.println("  unlimited. Earn coins, shards, and gear!");
             System.out.println("--------------------------------------------------");
-            System.out.println("  Coins: " + player.getCoins() + "    Shards: " + player.getShards());
+            System.out.println("  Coins: " + String.format("%,d", player.getCoins()) + "    Shards: " + String.format("%,d", player.getShards()));
             System.out.println();
             System.out.println("  Crate Tier Odds:");
             System.out.println("  [Wooden Crate]   - Chance: 75%  [Shard Bonus: 0.5%]");
@@ -2455,6 +3242,13 @@ public class Main {
 
         CrateManager.CrateResult result = crateManager.openCrate(tier, player);
 
+        // Record crate statistics
+        player.getStats().recordCrateOpened(tier, result.getCoinsEarned(), result.getShardsEarned(), result.getItems().size());
+        player.syncCounters();
+
+        // Check achievements
+        LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
+
         // Auto-save earned coins, shards, and inventory items
         playerDataManager.saveAllPlayersToCsv();
 
@@ -2472,10 +3266,218 @@ public class Main {
             }
         }
         System.out.println();
-        System.out.println("  New Balance -> Coins: " + player.getCoins() + "  |  Shards: " + player.getShards());
-        System.out.println("  Items in Inventory: " + player.getInventory().size());
+        System.out.println("  New Balance -> Coins: " + String.format("%,d", player.getCoins()) + "  |  Shards: " + String.format("%,d", player.getShards()));
+        System.out.println("  Items in Bag: " + player.getInventory().size() + "  |  Total Items Owned: " + player.getItemsOwned());
         System.out.println();
+
+        announceUnlockedAchievements(newUnlocks);
 
         System.out.println("  Returning to Open Crates...");
     }
+
+    // =========================================================================
+    // Achievements & Statistics Menu (2.5 & Player Option 5)
+    // =========================================================================
+
+    public static void achievementsAndStatisticsMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        // Automatically check for retroactive achievements upon viewing
+        LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
+        if (!newUnlocks.isEmpty()) {
+            announceUnlockedAchievements(newUnlocks);
+        }
+
+        String choice;
+        do {
+            AchievementManager am = playerDataManager.getAchievementManager();
+            int unlockedCount = am.getUnlockedCount(player);
+            int totalCount = am.getMasterTemplates().size();
+            int unclaimed = am.getUnclaimedCount(player);
+
+            System.out.println("\n==================================================");
+            System.out.println("            ACHIEVEMENTS & STATISTICS");
+            System.out.println("==================================================");
+            System.out.println("  Player: " + player.getUsername());
+            System.out.println("  Achievements Completed: " + unlockedCount + " / " + totalCount + " (" + (totalCount > 0 ? (unlockedCount * 100 / totalCount) : 0) + "%)");
+            if (unclaimed > 0) {
+                System.out.println("  ★ Pending Rewards Available to Claim: " + unclaimed + " ★");
+            }
+            System.out.println("--------------------------------------------------");
+            System.out.println("1. Player Statistics Dashboard");
+            System.out.println("2. Achievements List & Progress");
+            System.out.println("3. Claim Unlocked Achievement Rewards (" + unclaimed + " available)");
+            System.out.println("0. Back to Main Menu");
+            System.out.println("==================================================");
+
+            choice = input.readLine("Select an option: ");
+
+            switch (choice) {
+                case "1":
+                    displayStatisticsDashboard(input, player);
+                    break;
+                case "2":
+                    displayAchievementsList(input, playerDataManager, player);
+                    break;
+                case "3":
+                    claimAchievementRewardsFlow(input, playerDataManager, player);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    input.readLine("\nPress Enter to continue...");
+            }
+        } while (!choice.equals("0"));
+    }
+
+    private static void displayStatisticsDashboard(InputHandling input, PlayerAcc player) {
+        accounts.PlayerStats st = player.getStats();
+
+        System.out.println("\n==========================================================================");
+        System.out.println("                        PLAYER STATISTICS DASHBOARD");
+        System.out.println("==========================================================================");
+        System.out.println("  Player Account       : " + player.getUsername() + " (" + (player.isBanned() ? "[BANNED]" : "[ACTIVE]") + ")");
+        System.out.println("--------------------------------------------------------------------------");
+        System.out.println("  [CRATES & REWARDS]");
+        System.out.printf("  Total Crates Opened  : %,d\n", st.getCratesOpened());
+        System.out.printf("    • Wooden Crates    : %,d\n", st.getWoodenCrates());
+        System.out.printf("    • Silver Crates    : %,d\n", st.getSilverCrates());
+        System.out.printf("    • Gold Crates      : %,d\n", st.getGoldCrates());
+        System.out.printf("    • Diamond Crates   : %,d\n", st.getDiamondCrates());
+        System.out.println();
+        System.out.println("  [HEROES & SUMMONS]");
+        System.out.printf("  Total Summons Done   : %,d\n", st.getSummonsPerformed());
+        System.out.printf("  Heroes in Roster     : %d\n", player.getRoster().size());
+        System.out.printf("  Highest Star Hero    : %d★\n", Math.max(st.getHighestHeroRarity(), getRosterHighestStar(player)));
+        System.out.println();
+        System.out.println("  [INVENTORY & EQUIPMENT]");
+        System.out.printf("  Total Items Obtained : %,d\n", st.getItemsObtained());
+        System.out.printf("  Total Items Owned    : %,d (Bag: %d | Equipped: %d)\n",
+                player.getItemsOwned(), player.getInventory().size(), player.getEquippedItemsCount());
+        System.out.printf("  Times Gear Equipped  : %,d\n", st.getEquipmentEquipped());
+        System.out.println();
+        System.out.println("  [ECONOMY & CURRENCY]");
+        System.out.printf("  Current Coins        : %,d Coins\n", player.getCoins());
+        System.out.printf("  Total Coins Earned   : %,d Coins\n", st.getCoinsEarned());
+        System.out.printf("  Total Coins Spent    : %,d Coins\n", st.getCoinsSpent());
+        System.out.printf("  Current Shards       : %,d Shards\n", player.getShards());
+        System.out.printf("  Total Shards Earned  : %,d Shards\n", st.getShardsEarned());
+        System.out.printf("  Total Shards Spent   : %,d Shards\n", st.getShardsSpent());
+        System.out.println("==========================================================================");
+        input.readLine("\nPress Enter to return...");
+    }
+
+    private static int getRosterHighestStar(PlayerAcc player) {
+        int highest = 0;
+        for (Hero h : player.getRoster()) {
+            if (h.getStars() > highest) highest = h.getStars();
+        }
+        return highest;
+    }
+
+    private static void displayAchievementsList(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        AchievementManager am = playerDataManager.getAchievementManager();
+        LinkedList<Achievement> achievements = am.getAchievementsForPlayer(player);
+
+        String choice;
+        do {
+            System.out.println("\n==========================================================================");
+            System.out.println("                      ACHIEVEMENTS LIST & PROGRESS");
+            System.out.println("==========================================================================");
+            int idx = 1;
+            for (Achievement ach : achievements) {
+                int progress = ach.getProgress(player);
+                int target = ach.getTargetCount();
+                String progStr = "[" + progress + " / " + target + "]";
+
+                String status;
+                if (ach.isRewardClaimed()) {
+                    status = "[CLAIMED ✓]";
+                } else if (ach.isUnlocked()) {
+                    status = "[UNLOCKED ★ CLAIMABLE]";
+                } else {
+                    status = "[IN PROGRESS]";
+                }
+
+                System.out.printf("  [%2d] %-25s %-16s %-22s\n",
+                        idx++, ach.getTitle(), status, progStr);
+                System.out.println("       Category: " + ach.getCategory().getDisplayName() + " | Reward: " + ach.getRewardsDisplay());
+                System.out.println("       Condition: " + ach.getDescription());
+                if (ach.isUnlocked() && !ach.getUnlockedAt().isEmpty()) {
+                    System.out.println("       Unlocked at: " + ach.getUnlockedAt());
+                }
+                System.out.println("  ------------------------------------------------------------------------");
+            }
+
+            int unclaimed = am.getUnclaimedCount(player);
+            System.out.println("  Total: " + am.getUnlockedCount(player) + " / " + achievements.size() + " Unlocked"
+                    + "  |  " + unclaimed + " Reward(s) Pending Claim");
+            System.out.println("==========================================================================");
+            System.out.println("Commands: [1-" + achievements.size() + "] Claim Specific Reward  |  [C] Claim All Rewards  |  [0] Return");
+            System.out.println("==========================================================================");
+
+            choice = input.readLine("Select: ");
+            if (choice.equals("0")) break;
+
+            if (choice.equalsIgnoreCase("C")) {
+                int claimed = am.claimAllRewards(player);
+                playerDataManager.saveAllPlayersToCsv();
+                if (claimed > 0) {
+                    System.out.println("\n[SUCCESS] Successfully claimed rewards for " + claimed + " achievement(s)!");
+                } else {
+                    System.out.println("\n[!] No unclaimed achievement rewards available.");
+                }
+                input.readLine("Press Enter to continue...");
+            } else {
+                try {
+                    int aIdx = Integer.parseInt(choice) - 1;
+                    if (aIdx >= 0 && aIdx < achievements.size()) {
+                        Achievement selected = achievements.get(aIdx);
+                        if (!selected.isUnlocked()) {
+                            System.out.println("\n[!] That achievement is still in progress (" + selected.getProgress(player) + " / " + selected.getTargetCount() + ").");
+                        } else if (selected.isRewardClaimed()) {
+                            System.out.println("\n[!] You have already claimed the rewards for this achievement.");
+                        } else {
+                            boolean ok = am.claimReward(player, selected.getId());
+                            if (ok) {
+                                playerDataManager.saveAllPlayersToCsv();
+                                System.out.println("\n[SUCCESS] Claimed reward: " + selected.getRewardsDisplay() + "!");
+                            }
+                        }
+                    } else {
+                        System.out.println("Invalid selection.");
+                    }
+                    input.readLine("Press Enter to continue...");
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input.");
+                    input.readLine("Press Enter to continue...");
+                }
+            }
+        } while (!choice.equals("0"));
+    }
+
+    private static void claimAchievementRewardsFlow(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        AchievementManager am = playerDataManager.getAchievementManager();
+        int unclaimed = am.getUnclaimedCount(player);
+        if (unclaimed == 0) {
+            System.out.println("\n[!] No unclaimed achievement rewards available right now.");
+            System.out.println("    Complete more achievements by opening crates, summoning heroes, and collecting gear!");
+            input.readLine("Press Enter to continue...");
+            return;
+        }
+
+        System.out.println("\n==================================================");
+        System.out.println("           CLAIM ACHIEVEMENT REWARDS");
+        System.out.println("==================================================");
+        System.out.println("  You have " + unclaimed + " unclaimed achievement reward(s) ready!");
+        System.out.println("--------------------------------------------------");
+        int claimed = am.claimAllRewards(player);
+        playerDataManager.saveAllPlayersToCsv();
+
+        System.out.println("[SUCCESS] Claimed all " + claimed + " available achievement rewards!");
+        System.out.println("  Updated Balance -> Coins: " + String.format("%,d", player.getCoins())
+                + "  |  Shards: " + String.format("%,d", player.getShards()));
+        System.out.println("==================================================");
+        input.readLine("\nPress Enter to continue...");
+    }
+
 }

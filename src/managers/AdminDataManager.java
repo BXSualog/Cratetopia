@@ -31,6 +31,7 @@ import java.util.TreeMap;
 public class AdminDataManager {
 
     private static final String ADMINS_CSV_PATH = "data/admins.csv";
+    private static final String ADMIN_CSV_PATH  = "data/admin.csv";
 
     // Hardcoded fallback credentials (used when CSV is missing or empty)
     private static final String DEFAULT_ADMIN_USER = "admin";
@@ -122,6 +123,9 @@ public class AdminDataManager {
     public void loadAdminsFromCsv() {
         adminList.clear();
         File file = new File(ADMINS_CSV_PATH);
+        if (!file.exists()) {
+            file = new File(ADMIN_CSV_PATH);
+        }
 
         if (!file.exists()) {
             seedDefaultAdmins();
@@ -179,10 +183,14 @@ public class AdminDataManager {
     }
 
     /**
-     * Saves all current administrator accounts to data/admins.csv.
+     * Saves all current administrator accounts to data/admins.csv and data/admin.csv.
      */
     public void saveAdminsToCsv() {
-        File file = new File(ADMINS_CSV_PATH);
+        saveAdminsToFile(new File(ADMINS_CSV_PATH));
+        saveAdminsToFile(new File(ADMIN_CSV_PATH));
+    }
+
+    private void saveAdminsToFile(File file) {
         File parentDir = file.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
             parentDir.mkdirs();

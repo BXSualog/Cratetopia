@@ -17,11 +17,14 @@ import java.util.LinkedList;
  * Adheres strictly to DSA constraints using LinkedList collections.
  */
 public class PlayerDataManager {
-    private static final String CSV_FILE_PATH      = "data/players.csv";
-    private static final String INVENTORY_CSV_PATH = "data/player_inventory.csv";
-    private static final String HEROES_CSV_PATH    = "data/player_heroes.csv";
+    private static final String CSV_FILE_PATH        = "data/players.csv";
+    private static final String INVENTORY_CSV_PATH   = "data/player_inventory.csv";
+    private static final String HEROES_CSV_PATH      = "data/player_heroes.csv";
+    private static final String STATISTICS_CSV_PATH  = "data/player_statistics.csv";
+    private static final String ACHIEVEMENTS_CSV_PATH= AchievementManager.ACHIEVEMENTS_CSV_PATH;
 
     private final LinkedList<PlayerAcc> playerList = new LinkedList<>();
+    private final AchievementManager achievementManager = new AchievementManager();
 
     private CharacterDataManager charData;
     private ItemDataManager itemData;
@@ -41,6 +44,16 @@ public class PlayerDataManager {
         this.itemData = itemData;
         loadPlayerInventoriesFromCsv();
         loadPlayerHeroesFromCsv();
+        loadPlayerStatisticsFromCsv();
+        achievementManager.loadAchievementsFromCsv(ACHIEVEMENTS_CSV_PATH);
+        for (PlayerAcc p : playerList) {
+            p.syncCounters();
+            achievementManager.checkAndUnlockAchievements(p);
+        }
+    }
+
+    public AchievementManager getAchievementManager() {
+        return achievementManager;
     }
 
     public LinkedList<PlayerAcc> getPlayerList() {
@@ -51,6 +64,12 @@ public class PlayerDataManager {
         loadPlayersFromCsv();
         loadPlayerInventoriesFromCsv();
         loadPlayerHeroesFromCsv();
+        loadPlayerStatisticsFromCsv();
+        achievementManager.loadAchievementsFromCsv(ACHIEVEMENTS_CSV_PATH);
+        for (PlayerAcc p : playerList) {
+            p.syncCounters();
+            achievementManager.checkAndUnlockAchievements(p);
+        }
     }
 
     public void loadPlayersFromCsv() {
@@ -235,6 +254,8 @@ public class PlayerDataManager {
         savePlayersFile();
         savePlayerInventoriesFile();
         savePlayerHeroesFile();
+        savePlayerStatisticsFile();
+        achievementManager.saveAchievementsToCsv(ACHIEVEMENTS_CSV_PATH);
     }
 
     public boolean deletePlayer(String username) {
@@ -242,6 +263,7 @@ public class PlayerDataManager {
         PlayerAcc target = getPlayer(username);
         if (target != null) {
             playerList.remove(target);
+            achievementManager.removePlayer(username);
             saveAllPlayersToCsv();
             return true;
         }
@@ -256,6 +278,7 @@ public class PlayerDataManager {
             writer.write("username,password,coins,shards,heroesCollected,itemsOwned,isBanned");
             writer.newLine();
             for (PlayerAcc player : playerList) {
+                player.syncCounters();
                 writer.write(player.getUsername() + "," +
                              player.getPassword() + "," +
                              player.getCoins() + "," +
@@ -315,6 +338,82 @@ public class PlayerDataManager {
             }
         } catch (IOException e) {
             System.err.println("Error saving player heroes to CSV: " + e.getMessage());
+        }
+    }
+
+    public void loadPlayerStatisticsFromCsv() {
+        File file = new File(STATISTICS_CSV_PATH);
+        if (!file.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean isFirstLine = true;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                if (isFirstLine && line.toLowerCase().startsWith("username,cratesopened")) {
+                    isFirstLine = false;
+                    continue;
+                }
+                isFirstLine = false;
+
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 2) {
+                    String username = parts[0].trim();
+                    PlayerAcc player = getPlayer(username);
+                    if (player != null) {
+                        int crates = parts.length > 1 ? parseIntOrDefault(parts[1], 0) : 0;
+                        int summons = parts.length > 2 ? parseIntOrDefault(parts[2], 0) : 0;
+                        int items = parts.length > 3 ? parseIntOrDefault(parts[3], 0) : 0;
+                        int coinsEarned = parts.length > 4 ? parseIntOrDefault(parts[4], 0) : 0;
+                        int coinsSpent = parts.length > 5 ? parseIntOrDefault(parts[5], 0) : 0;
+                        int shardsEarned = parts.length > 6 ? parseIntOrDefault(parts[6], 0) : 0;
+                        int shardsSpent = parts.length > 7 ? parseIntOrDefault(parts[7], 0) : 0;
+                        int wooden = parts.length > 8 ? parseIntOrDefault(parts[8], 0) : 0;
+                        int silver = parts.length > 9 ? parseIntOrDefault(parts[9], 0) : 0;
+                        int gold = parts.length > 10 ? parseIntOrDefault(parts[10], 0) : 0;
+                        int diamond = parts.length > 11 ? parseIntOrDefault(parts[11], 0) : 0;
+                        int rarity = parts.length > 12 ? parseIntOrDefault(parts[12], 0) : 0;
+                        int equipped = parts.length > 13 ? parseIntOrDefault(parts[13], 0) : 0;
+
+                        player.setStats(new accounts.PlayerStats(crates, summons, items,
+                                coinsEarned, coinsSpent, shardsEarned, shardsSpent,
+                                wooden, silver, gold, diamond, rarity, equipped));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading player statistics CSV: " + e.getMessage());
+        }
+    }
+
+    private void savePlayerStatisticsFile() {
+        File file = new File(STATISTICS_CSV_PATH);
+        ensureParentDir(file);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
+            writer.write("username,cratesOpened,summonsPerformed,itemsObtained,coinsEarned,coinsSpent,shardsEarned,shardsSpent,woodenCrates,silverCrates,goldCrates,diamondCrates,highestHeroRarity,equipmentEquipped");
+            writer.newLine();
+            for (PlayerAcc player : playerList) {
+                accounts.PlayerStats st = player.getStats();
+                writer.write(player.getUsername() + "," +
+                        st.getCratesOpened() + "," +
+                        st.getSummonsPerformed() + "," +
+                        st.getItemsObtained() + "," +
+                        st.getCoinsEarned() + "," +
+                        st.getCoinsSpent() + "," +
+                        st.getShardsEarned() + "," +
+                        st.getShardsSpent() + "," +
+                        st.getWoodenCrates() + "," +
+                        st.getSilverCrates() + "," +
+                        st.getGoldCrates() + "," +
+                        st.getDiamondCrates() + "," +
+                        st.getHighestHeroRarity() + "," +
+                        st.getEquipmentEquipped());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving player statistics to CSV: " + e.getMessage());
         }
     }
 

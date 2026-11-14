@@ -1,0 +1,35 @@
+username,achievement_id,unlocked,unlocked_at,reward_claimed
+BX,CRATE_001,false,,false
+BX,CRATE_025,false,,false
+BX,CRATE_050,false,,false
+BX,CRATE_100,false,,false
+BX,SUMMON_001,false,,false
+BX,SUMMON_010,false,,false
+BX,SUMMON_050,false,,false
+BX,HERO_5STAR,false,,false
+BX,HERO_6STAR,false,,false
+BX,ROSTER_005,true,2026-11-14 15:25:57,false
+BX,ROSTER_010,false,,false
+BX,ITEMS_010,true,2026-11-14 15:25:57,false
+BX,ITEMS_030,false,,false
+BX,COINS_10K,false,,false
+BX,COINS_50K,false,,false
+BX,FULL_SET,false,,false
+BX,FULL_GEAR,false,,false
+Xai,CRATE_001,false,,false
+Xai,CRATE_025,false,,false
+Xai,CRATE_050,false,,false
+Xai,CRATE_100,false,,false
+Xai,SUMMON_001,false,,false
+Xai,SUMMON_010,false,,false
+Xai,SUMMON_050,false,,false
+Xai,HERO_5STAR,false,,false
+Xai,HERO_6STAR,false,,false
+Xai,ROSTER_005,false,,false
+Xai,ROSTER_010,false,,false
+Xai,ITEMS_010,false,,false
+Xai,ITEMS_030,false,,false
+Xai,COINS_10K,false,,false
+Xai,COINS_50K,false,,false
+Xai,FULL_SET,false,,false
+Xai,FULL_GEAR,false,,false

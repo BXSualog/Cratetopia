@@ -1,8 +1,10 @@
 package accounts;
 
 import characters.Hero;
+import items.Armor;
 import items.Item;
 import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * PlayerAcc – the player account type.
@@ -32,14 +34,21 @@ public class PlayerAcc extends Account {
     private int shards;  // premium currency used for hero gacha pulls
 
     // --- Statistics (tracked for display on the home screen) ---
-    private int heroesCollected; // total heroes ever added
-    private int itemsOwned;      // total items ever added
+    private int heroesCollected; // total heroes in roster
+    private int itemsOwned;      // total items owned (inventory + equipped gear)
+
+    // Detailed player statistics (crates, summons, economy, achievements)
+    private PlayerStats stats = new PlayerStats();
 
     // --- DSA: LinkedList for Inventory & Roster ---
     // LinkedList<Item>  → stores all unequipped gear the player owns
     // LinkedList<Hero>  → stores all heroes the player has summoned
     private final LinkedList<Item> inventory = new LinkedList<>();
     private final LinkedList<Hero> roster    = new LinkedList<>();
+
+    // --- DSA: Stack (LIFO) for Player Activity History ---
+    // Tracks recent gameplay actions in Last-In, First-Out order.
+    private final Stack<String> activityHistory = new Stack<>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -115,32 +124,114 @@ public class PlayerAcc extends Account {
     public void setShards(int shards)   { this.shards = shards; }
 
     // -------------------------------------------------------------------------
-    // Statistics Getters & Setters
+    // Statistics & Counters Getters & Setters
     // -------------------------------------------------------------------------
 
+    public PlayerStats getStats() {
+        return stats;
+    }
+
+    public void setStats(PlayerStats stats) {
+        if (stats != null) {
+            this.stats = stats;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // DSA: Stack (LIFO) Methods for Activity Log
+    // -------------------------------------------------------------------------
+
+    public Stack<String> getActivityHistory() {
+        return activityHistory;
+    }
+
+    public void pushActivity(String activity) {
+        if (activity != null && !activity.trim().isEmpty()) {
+            activityHistory.push(activity.trim());
+        }
+    }
+
+    public String peekRecentActivity() {
+        return activityHistory.isEmpty() ? "No recent activity" : activityHistory.peek();
+    }
+
     /**
-     * Returns the total heroes collected.
-     * Math.max ensures the count is never less than the actual roster size
-     * (in case saved data is out of sync with the live list).
+     * Returns all equipment currently equipped across all heroes in the roster.
+     */
+    public LinkedList<Item> getEquippedItems() {
+        LinkedList<Item> equipped = new LinkedList<>();
+        for (Hero h : roster) {
+            if (h.getEquippedWeapon() != null) {
+                equipped.add(h.getEquippedWeapon());
+            }
+            for (Armor a : h.getEquippedArmors()) {
+                if (a != null) {
+                    equipped.add(a);
+                }
+            }
+            if (h.getEquippedAccessory() != null) {
+                equipped.add(h.getEquippedAccessory());
+            }
+        }
+        return equipped;
+    }
+
+    /**
+     * Returns the total count of gear items currently equipped across all heroes.
+     */
+    public int getEquippedItemsCount() {
+        return getEquippedItems().size();
+    }
+
+    /**
+     * Returns the grand total of items owned (both unequipped in bag and equipped on heroes).
+     */
+    public int getTotalItemsCount() {
+        return inventory.size() + getEquippedItemsCount();
+    }
+
+    /**
+     * Returns a combined list of all items owned by the player (inventory bag + hero equipment).
+     */
+    public LinkedList<Item> getAllItems() {
+        LinkedList<Item> all = new LinkedList<>(inventory);
+        all.addAll(getEquippedItems());
+        return all;
+    }
+
+    /**
+     * Synchronizes heroesCollected and itemsOwned counters directly with live
+     * roster and inventory + equipment collections to completely prevent any desynchronization.
+     */
+    public void syncCounters() {
+        this.heroesCollected = roster.size();
+        this.itemsOwned = inventory.size() + getEquippedItemsCount();
+    }
+
+    /**
+     * Returns the total heroes in roster.
+     * Guaranteed to match roster.size() perfectly.
      */
     public int getHeroesCollected() {
-        return Math.max(heroesCollected, roster.size());
+        this.heroesCollected = roster.size();
+        return this.heroesCollected;
     }
 
     public void setHeroesCollected(int heroesCollected) {
-        this.heroesCollected = heroesCollected;
+        this.heroesCollected = roster.size();
     }
 
     /**
-     * Returns the total items owned.
-     * Math.max keeps the count accurate even if saved data lags behind.
+     * Returns the total items owned (inventory bag + equipped items).
+     * Guaranteed to match actual inventory + equipment sizes.
      */
     public int getItemsOwned() {
-        return Math.max(itemsOwned, inventory.size());
+        this.itemsOwned = inventory.size() + getEquippedItemsCount();
+        return this.itemsOwned;
     }
 
     public void setItemsOwned(int itemsOwned) {
-        this.itemsOwned = itemsOwned;
+        this.itemsOwned = inventory.size() + getEquippedItemsCount();
     }
 
     // -------------------------------------------------------------------------
@@ -217,7 +308,7 @@ public class PlayerAcc extends Account {
         // Guard: item must exist and must not already be in the inventory
         if (item != null && !hasItem(item.getId())) {
             inventory.add(item);               // LinkedList.add() = add to tail, O(1)
-            this.itemsOwned = inventory.size(); // keep the count in sync
+            syncCounters();                    // keep counters perfectly synced
             return true;
         }
         return false; // duplicate — skip it
@@ -232,7 +323,7 @@ public class PlayerAcc extends Account {
     public boolean removeItem(Item item) {
         boolean removed = inventory.remove(item); // LinkedList.remove() = O(n) search then pointer re-link
         if (removed) {
-            this.itemsOwned = inventory.size();
+            syncCounters();
         }
         return removed;
     }
@@ -285,7 +376,7 @@ public class PlayerAcc extends Account {
     public boolean addHero(Hero hero) {
         if (hero != null && !hasHero(hero.getId())) {
             roster.add(hero);                        // add to tail of the LinkedList
-            this.heroesCollected = roster.size();    // keep the count in sync
+            syncCounters();                          // keep the count in sync
             return true;
         }
         return false;
@@ -300,7 +391,7 @@ public class PlayerAcc extends Account {
     public boolean removeHero(Hero hero) {
         boolean removed = roster.remove(hero);
         if (removed) {
-            this.heroesCollected = roster.size();
+            syncCounters();
         }
         return removed;
     }
