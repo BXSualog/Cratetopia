@@ -21,17 +21,18 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Main {
+    // Single shared scanner -- declared once, used everywhere
+    private static final Scanner scanner = new Scanner(System.in);
 
     /**
      * Helper to print a prompt and read a line from Scanner, trimmed.
      */
-    private static String readLine(Scanner scanner, String prompt) {
+    private static String readLine(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine().trim();
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
         ItemDataManager itemDataManager = new ItemDataManager();
         CharacterDataManager charDataManager = new CharacterDataManager();
         PlayerDataManager playerDataManager = new PlayerDataManager(charDataManager, itemDataManager);
@@ -51,19 +52,19 @@ public class Main {
             System.out.println("0. Exit");
             System.out.println("============================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    registerUser(scanner, playerDataManager);
+                    registerUser(playerDataManager);
                     break;
 
                 case "2":
-                    loginUser(scanner, playerDataManager, crateManager, gachaManager);
+                    loginUser(playerDataManager, crateManager, gachaManager);
                     break;
 
                 case "3":
-                    loginAdmin(scanner, adminDataManager);
+                    loginAdmin(adminDataManager);
                     break;
 
                 case "0":
@@ -77,7 +78,7 @@ public class Main {
             }
 
             if (!choice.equals("0") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3")) {
-                readLine(scanner, "\nPress Enter to continue...");
+                readLine("\nPress Enter to continue...");
             }
 
         } while (!choice.equals("0"));
@@ -85,7 +86,7 @@ public class Main {
         scanner.close();
     }
 
-    public static void registerUser(Scanner scanner, PlayerDataManager playerDataManager) {
+    public static void registerUser(PlayerDataManager playerDataManager) {
         System.out.println("===========================================");
         System.out.println("          REGISTER PLAYER ACCOUNT");
         System.out.println("===========================================");
@@ -96,7 +97,7 @@ public class Main {
 
         String username;
         while (true) {
-            username = readLine(scanner, "Enter username: ");
+            username = readLine("Enter username: ");
             if (username.isEmpty()) {
                 System.out.println("[!] Username cannot be empty. Please try again.");
             } else if (username.length() < 3) {
@@ -116,7 +117,7 @@ public class Main {
 
         String password;
         while (true) {
-            password = readLine(scanner, "Enter password: ");
+            password = readLine("Enter password: ");
             if (password.isEmpty()) {
                 System.out.println("[!] Password cannot be empty.");
             } else if (password.length() < 4) {
@@ -138,7 +139,7 @@ public class Main {
             System.out.println("[!] Failed to register account. Please try again.");
         }
 
-        readLine(scanner, "\nPress Enter to return to the Login Menu...");
+        readLine("\nPress Enter to return to the Login Menu...");
     }
 
     /** Returns true if the string contains at least one ASCII letter (a-z or A-Z). */
@@ -150,18 +151,18 @@ public class Main {
         return false;
     }
 
-    public static void loginUser(Scanner scanner, PlayerDataManager playerDataManager,
+    public static void loginUser(PlayerDataManager playerDataManager,
                                  CrateManager crateManager, CharacterGachaManager gachaManager) {
         while (true) {
             System.out.println("===========================================");
             System.out.println("               PLAYER LOGIN");
             System.out.println("===========================================");
 
-            String username = readLine(scanner, "Enter username: ");
+            String username = readLine("Enter username: ");
             if (username.equals("0")) {
                 break;
             }
-            String password = readLine(scanner, "Enter password: ");
+            String password = readLine("Enter password: ");
 
             boolean success = playerDataManager.loginPlayer(username, password);
             if (success) {
@@ -175,15 +176,15 @@ public class Main {
                     System.out.println("  Please contact administration if you believe");
                     System.out.println("  this was done in error.");
                     System.out.println("===========================================");
-                    readLine(scanner, "\nPress Enter to return to Login Menu...");
+                    readLine("\nPress Enter to return to Login Menu...");
                     break;
                 }
                 System.out.println("Login successful! Welcome, " + player.getUsername() + "!");
-                playerHomescreen(scanner, playerDataManager, crateManager, gachaManager, player);
+                playerHomescreen(playerDataManager, crateManager, gachaManager, player);
                 break;
             } else {
                 System.out.println("Invalid username or password. Please try again.");
-                String opt = readLine(scanner, "\nPress Enter to try again (or '0' to return)...");
+                String opt = readLine("\nPress Enter to try again (or '0' to return)...");
                 if (opt.equals("0")) {
                     break;
                 }
@@ -202,27 +203,27 @@ public class Main {
      * @param input             Input handler for reading console inputs.
      * @param adminDataManager  Administrator manager for authentication & operations.
      */
-    public static void loginAdmin(Scanner scanner, AdminDataManager adminDataManager) {
+    public static void loginAdmin(AdminDataManager adminDataManager) {
         while (true) {
             System.out.println("===========================================");
             System.out.println("               ADMIN LOGIN");
             System.out.println("===========================================");
 
-            String username = readLine(scanner, "Enter admin username (or '0' to return): ");
+            String username = readLine("Enter admin username (or '0' to return): ");
             if (username.equals("0")) {
                 break;
             }
-            String password = readLine(scanner, "Enter admin password: ");
+            String password = readLine("Enter admin password: ");
 
             AdminAcc admin = adminDataManager.loginAdmin(username, password);
             if (admin != null) {
                 System.out.println("\n[SUCCESS] Login successful! Welcome, Administrator "
                         + admin.getUsername() + " [" + admin.getRole() + "]!");
-                adminHomescreen(scanner, adminDataManager, admin);
+                adminHomescreen(adminDataManager, admin);
                 break;
             } else {
                 System.out.println("\n[!] Invalid admin credentials. Access denied.");
-                String opt = readLine(scanner, "\nPress Enter to try again (or '0' to return)...");
+                String opt = readLine("\nPress Enter to try again (or '0' to return)...");
                 if (opt.equals("0")) {
                     break;
                 }
@@ -239,7 +240,7 @@ public class Main {
      * @param adminDataManager  Administrator data manager.
      * @param admin             The currently authenticated admin account.
      */
-    public static void adminHomescreen(Scanner scanner, AdminDataManager adminDataManager, AdminAcc admin) {
+    public static void adminHomescreen(AdminDataManager adminDataManager, AdminAcc admin) {
         String choice;
 
         do {
@@ -263,27 +264,27 @@ public class Main {
             System.out.println("0. Logout");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    adminStatisticsReportsMenu(scanner, adminDataManager);
+                    adminStatisticsReportsMenu(adminDataManager);
                     break;
 
                 case "2":
-                    adminPlayerManagement(scanner, adminDataManager);
+                    adminPlayerManagement(adminDataManager);
                     break;
 
                 case "3":
-                    adminCatalogsMenu(scanner, adminDataManager);
+                    adminCatalogsMenu(adminDataManager);
                     break;
 
                 case "4":
-                    adminEconomyManagementMenu(scanner, adminDataManager);
+                    adminEconomyManagementMenu(adminDataManager);
                     break;
 
                 case "5":
-                    adminAccountsMenu(scanner, adminDataManager, admin);
+                    adminAccountsMenu(adminDataManager, admin);
                     break;
 
                 case "6":
@@ -299,7 +300,7 @@ public class Main {
                     System.out.println();
                     adminDataManager.saveAllSystemData();
                     System.out.println("[SUCCESS] All system, player, catalog, and administrator records saved!");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
                     break;
 
                 case "0":
@@ -313,7 +314,7 @@ public class Main {
 
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
@@ -328,7 +329,7 @@ public class Main {
      * - Display the total number of registered players.
      * - Provide an overview of player activity.
      */
-    private static void adminStatisticsReportsMenu(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminStatisticsReportsMenu(AdminDataManager adminDataManager) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -341,26 +342,26 @@ public class Main {
             System.out.println("0. Back to Admin Dashboard");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    adminDisplayRegisteredPlayers(scanner, adminDataManager);
+                    adminDisplayRegisteredPlayers(adminDataManager);
                     break;
                 case "2":
-                    adminPlayerActivityOverview(scanner, adminDataManager);
+                    adminPlayerActivityOverview(adminDataManager);
                     break;
                 case "3":
-                    adminPlayerLeaderboards(scanner, adminDataManager);
+                    adminPlayerLeaderboards(adminDataManager);
                     break;
                 case "4":
-                    adminHeroPopularityReport(scanner, adminDataManager);
+                    adminHeroPopularityReport(adminDataManager);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
@@ -368,7 +369,7 @@ public class Main {
     /**
      * Requirement 1.6: Display the total number of registered players.
      */
-    private static void adminDisplayRegisteredPlayers(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminDisplayRegisteredPlayers(AdminDataManager adminDataManager) {
         int total = adminDataManager.getTotalPlayersCount();
         int active = adminDataManager.getActivePlayersCount();
         int banned = adminDataManager.getBannedPlayersCount();
@@ -407,13 +408,13 @@ public class Main {
             }
         }
         System.out.println("==================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     /**
      * Requirement 1.6: Provide an overview of player activity.
      */
-    private static void adminPlayerActivityOverview(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminPlayerActivityOverview(AdminDataManager adminDataManager) {
         int totalPlayers = adminDataManager.getTotalPlayersCount();
         int activePlayers = adminDataManager.getActivePlayersCount();
         int bannedPlayers = adminDataManager.getBannedPlayersCount();
@@ -449,13 +450,13 @@ public class Main {
         System.out.printf("  Hero Catalog Templates       : %,d templates\n", adminDataManager.getTotalHeroesCatalogCount());
         System.out.printf("  Item Catalog Templates       : %,d templates\n", adminDataManager.getTotalItemsCatalogCount());
         System.out.println("==================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     /**
      * Requirement 1.6 helper: Player Leaderboards (Wealth & Collectors)
      */
-    private static void adminPlayerLeaderboards(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminPlayerLeaderboards(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("                PLAYER LEADERBOARDS");
         System.out.println("==================================================");
@@ -509,13 +510,13 @@ public class Main {
         }
 
         System.out.println("==================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     /**
      * Requirement 1.6 helper: Hero Popularity / Ownership Analysis
      */
-    private static void adminHeroPopularityReport(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminHeroPopularityReport(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("         HERO POPULARITY & OWNERSHIP REPORT");
         System.out.println("==================================================");
@@ -538,13 +539,13 @@ public class Main {
             }
         }
         System.out.println("==================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     /**
      * Submenu 2: Player Account Management (1.3 Requirement)
      */
-    private static void adminPlayerManagement(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminPlayerManagement(AdminDataManager adminDataManager) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -559,32 +560,32 @@ public class Main {
             System.out.println("0. Back to Admin Dashboard");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    adminViewAllPlayers(scanner, adminDataManager);
+                    adminViewAllPlayers(adminDataManager);
                     break;
                 case "2":
-                    adminSearchPlayer(scanner, adminDataManager);
+                    adminSearchPlayer(adminDataManager);
                     break;
                 case "3":
-                    adminBanUnbanPlayer(scanner, adminDataManager);
+                    adminBanUnbanPlayer(adminDataManager);
                     break;
                 case "4":
-                    adminDeletePlayer(scanner, adminDataManager);
+                    adminDeletePlayer(adminDataManager);
                     break;
                 case "5":
-                    adminModifyCurrencyMenu(scanner, adminDataManager);
+                    adminModifyCurrencyMenu(adminDataManager);
                     break;
                 case "6":
-                    adminResetPlayer(scanner, adminDataManager);
+                    adminResetPlayer(adminDataManager);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
@@ -592,7 +593,7 @@ public class Main {
     /**
      * Requirement: View all registered players and their statistics.
      */
-    private static void adminViewAllPlayers(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminViewAllPlayers(AdminDataManager adminDataManager) {
         LinkedList<PlayerAcc> players = (adminDataManager.getPlayerDataManager() != null)
                 ? adminDataManager.getPlayerDataManager().getPlayerList()
                 : new LinkedList<>();
@@ -628,23 +629,23 @@ public class Main {
                     adminDataManager.getTotalEconomyShards());
         }
         System.out.println("==========================================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     /**
      * Requirement: Search for a player by username.
      */
-    private static void adminSearchPlayer(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminSearchPlayer(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("            SEARCH PLAYER BY USERNAME");
         System.out.println("==================================================");
-        String query = readLine(scanner, "Enter username or search query (or '0' to cancel): ");
+        String query = readLine("Enter username or search query (or '0' to cancel): ");
         if (query.equals("0") || query.trim().isEmpty()) return;
 
         LinkedList<PlayerAcc> matches = adminDataManager.searchPlayers(query.trim());
         if (matches.isEmpty()) {
             System.out.println("\n[!] No player found matching '" + query + "'.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -659,7 +660,7 @@ public class Main {
                 System.out.printf("  [%d] %-16s %-10s (Coins: %,d | Shards: %,d)\n",
                         idx++, p.getUsername(), status, p.getCoins(), p.getShards());
             }
-            String choice = readLine(scanner, "\nSelect player number to inspect (or '0' to cancel): ");
+            String choice = readLine("\nSelect player number to inspect (or '0' to cancel): ");
             if (choice.equals("0")) return;
             try {
                 int selectedIdx = Integer.parseInt(choice) - 1;
@@ -667,23 +668,23 @@ public class Main {
                     selectedPlayer = matches.get(selectedIdx);
                 } else {
                     System.out.println("Invalid selection.");
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
                     return;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid number.");
-                readLine(scanner, "Press Enter to continue...");
+                readLine("Press Enter to continue...");
                 return;
             }
         }
 
-        displayPlayerFullProfile(scanner, adminDataManager, selectedPlayer);
+        displayPlayerFullProfile(adminDataManager, selectedPlayer);
     }
 
     /**
      * Displays a full player profile and offers interactive admin actions.
      */
-    private static void displayPlayerFullProfile(Scanner scanner, AdminDataManager adminDataManager, PlayerAcc player) {
+    private static void displayPlayerFullProfile(AdminDataManager adminDataManager, PlayerAcc player) {
         String choice;
         do {
             String status = player.isBanned() ? "[BANNED / SUSPENDED]" : "[ACTIVE]";
@@ -732,35 +733,35 @@ public class Main {
                     + " | [2] Delete Account | [3] Modify Coins/Shards | [0] Return");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select action: ");
+            choice = readLine("Select action: ");
             switch (choice) {
                 case "1":
                     adminDataManager.togglePlayerBan(player.getUsername());
                     System.out.println("\n[SUCCESS] Player '" + player.getUsername() + "' status changed to: "
                             + (player.isBanned() ? "[BANNED]" : "[ACTIVE]"));
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
                     break;
                 case "2":
                     System.out.println("\n[DANGER] This will PERMANENTLY delete account '" + player.getUsername() + "'!");
-                    String confirm = readLine(scanner, "Type 'DELETE' to confirm: ");
+                    String confirm = readLine("Type 'DELETE' to confirm: ");
                     if (confirm.equals("DELETE")) {
                         adminDataManager.deletePlayer(player.getUsername());
                         System.out.println("\n[SUCCESS] Player account permanently deleted.");
-                        readLine(scanner, "Press Enter to return...");
+                        readLine("Press Enter to return...");
                         return;
                     } else {
                         System.out.println("\nOperation cancelled.");
-                        readLine(scanner, "Press Enter to continue...");
+                        readLine("Press Enter to continue...");
                     }
                     break;
                 case "3":
-                    adminModifyCurrencyMenu(scanner, adminDataManager, player.getUsername());
+                    adminModifyCurrencyMenu(adminDataManager, player.getUsername());
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option.");
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
@@ -768,17 +769,17 @@ public class Main {
     /**
      * Requirement: Ban or unban a player account.
      */
-    private static void adminBanUnbanPlayer(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminBanUnbanPlayer(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("             BAN / UNBAN PLAYER ACCOUNT");
         System.out.println("==================================================");
-        String username = readLine(scanner, "Enter player username (or '0' to cancel): ");
+        String username = readLine("Enter player username (or '0' to cancel): ");
         if (username.equals("0") || username.trim().isEmpty()) return;
 
         PlayerAcc player = adminDataManager.findPlayer(username);
         if (player == null) {
             System.out.println("\n[!] Player '" + username + "' not found.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -787,7 +788,7 @@ public class Main {
                 + (currentStatus ? "[BANNED]" : "[ACTIVE]"));
 
         if (!currentStatus) {
-            String confirm = readLine(scanner, "Do you want to BAN player '" + player.getUsername() + "'? (y/N): ");
+            String confirm = readLine("Do you want to BAN player '" + player.getUsername() + "'? (y/N): ");
             if (confirm.equalsIgnoreCase("y")) {
                 adminDataManager.banPlayer(player.getUsername());
                 System.out.println("\n[SUCCESS] Player '" + player.getUsername() + "' has been BANNED. Login access is now revoked.");
@@ -795,7 +796,7 @@ public class Main {
                 System.out.println("\nOperation cancelled.");
             }
         } else {
-            String confirm = readLine(scanner, "Do you want to UNBAN player '" + player.getUsername() + "'? (y/N): ");
+            String confirm = readLine("Do you want to UNBAN player '" + player.getUsername() + "'? (y/N): ");
             if (confirm.equalsIgnoreCase("y")) {
                 adminDataManager.unbanPlayer(player.getUsername());
                 System.out.println("\n[SUCCESS] Player '" + player.getUsername() + "' has been UNBANNED. Login access restored.");
@@ -803,29 +804,29 @@ public class Main {
                 System.out.println("\nOperation cancelled.");
             }
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement: Delete a player account.
      */
-    private static void adminDeletePlayer(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminDeletePlayer(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("             DELETE PLAYER ACCOUNT");
         System.out.println("==================================================");
-        String username = readLine(scanner, "Enter player username to PERMANENTLY DELETE (or '0' to cancel): ");
+        String username = readLine("Enter player username to PERMANENTLY DELETE (or '0' to cancel): ");
         if (username.equals("0") || username.trim().isEmpty()) return;
 
         PlayerAcc player = adminDataManager.findPlayer(username);
         if (player == null) {
             System.out.println("\n[!] Player '" + username + "' not found.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
         System.out.println("\n[DANGER] This will PERMANENTLY delete account '" + player.getUsername()
                 + "' and remove all associated hero roster and inventory data!");
-        String confirm = readLine(scanner, "Type 'DELETE' to confirm: ");
+        String confirm = readLine("Type 'DELETE' to confirm: ");
         if (confirm.equals("DELETE")) {
             boolean success = adminDataManager.deletePlayer(player.getUsername());
             if (success) {
@@ -836,20 +837,20 @@ public class Main {
         } else {
             System.out.println("\nConfirmation mismatch. Operation cancelled.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
-    private static void adminModifyCurrencyMenu(Scanner scanner, AdminDataManager adminDataManager) {
-        String username = readLine(scanner, "\nEnter player username to modify currencies (or '0' to cancel): ");
+    private static void adminModifyCurrencyMenu(AdminDataManager adminDataManager) {
+        String username = readLine("\nEnter player username to modify currencies (or '0' to cancel): ");
         if (username.equals("0") || username.trim().isEmpty()) return;
-        adminModifyCurrencyMenu(scanner, adminDataManager, username);
+        adminModifyCurrencyMenu(adminDataManager, username);
     }
 
-    private static void adminModifyCurrencyMenu(Scanner scanner, AdminDataManager adminDataManager, String username) {
+    private static void adminModifyCurrencyMenu(AdminDataManager adminDataManager, String username) {
         PlayerAcc player = adminDataManager.findPlayer(username);
         if (player == null) {
             System.out.println("\n[!] Player '" + username + "' not found.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -857,16 +858,16 @@ public class Main {
         System.out.println("1. Coins (Current: " + String.format("%,d", player.getCoins()) + ")");
         System.out.println("2. Shards (Current: " + String.format("%,d", player.getShards()) + ")");
         System.out.println("0. Cancel");
-        String opt = readLine(scanner, "Select: ");
+        String opt = readLine("Select: ");
 
         if (opt.equals("1")) {
-            adminModifyCurrency(scanner, adminDataManager, player.getUsername(), false);
+            adminModifyCurrency(adminDataManager, player.getUsername(), false);
         } else if (opt.equals("2")) {
-            adminModifyCurrency(scanner, adminDataManager, player.getUsername(), true);
+            adminModifyCurrency(adminDataManager, player.getUsername(), true);
         }
     }
 
-    private static void adminModifyCurrency(Scanner scanner, AdminDataManager adminDataManager,
+    private static void adminModifyCurrency(AdminDataManager adminDataManager,
                                             String username, boolean isShards) {
         String currencyLabel = isShards ? "Shards" : "Coins";
         PlayerAcc player = adminDataManager.findPlayer(username);
@@ -874,7 +875,7 @@ public class Main {
 
         int currentBalance = isShards ? player.getShards() : player.getCoins();
         System.out.printf("\nCurrent %s for %s: %,d\n", currencyLabel, player.getUsername(), currentBalance);
-        String amountStr = readLine(scanner, "Enter amount to ADD (positive) or DEDUCT (negative): ");
+        String amountStr = readLine("Enter amount to ADD (positive) or DEDUCT (negative): ");
 
         try {
             int delta = Integer.parseInt(amountStr);
@@ -892,22 +893,22 @@ public class Main {
         } catch (NumberFormatException e) {
             System.out.println("\n[!] Invalid number format.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
-    private static void adminResetPlayer(Scanner scanner, AdminDataManager adminDataManager) {
-        String username = readLine(scanner, "\nEnter player username to RESET progress (or '0' to cancel): ");
+    private static void adminResetPlayer(AdminDataManager adminDataManager) {
+        String username = readLine("\nEnter player username to RESET progress (or '0' to cancel): ");
         if (username.equals("0") || username.trim().isEmpty()) return;
 
         PlayerAcc player = adminDataManager.findPlayer(username);
         if (player == null) {
             System.out.println("\n[!] Player '" + username + "' not found.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
         System.out.println("\n[WARNING] This will reset coins to 500, shards to 10, and wipe all items & heroes!");
-        String confirm = readLine(scanner, "Are you sure you want to proceed? (y/N): ");
+        String confirm = readLine("Are you sure you want to proceed? (y/N): ");
         if (confirm.equalsIgnoreCase("y")) {
             boolean success = adminDataManager.resetPlayerProgress(username);
             if (success) {
@@ -918,7 +919,7 @@ public class Main {
         } else {
             System.out.println("\nOperation cancelled.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     // =========================================================================
@@ -935,7 +936,7 @@ public class Main {
      * - View all heroes from all class CSV files.
      * - Add, edit, or remove heroes from the catalog.
      */
-    private static void adminCatalogsMenu(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminCatalogsMenu(AdminDataManager adminDataManager) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -955,38 +956,38 @@ public class Main {
             System.out.println("0. Back to Admin Dashboard");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    adminViewItemsCatalog(scanner, adminDataManager);
+                    adminViewItemsCatalog(adminDataManager);
                     break;
                 case "2":
-                    adminAddNewItem(scanner, adminDataManager);
+                    adminAddNewItem(adminDataManager);
                     break;
                 case "3":
-                    adminEditItem(scanner, adminDataManager);
+                    adminEditItem(adminDataManager);
                     break;
                 case "4":
-                    adminDeleteItem(scanner, adminDataManager);
+                    adminDeleteItem(adminDataManager);
                     break;
                 case "5":
-                    adminViewHeroesCatalog(scanner, adminDataManager);
+                    adminViewHeroesCatalog(adminDataManager);
                     break;
                 case "6":
-                    adminAddNewHero(scanner, adminDataManager);
+                    adminAddNewHero(adminDataManager);
                     break;
                 case "7":
-                    adminEditHero(scanner, adminDataManager);
+                    adminEditHero(adminDataManager);
                     break;
                 case "8":
-                    adminRemoveHero(scanner, adminDataManager);
+                    adminRemoveHero(adminDataManager);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
@@ -994,11 +995,11 @@ public class Main {
     /**
      * Requirement 1.4: View all catalog items, including weapons, armor, and accessories.
      */
-    private static void adminViewItemsCatalog(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminViewItemsCatalog(AdminDataManager adminDataManager) {
         ItemDataManager idm = adminDataManager.getItemDataManager();
         if (idm == null) {
             System.out.println("\n[!] Item Data Manager is not available.");
-            readLine(scanner, "Press Enter to return...");
+            readLine("Press Enter to return...");
             return;
         }
 
@@ -1008,7 +1009,7 @@ public class Main {
         System.out.println("3. Accessories (" + idm.getAccessories().size() + ")");
         System.out.println("4. All Items Combined (" + (idm.getWeapons().size() + idm.getArmors().size() + idm.getAccessories().size()) + ")");
         System.out.println("0. Cancel");
-        String cat = readLine(scanner, "Select: ");
+        String cat = readLine("Select: ");
 
         if (cat.equals("1")) {
             System.out.println("\n==========================================================================");
@@ -1071,13 +1072,13 @@ public class Main {
         }
 
         System.out.println("==========================================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     /**
      * Requirement 1.4: Add new items to the CSV catalog.
      */
-    private static void adminAddNewItem(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminAddNewItem(AdminDataManager adminDataManager) {
         ItemDataManager idm = adminDataManager.getItemDataManager();
         if (idm == null) return;
 
@@ -1089,13 +1090,13 @@ public class Main {
         System.out.println("2. Armor");
         System.out.println("3. Accessory");
         System.out.println("0. Cancel");
-        String cat = readLine(scanner, "Select category: ");
+        String cat = readLine("Select category: ");
 
         if (!cat.equals("1") && !cat.equals("2") && !cat.equals("3")) return;
 
         String id;
         while (true) {
-            id = readLine(scanner, "Enter unique Item ID (e.g. W999, A999, AC999, or '0' to cancel): ");
+            id = readLine("Enter unique Item ID (e.g. W999, A999, AC999, or '0' to cancel): ");
             if (id.equals("0")) return;
             if (id.isEmpty()) {
                 System.out.println("ID cannot be empty.");
@@ -1106,23 +1107,23 @@ public class Main {
             }
         }
 
-        String name = readLine(scanner, "Enter Item Name: ");
+        String name = readLine("Enter Item Name: ");
         if (name.isEmpty()) name = "Unnamed Item";
 
         System.out.println("Available Rarities: Common, Uncommon, Rare, Epic, Legendary");
-        String rarity = readLine(scanner, "Enter Rarity (default: Common): ");
+        String rarity = readLine("Enter Rarity (default: Common): ");
         if (rarity.isEmpty()) rarity = "Common";
 
-        String classes = readLine(scanner, "Enter Equippable Classes (e.g. 'All' or 'Warrior;Tank'): ");
+        String classes = readLine("Enter Equippable Classes (e.g. 'All' or 'Warrior;Tank'): ");
         if (classes.isEmpty()) classes = "All";
 
-        String desc = readLine(scanner, "Enter Description: ");
+        String desc = readLine("Enter Description: ");
 
         if (cat.equals("1")) {
-            String type = readLine(scanner, "Enter Weapon Type (e.g. Sword, Axe, Bow, Dagger, Staff): ");
+            String type = readLine("Enter Weapon Type (e.g. Sword, Axe, Bow, Dagger, Staff): ");
             if (type.isEmpty()) type = "Sword";
-            int atk = readInt(scanner, "Enter Attack Bonus: ", 10);
-            int crit = readInt(scanner, "Enter Crit Chance %: ", 5);
+            int atk = readInt("Enter Attack Bonus: ", 10);
+            int crit = readInt("Enter Crit Chance %: ", 5);
 
             Weapon weapon = new Weapon(id, name, rarity, type, atk, crit, classes, desc);
             boolean success = idm.addWeapon(weapon);
@@ -1133,15 +1134,15 @@ public class Main {
             }
         } else if (cat.equals("2")) {
             System.out.println("Available Slots: Helmet, Chest, Leggings");
-            String type = readLine(scanner, "Enter Slot Type (Helmet/Chest/Leggings): ");
+            String type = readLine("Enter Slot Type (Helmet/Chest/Leggings): ");
             if (type.isEmpty()) type = "Chest";
 
-            String setName = readLine(scanner, "Enter Armor Set Name (or 'None'): ");
+            String setName = readLine("Enter Armor Set Name (or 'None'): ");
             if (setName.isEmpty()) setName = "None";
 
-            int def = readInt(scanner, "Enter Defense Bonus: ", 10);
-            int hpBonus = readInt(scanner, "Enter Flat HP Bonus: ", 20);
-            int hpPct = readInt(scanner, "Enter Health % Bonus: ", 0);
+            int def = readInt("Enter Defense Bonus: ", 10);
+            int hpBonus = readInt("Enter Flat HP Bonus: ", 20);
+            int hpPct = readInt("Enter Health % Bonus: ", 0);
 
             Armor armor = new Armor(id, name, rarity, type, setName, def, hpBonus, hpPct, classes, desc);
             boolean success = idm.addArmor(armor);
@@ -1151,14 +1152,14 @@ public class Main {
                 System.out.println("\n[!] Failed to save armor to catalog.");
             }
         } else if (cat.equals("3")) {
-            String type = readLine(scanner, "Enter Accessory Type (e.g. Ring, Amulet, Charm, Trinket): ");
+            String type = readLine("Enter Accessory Type (e.g. Ring, Amulet, Charm, Trinket): ");
             if (type.isEmpty()) type = "Ring";
 
             System.out.println("Bonus Types: attack, health, defense, crit_chance");
-            String bonusType = readLine(scanner, "Enter Bonus Stat Type: ");
+            String bonusType = readLine("Enter Bonus Stat Type: ");
             if (bonusType.isEmpty()) bonusType = "attack";
 
-            int bonus = readInt(scanner, "Enter Stat Bonus Amount: ", 15);
+            int bonus = readInt("Enter Stat Bonus Amount: ", 15);
 
             Accessory acc = new Accessory(id, name, rarity, type, bonus, bonusType, classes, desc);
             boolean success = idm.addAccessory(acc);
@@ -1168,60 +1169,60 @@ public class Main {
                 System.out.println("\n[!] Failed to save accessory to catalog.");
             }
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.4: Edit or update existing item statistics.
      */
-    private static void adminEditItem(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminEditItem(AdminDataManager adminDataManager) {
         ItemDataManager idm = adminDataManager.getItemDataManager();
         if (idm == null) return;
 
         System.out.println("\n==================================================");
         System.out.println("            EDIT ITEM IN CSV CATALOG");
         System.out.println("==================================================");
-        String id = readLine(scanner, "Enter Item ID to edit (or '0' to cancel): ");
+        String id = readLine("Enter Item ID to edit (or '0' to cancel): ");
         if (id.equals("0") || id.isEmpty()) return;
 
         Item item = idm.getItemById(id);
         if (item == null) {
             System.out.println("\n[!] No item found with ID '" + id + "'.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
         System.out.println("\nEditing Item [" + item.getId() + "] " + item.getName());
         System.out.println("(Press Enter on any prompt to keep the current value)\n");
 
-        String name = promptKeepCurrent(scanner, "Name", item.getName());
-        String rarity = promptKeepCurrent(scanner, "Rarity", item.getRarity());
-        String type = promptKeepCurrent(scanner, "Type", item.getType());
-        String classes = promptKeepCurrent(scanner, "Equippable Classes", item.getEquippableClassesRaw());
-        String desc = promptKeepCurrent(scanner, "Description", item.getDescription());
+        String name = promptKeepCurrent("Name", item.getName());
+        String rarity = promptKeepCurrent("Rarity", item.getRarity());
+        String type = promptKeepCurrent("Type", item.getType());
+        String classes = promptKeepCurrent("Equippable Classes", item.getEquippableClassesRaw());
+        String desc = promptKeepCurrent("Description", item.getDescription());
 
         boolean updated = false;
 
         if (item instanceof Weapon) {
             Weapon w = (Weapon) item;
-            int atk = readInt(scanner, "Attack Bonus [" + w.getAttack() + "]: ", w.getAttack());
-            int crit = readInt(scanner, "Crit Chance % [" + w.getCritChance() + "]: ", w.getCritChance());
+            int atk = readInt("Attack Bonus [" + w.getAttack() + "]: ", w.getAttack());
+            int crit = readInt("Crit Chance % [" + w.getCritChance() + "]: ", w.getCritChance());
 
             Weapon newWeapon = new Weapon(w.getId(), name, rarity, type, atk, crit, classes, desc);
             updated = idm.updateWeapon(w.getId(), newWeapon);
         } else if (item instanceof Armor) {
             Armor a = (Armor) item;
-            String setName = promptKeepCurrent(scanner, "Set Name", a.getSetName());
-            int def = readInt(scanner, "Defense Bonus [" + a.getDefense() + "]: ", a.getDefense());
-            int hp = readInt(scanner, "Flat HP Bonus [" + a.getHealthBonus() + "]: ", a.getHealthBonus());
-            int hpPct = readInt(scanner, "Health % Bonus [" + a.getHealthPercentBonus() + "]: ", a.getHealthPercentBonus());
+            String setName = promptKeepCurrent("Set Name", a.getSetName());
+            int def = readInt("Defense Bonus [" + a.getDefense() + "]: ", a.getDefense());
+            int hp = readInt("Flat HP Bonus [" + a.getHealthBonus() + "]: ", a.getHealthBonus());
+            int hpPct = readInt("Health % Bonus [" + a.getHealthPercentBonus() + "]: ", a.getHealthPercentBonus());
 
             Armor newArmor = new Armor(a.getId(), name, rarity, type, setName, def, hp, hpPct, classes, desc);
             updated = idm.updateArmor(a.getId(), newArmor);
         } else if (item instanceof Accessory) {
             Accessory ac = (Accessory) item;
-            String bonusType = promptKeepCurrent(scanner, "Bonus Stat Type", ac.getBonusType());
-            int bonus = readInt(scanner, "Stat Bonus [" + ac.getStatBonus() + "]: ", ac.getStatBonus());
+            String bonusType = promptKeepCurrent("Bonus Stat Type", ac.getBonusType());
+            int bonus = readInt("Stat Bonus [" + ac.getStatBonus() + "]: ", ac.getStatBonus());
 
             Accessory newAcc = new Accessory(ac.getId(), name, rarity, type, bonus, bonusType, classes, desc);
             updated = idm.updateAccessory(ac.getId(), newAcc);
@@ -1232,31 +1233,31 @@ public class Main {
         } else {
             System.out.println("\n[!] Failed to update item.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.4: Delete items from the catalog.
      */
-    private static void adminDeleteItem(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminDeleteItem(AdminDataManager adminDataManager) {
         ItemDataManager idm = adminDataManager.getItemDataManager();
         if (idm == null) return;
 
         System.out.println("\n==================================================");
         System.out.println("           DELETE ITEM FROM CATALOG");
         System.out.println("==================================================");
-        String id = readLine(scanner, "Enter Item ID to delete (or '0' to cancel): ");
+        String id = readLine("Enter Item ID to delete (or '0' to cancel): ");
         if (id.equals("0") || id.isEmpty()) return;
 
         Item item = idm.getItemById(id);
         if (item == null) {
             System.out.println("\n[!] No item found with ID '" + id + "'.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
         System.out.println("\nItem: [" + item.getId() + "] " + item.getName() + " (" + item.getType() + " - " + item.getRarity() + ")");
-        String confirm = readLine(scanner, "Are you sure you want to PERMANENTLY delete this item? (y/N): ");
+        String confirm = readLine("Are you sure you want to PERMANENTLY delete this item? (y/N): ");
         if (confirm.equalsIgnoreCase("y")) {
             boolean success = idm.deleteItem(id);
             if (success) {
@@ -1267,17 +1268,17 @@ public class Main {
         } else {
             System.out.println("\nOperation cancelled.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.4: View all heroes from all class CSV files.
      */
-    private static void adminViewHeroesCatalog(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminViewHeroesCatalog(AdminDataManager adminDataManager) {
         CharacterDataManager cdm = adminDataManager.getCharDataManager();
         if (cdm == null) {
             System.out.println("\n[!] Character Data Manager is not available.");
-            readLine(scanner, "Press Enter to return...");
+            readLine("Press Enter to return...");
             return;
         }
 
@@ -1291,7 +1292,7 @@ public class Main {
         System.out.println("7. Support (" + cdm.getHeroesByClass(CharacterClass.SUPPORT).size() + ")");
         System.out.println("8. Brawler (" + cdm.getHeroesByClass(CharacterClass.BRAWLER).size() + ")");
         System.out.println("0. Cancel");
-        String opt = readLine(scanner, "Select: ");
+        String opt = readLine("Select: ");
 
         LinkedList<Hero> heroes;
         String label;
@@ -1337,13 +1338,13 @@ public class Main {
             System.out.println("       Lore  -> " + h.getDescription());
         }
         System.out.println("==========================================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     /**
      * Requirement 1.4: Add new hero to the catalog and CSV file.
      */
-    private static void adminAddNewHero(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminAddNewHero(AdminDataManager adminDataManager) {
         CharacterDataManager cdm = adminDataManager.getCharDataManager();
         if (cdm == null) return;
 
@@ -1353,7 +1354,7 @@ public class Main {
         System.out.println("Select Character Class:");
         System.out.println("1. Warrior   2. Mage     3. Assassin  4. Tank");
         System.out.println("5. Ranger    6. Support  7. Brawler   0. Cancel");
-        String cChoice = readLine(scanner, "Select Class: ");
+        String cChoice = readLine("Select Class: ");
 
         CharacterClass cc = null;
         switch (cChoice) {
@@ -1369,7 +1370,7 @@ public class Main {
 
         String id;
         while (true) {
-            id = readLine(scanner, "Enter unique Hero ID (e.g. WAR010, BRW010, or '0' to cancel): ");
+            id = readLine("Enter unique Hero ID (e.g. WAR010, BRW010, or '0' to cancel): ");
             if (id.equals("0")) return;
             if (id.isEmpty()) {
                 System.out.println("ID cannot be empty.");
@@ -1380,19 +1381,19 @@ public class Main {
             }
         }
 
-        String name = readLine(scanner, "Enter Hero Name: ");
+        String name = readLine("Enter Hero Name: ");
         if (name.isEmpty()) name = "Unnamed Hero";
 
-        String title = readLine(scanner, "Enter Title / Designation (optional): ");
-        String element = readLine(scanner, "Enter Elemental Power (Fire, Water, Earth, Wind, Light, Dark, None): ");
+        String title = readLine("Enter Title / Designation (optional): ");
+        String element = readLine("Enter Elemental Power (Fire, Water, Earth, Wind, Light, Dark, None): ");
         if (element.isEmpty()) element = "None";
 
-        int stars = readInt(scanner, "Enter Star Rating (3 - 6): ", 3);
-        int hp = readInt(scanner, "Enter Base HP: ", 500);
-        int atk = readInt(scanner, "Enter Base Attack: ", 75);
-        int def = readInt(scanner, "Enter Base Defense: ", 35);
-        int crit = readInt(scanner, "Enter Base Crit Chance %: ", 10);
-        String desc = readLine(scanner, "Enter Lore / Description: ");
+        int stars = readInt("Enter Star Rating (3 - 6): ", 3);
+        int hp = readInt("Enter Base HP: ", 500);
+        int atk = readInt("Enter Base Attack: ", 75);
+        int def = readInt("Enter Base Defense: ", 35);
+        int crit = readInt("Enter Base Crit Chance %: ", 10);
+        String desc = readLine("Enter Lore / Description: ");
 
         Hero newHero = new Hero(id, name, title, element, cc, stars, hp, atk, def, crit, desc);
         boolean success = cdm.addHero(newHero);
@@ -1401,41 +1402,41 @@ public class Main {
         } else {
             System.out.println("\n[!] Failed to add hero to catalog.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.4: Edit or update existing hero statistics.
      */
-    private static void adminEditHero(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminEditHero(AdminDataManager adminDataManager) {
         CharacterDataManager cdm = adminDataManager.getCharDataManager();
         if (cdm == null) return;
 
         System.out.println("\n==================================================");
         System.out.println("             EDIT HERO IN CATALOG");
         System.out.println("==================================================");
-        String id = readLine(scanner, "Enter Hero ID to edit (or '0' to cancel): ");
+        String id = readLine("Enter Hero ID to edit (or '0' to cancel): ");
         if (id.equals("0") || id.isEmpty()) return;
 
         Hero hero = cdm.getHeroTemplateById(id);
         if (hero == null) {
             System.out.println("\n[!] Hero with ID '" + id + "' not found.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
         System.out.println("\nEditing Hero [" + hero.getId() + "] " + hero.getName() + " (" + hero.getCharacterClass().getDisplayName() + ")");
         System.out.println("(Press Enter on any prompt to keep the current value)\n");
 
-        String name = promptKeepCurrent(scanner, "Name", hero.getName());
-        String title = promptKeepCurrent(scanner, "Title", hero.getTitle());
-        String element = promptKeepCurrent(scanner, "Elemental Power", hero.getElementalPower());
-        int stars = readInt(scanner, "Stars [" + hero.getStars() + "]: ", hero.getStars());
-        int hp = readInt(scanner, "Base HP [" + hero.getBaseHp() + "]: ", hero.getBaseHp());
-        int atk = readInt(scanner, "Base Attack [" + hero.getBaseAttack() + "]: ", hero.getBaseAttack());
-        int def = readInt(scanner, "Base Defense [" + hero.getBaseDefense() + "]: ", hero.getBaseDefense());
-        int crit = readInt(scanner, "Base Crit % [" + hero.getBaseCritChance() + "]: ", hero.getBaseCritChance());
-        String desc = promptKeepCurrent(scanner, "Description", hero.getDescription());
+        String name = promptKeepCurrent("Name", hero.getName());
+        String title = promptKeepCurrent("Title", hero.getTitle());
+        String element = promptKeepCurrent("Elemental Power", hero.getElementalPower());
+        int stars = readInt("Stars [" + hero.getStars() + "]: ", hero.getStars());
+        int hp = readInt("Base HP [" + hero.getBaseHp() + "]: ", hero.getBaseHp());
+        int atk = readInt("Base Attack [" + hero.getBaseAttack() + "]: ", hero.getBaseAttack());
+        int def = readInt("Base Defense [" + hero.getBaseDefense() + "]: ", hero.getBaseDefense());
+        int crit = readInt("Base Crit % [" + hero.getBaseCritChance() + "]: ", hero.getBaseCritChance());
+        String desc = promptKeepCurrent("Description", hero.getDescription());
 
         Hero updatedHero = new Hero(hero.getId(), name, title, element, hero.getCharacterClass(), stars, hp, atk, def, crit, desc);
         boolean success = cdm.updateHero(hero.getId(), updatedHero);
@@ -1444,31 +1445,31 @@ public class Main {
         } else {
             System.out.println("\n[!] Failed to update hero.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.4: Delete / remove hero from the catalog.
      */
-    private static void adminRemoveHero(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminRemoveHero(AdminDataManager adminDataManager) {
         CharacterDataManager cdm = adminDataManager.getCharDataManager();
         if (cdm == null) return;
 
         System.out.println("\n==================================================");
         System.out.println("            REMOVE HERO FROM CATALOG");
         System.out.println("==================================================");
-        String id = readLine(scanner, "Enter Hero ID to remove (or '0' to cancel): ");
+        String id = readLine("Enter Hero ID to remove (or '0' to cancel): ");
         if (id.equals("0") || id.isEmpty()) return;
 
         Hero hero = cdm.getHeroTemplateById(id);
         if (hero == null) {
             System.out.println("\n[!] Hero with ID '" + id + "' not found.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
         System.out.println("\nHero: [" + hero.getId() + "] " + hero.getName() + " (" + hero.getCharacterClass().getDisplayName() + " " + hero.getStarsDisplay() + ")");
-        String confirm = readLine(scanner, "Are you sure you want to PERMANENTLY delete this hero from catalog? (y/N): ");
+        String confirm = readLine("Are you sure you want to PERMANENTLY delete this hero from catalog? (y/N): ");
         if (confirm.equalsIgnoreCase("y")) {
             boolean success = cdm.removeHero(id);
             if (success) {
@@ -1479,7 +1480,7 @@ public class Main {
         } else {
             System.out.println("\nOperation cancelled.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     // =========================================================================
@@ -1493,7 +1494,7 @@ public class Main {
      * - Adjust gacha pull rates in CharacterGachaManager.
      * - Grant coins or shards to a specific player.
      */
-    private static void adminEconomyManagementMenu(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminEconomyManagementMenu(AdminDataManager adminDataManager) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -1508,32 +1509,32 @@ public class Main {
             System.out.println("0. Back to Admin Dashboard");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    adminAdjustCrateRates(scanner, adminDataManager);
+                    adminAdjustCrateRates(adminDataManager);
                     break;
                 case "2":
-                    adminAdjustCrateLoot(scanner, adminDataManager);
+                    adminAdjustCrateLoot(adminDataManager);
                     break;
                 case "3":
-                    adminAdjustGachaRates(scanner, adminDataManager);
+                    adminAdjustGachaRates(adminDataManager);
                     break;
                 case "4":
-                    adminGrantPlayerCurrencyPrompt(scanner, adminDataManager);
+                    adminGrantPlayerCurrencyPrompt(adminDataManager);
                     break;
                 case "5":
-                    adminResetEconomyRates(scanner, adminDataManager);
+                    adminResetEconomyRates(adminDataManager);
                     break;
                 case "6":
-                    adminEconomyOverview(scanner, adminDataManager);
+                    adminEconomyOverview(adminDataManager);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
@@ -1541,11 +1542,11 @@ public class Main {
     /**
      * Requirement 1.5: Adjust crate drop rates in CrateManager.
      */
-    private static void adminAdjustCrateRates(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminAdjustCrateRates(AdminDataManager adminDataManager) {
         CrateManager cm = adminDataManager.getCrateManager();
         if (cm == null) {
             System.out.println("\n[!] CrateManager is not available.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -1559,13 +1560,13 @@ public class Main {
         System.out.printf("    - Diamond Crate : %d%%\n", cm.getDiamondRate());
         System.out.println("--------------------------------------------------");
 
-        String opt = readLine(scanner, "Do you want to adjust these rates? (y/N): ");
+        String opt = readLine("Do you want to adjust these rates? (y/N): ");
         if (!opt.equalsIgnoreCase("y")) return;
 
-        int wooden = readInt(scanner, "Enter new Wooden Crate rate %: ", cm.getWoodenRate());
-        int silver = readInt(scanner, "Enter new Silver Crate rate %: ", cm.getSilverRate());
-        int gold = readInt(scanner, "Enter new Gold Crate rate %: ", cm.getGoldRate());
-        int diamond = readInt(scanner, "Enter new Diamond Crate rate %: ", cm.getDiamondRate());
+        int wooden = readInt("Enter new Wooden Crate rate %: ", cm.getWoodenRate());
+        int silver = readInt("Enter new Silver Crate rate %: ", cm.getSilverRate());
+        int gold = readInt("Enter new Gold Crate rate %: ", cm.getGoldRate());
+        int diamond = readInt("Enter new Diamond Crate rate %: ", cm.getDiamondRate());
 
         int total = wooden + silver + gold + diamond;
         if (total != 100) {
@@ -1580,13 +1581,13 @@ public class Main {
                 System.out.println("\n[!] Failed to set crate rates.");
             }
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.5: Adjust crate reward tables in CrateManager.
      */
-    private static void adminAdjustCrateLoot(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminAdjustCrateLoot(AdminDataManager adminDataManager) {
         CrateManager cm = adminDataManager.getCrateManager();
         if (cm == null) return;
 
@@ -1603,51 +1604,51 @@ public class Main {
         System.out.println("4. Diamond Crate (Coins: " + cm.getDiamondMinCoins() + "-" + cm.getDiamondMaxCoins()
                 + " | Leg Arm: " + cm.getDiamondLegArmorChance() + "% | Leg Wpn: " + cm.getDiamondLegWeaponChance() + "% | Shards: " + cm.getDiamondShardChance() + "%)");
         System.out.println("0. Cancel");
-        String sel = readLine(scanner, "Select crate: ");
+        String sel = readLine("Select crate: ");
 
         if (sel.equals("1")) {
-            int minC = readInt(scanner, "Min Coins [" + cm.getWoodenMinCoins() + "]: ", cm.getWoodenMinCoins());
-            int maxC = readInt(scanner, "Max Coins [" + cm.getWoodenMaxCoins() + "]: ", cm.getWoodenMaxCoins());
-            int rare = readInt(scanner, "Rare Item Chance % [" + cm.getWoodenRareChance() + "]: ", cm.getWoodenRareChance());
-            int shard = readInt(scanner, "Shard Bonus Chance % [" + cm.getWoodenShardChance() + "]: ", cm.getWoodenShardChance());
+            int minC = readInt("Min Coins [" + cm.getWoodenMinCoins() + "]: ", cm.getWoodenMinCoins());
+            int maxC = readInt("Max Coins [" + cm.getWoodenMaxCoins() + "]: ", cm.getWoodenMaxCoins());
+            int rare = readInt("Rare Item Chance % [" + cm.getWoodenRareChance() + "]: ", cm.getWoodenRareChance());
+            int shard = readInt("Shard Bonus Chance % [" + cm.getWoodenShardChance() + "]: ", cm.getWoodenShardChance());
             cm.setWoodenLoot(minC, maxC, rare, shard);
             System.out.println("\n[SUCCESS] Wooden Crate reward table updated!");
         } else if (sel.equals("2")) {
-            int minC = readInt(scanner, "Min Coins [" + cm.getSilverMinCoins() + "]: ", cm.getSilverMinCoins());
-            int maxC = readInt(scanner, "Max Coins [" + cm.getSilverMaxCoins() + "]: ", cm.getSilverMaxCoins());
-            int wpn = readInt(scanner, "Rare Weapon Chance % [" + cm.getSilverRareWeaponChance() + "]: ", cm.getSilverRareWeaponChance());
-            int arm = readInt(scanner, "Rare Armor Chance % [" + cm.getSilverRareArmorChance() + "]: ", cm.getSilverRareArmorChance());
-            int shard = readInt(scanner, "Shards Chance % [" + cm.getSilverShardChance() + "]: ", cm.getSilverShardChance());
+            int minC = readInt("Min Coins [" + cm.getSilverMinCoins() + "]: ", cm.getSilverMinCoins());
+            int maxC = readInt("Max Coins [" + cm.getSilverMaxCoins() + "]: ", cm.getSilverMaxCoins());
+            int wpn = readInt("Rare Weapon Chance % [" + cm.getSilverRareWeaponChance() + "]: ", cm.getSilverRareWeaponChance());
+            int arm = readInt("Rare Armor Chance % [" + cm.getSilverRareArmorChance() + "]: ", cm.getSilverRareArmorChance());
+            int shard = readInt("Shards Chance % [" + cm.getSilverShardChance() + "]: ", cm.getSilverShardChance());
             cm.setSilverLoot(minC, maxC, wpn, arm, shard);
             System.out.println("\n[SUCCESS] Silver Crate reward table updated!");
         } else if (sel.equals("3")) {
-            int minC = readInt(scanner, "Min Coins [" + cm.getGoldMinCoins() + "]: ", cm.getGoldMinCoins());
-            int maxC = readInt(scanner, "Max Coins [" + cm.getGoldMaxCoins() + "]: ", cm.getGoldMaxCoins());
-            int arm = readInt(scanner, "Epic Armor Chance % [" + cm.getGoldEpicArmorChance() + "]: ", cm.getGoldEpicArmorChance());
-            int wpn = readInt(scanner, "Epic Weapon Chance % [" + cm.getGoldEpicWeaponChance() + "]: ", cm.getGoldEpicWeaponChance());
-            int shard = readInt(scanner, "Shards Chance % [" + cm.getGoldShardChance() + "]: ", cm.getGoldShardChance());
+            int minC = readInt("Min Coins [" + cm.getGoldMinCoins() + "]: ", cm.getGoldMinCoins());
+            int maxC = readInt("Max Coins [" + cm.getGoldMaxCoins() + "]: ", cm.getGoldMaxCoins());
+            int arm = readInt("Epic Armor Chance % [" + cm.getGoldEpicArmorChance() + "]: ", cm.getGoldEpicArmorChance());
+            int wpn = readInt("Epic Weapon Chance % [" + cm.getGoldEpicWeaponChance() + "]: ", cm.getGoldEpicWeaponChance());
+            int shard = readInt("Shards Chance % [" + cm.getGoldShardChance() + "]: ", cm.getGoldShardChance());
             cm.setGoldLoot(minC, maxC, arm, wpn, shard);
             System.out.println("\n[SUCCESS] Gold Crate reward table updated!");
         } else if (sel.equals("4")) {
-            int minC = readInt(scanner, "Min Coins [" + cm.getDiamondMinCoins() + "]: ", cm.getDiamondMinCoins());
-            int maxC = readInt(scanner, "Max Coins [" + cm.getDiamondMaxCoins() + "]: ", cm.getDiamondMaxCoins());
-            int arm = readInt(scanner, "Legendary Armor Chance % [" + cm.getDiamondLegArmorChance() + "]: ", cm.getDiamondLegArmorChance());
-            int wpn = readInt(scanner, "Legendary Weapon Chance % [" + cm.getDiamondLegWeaponChance() + "]: ", cm.getDiamondLegWeaponChance());
-            int shard = readInt(scanner, "Shards Chance % [" + cm.getDiamondShardChance() + "]: ", cm.getDiamondShardChance());
+            int minC = readInt("Min Coins [" + cm.getDiamondMinCoins() + "]: ", cm.getDiamondMinCoins());
+            int maxC = readInt("Max Coins [" + cm.getDiamondMaxCoins() + "]: ", cm.getDiamondMaxCoins());
+            int arm = readInt("Legendary Armor Chance % [" + cm.getDiamondLegArmorChance() + "]: ", cm.getDiamondLegArmorChance());
+            int wpn = readInt("Legendary Weapon Chance % [" + cm.getDiamondLegWeaponChance() + "]: ", cm.getDiamondLegWeaponChance());
+            int shard = readInt("Shards Chance % [" + cm.getDiamondShardChance() + "]: ", cm.getDiamondShardChance());
             cm.setDiamondLoot(minC, maxC, arm, wpn, shard);
             System.out.println("\n[SUCCESS] Diamond Crate reward table updated!");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.5: Adjust gacha pull rates in CharacterGachaManager.
      */
-    private static void adminAdjustGachaRates(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminAdjustGachaRates(AdminDataManager adminDataManager) {
         CharacterGachaManager gm = adminDataManager.getGachaManager();
         if (gm == null) {
             System.out.println("\n[!] CharacterGachaManager is not available.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -1668,14 +1669,14 @@ public class Main {
         System.out.println("1. Adjust Single Pull Rates (3★, 4★, 5★, 6★)");
         System.out.println("2. Adjust 10x Pull Guarantee Rates (4★, 5★, 6★)");
         System.out.println("0. Cancel");
-        String opt = readLine(scanner, "Select option: ");
+        String opt = readLine("Select option: ");
 
         if (opt.equals("1")) {
             System.out.println("\nEnter new rates in per mille (out of 1000, e.g. 650 = 65.0%):");
-            int r3 = readInt(scanner, "3★ Rate [Current: " + gm.getRate3Star() + "]: ", gm.getRate3Star());
-            int r4 = readInt(scanner, "4★ Rate [Current: " + gm.getRate4Star() + "]: ", gm.getRate4Star());
-            int r5 = readInt(scanner, "5★ Rate [Current: " + gm.getRate5Star() + "]: ", gm.getRate5Star());
-            int r6 = readInt(scanner, "6★ Rate [Current: " + gm.getRate6Star() + "]: ", gm.getRate6Star());
+            int r3 = readInt("3★ Rate [Current: " + gm.getRate3Star() + "]: ", gm.getRate3Star());
+            int r4 = readInt("4★ Rate [Current: " + gm.getRate4Star() + "]: ", gm.getRate4Star());
+            int r5 = readInt("5★ Rate [Current: " + gm.getRate5Star() + "]: ", gm.getRate5Star());
+            int r6 = readInt("6★ Rate [Current: " + gm.getRate6Star() + "]: ", gm.getRate6Star());
 
             int sum = r3 + r4 + r5 + r6;
             if (sum != 1000) {
@@ -1688,9 +1689,9 @@ public class Main {
             }
         } else if (opt.equals("2")) {
             System.out.println("\nEnter new guarantee rates in percent (out of 100%):");
-            int g4 = readInt(scanner, "4★ Guarantee % [Current: " + gm.getGuarantee4Star() + "]: ", gm.getGuarantee4Star());
-            int g5 = readInt(scanner, "5★ Guarantee % [Current: " + gm.getGuarantee5Star() + "]: ", gm.getGuarantee5Star());
-            int g6 = readInt(scanner, "6★ Guarantee % [Current: " + gm.getGuarantee6Star() + "]: ", gm.getGuarantee6Star());
+            int g4 = readInt("4★ Guarantee % [Current: " + gm.getGuarantee4Star() + "]: ", gm.getGuarantee4Star());
+            int g5 = readInt("5★ Guarantee % [Current: " + gm.getGuarantee5Star() + "]: ", gm.getGuarantee5Star());
+            int g6 = readInt("6★ Guarantee % [Current: " + gm.getGuarantee6Star() + "]: ", gm.getGuarantee6Star());
 
             int sum = g4 + g5 + g6;
             if (sum != 100) {
@@ -1701,23 +1702,23 @@ public class Main {
                 System.out.printf("  4★: %d%% | 5★: %d%% | 6★: %d%%\n", g4, g5, g6);
             }
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.5: Grant coins or shards to a specific player.
      */
-    private static void adminGrantPlayerCurrencyPrompt(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminGrantPlayerCurrencyPrompt(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("           GRANT CURRENCY TO PLAYER");
         System.out.println("==================================================");
-        String username = readLine(scanner, "Enter player username (or '0' to cancel): ");
+        String username = readLine("Enter player username (or '0' to cancel): ");
         if (username.equals("0") || username.isEmpty()) return;
 
         PlayerAcc player = adminDataManager.findPlayer(username);
         if (player == null) {
             System.out.println("\n[!] Player '" + username + "' not found.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -1725,12 +1726,12 @@ public class Main {
         System.out.printf("Current Balance: %,d Coins | %,d Shards\n", player.getCoins(), player.getShards());
         System.out.println("--------------------------------------------------");
 
-        int coins = readInt(scanner, "Enter Coins to grant (0 for none): ", 0);
-        int shards = readInt(scanner, "Enter Shards to grant (0 for none): ", 0);
+        int coins = readInt("Enter Coins to grant (0 for none): ", 0);
+        int shards = readInt("Enter Shards to grant (0 for none): ", 0);
 
         if (coins <= 0 && shards <= 0) {
             System.out.println("\nNo currencies specified. Operation cancelled.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -1742,17 +1743,17 @@ public class Main {
         } else {
             System.out.println("\n[!] Failed to grant currency.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.5 helper: Reset economy rates to default.
      */
-    private static void adminResetEconomyRates(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminResetEconomyRates(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("        RESET ECONOMY RATES TO DEFAULTS");
         System.out.println("==================================================");
-        String confirm = readLine(scanner, "Reset all Crate drop tables and Gacha pull rates to defaults? (y/N): ");
+        String confirm = readLine("Reset all Crate drop tables and Gacha pull rates to defaults? (y/N): ");
         if (confirm.equalsIgnoreCase("y")) {
             if (adminDataManager.getCrateManager() != null) {
                 adminDataManager.getCrateManager().resetAllCrateRatesToDefault();
@@ -1764,13 +1765,13 @@ public class Main {
         } else {
             System.out.println("\nOperation cancelled.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     /**
      * Requirement 1.5 helper: Economy circulation & analytics.
      */
-    private static void adminEconomyOverview(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminEconomyOverview(AdminDataManager adminDataManager) {
         int totalPlayers = adminDataManager.getTotalPlayersCount();
         long totalCoins = adminDataManager.getTotalEconomyCoins();
         long totalShards = adminDataManager.getTotalEconomyShards();
@@ -1792,16 +1793,16 @@ public class Main {
             System.out.printf("    #%d %-16s : %,d Coins | %,d Shards\n", (i + 1), p.getUsername(), p.getCoins(), p.getShards());
         }
         System.out.println("==================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
-    private static String promptKeepCurrent(Scanner scanner, String label, String currentVal) {
-        String val = readLine(scanner, label + " [" + currentVal + "]: ");
+    private static String promptKeepCurrent(String label, String currentVal) {
+        String val = readLine(label + " [" + currentVal + "]: ");
         return val.isEmpty() ? currentVal : val;
     }
 
-    private static int readInt(Scanner scanner, String prompt, int defaultVal) {
-        String s = readLine(scanner, prompt);
+    private static int readInt(String prompt, int defaultVal) {
+        String s = readLine(prompt);
         if (s.isEmpty()) return defaultVal;
         try {
             return Integer.parseInt(s.trim());
@@ -1814,7 +1815,7 @@ public class Main {
     /**
      * Submenu 4: Admin Accounts & Credentials
      */
-    private static void adminAccountsMenu(Scanner scanner, AdminDataManager adminDataManager, AdminAcc currentAdmin) {
+    private static void adminAccountsMenu(AdminDataManager adminDataManager, AdminAcc currentAdmin) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -1825,7 +1826,7 @@ public class Main {
             System.out.println("0. Back to Admin Dashboard");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
@@ -1838,11 +1839,11 @@ public class Main {
                         System.out.printf("  [%d] %-16s | Role: %s%s\n", idx++, a.getUsername(), a.getRole(), currentTag);
                     }
                     System.out.println("==================================================");
-                    readLine(scanner, "\nPress Enter to return...");
+                    readLine("\nPress Enter to return...");
                     break;
 
                 case "2":
-                    adminRegisterAccount(scanner, adminDataManager);
+                    adminRegisterAccount(adminDataManager);
                     break;
 
                 case "0":
@@ -1850,19 +1851,19 @@ public class Main {
 
                 default:
                     System.out.println("Invalid option.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
 
-    private static void adminRegisterAccount(Scanner scanner, AdminDataManager adminDataManager) {
+    private static void adminRegisterAccount(AdminDataManager adminDataManager) {
         System.out.println("\n==================================================");
         System.out.println("          REGISTER NEW ADMINISTRATOR");
         System.out.println("==================================================");
 
         String username;
         while (true) {
-            username = readLine(scanner, "Enter new admin username (or '0' to cancel): ");
+            username = readLine("Enter new admin username (or '0' to cancel): ");
             if (username.equals("0")) return;
             if (username.isEmpty()) {
                 System.out.println("Username cannot be empty.");
@@ -1877,7 +1878,7 @@ public class Main {
 
         String password;
         while (true) {
-            password = readLine(scanner, "Enter new admin password: ");
+            password = readLine("Enter new admin password: ");
             if (password.isEmpty()) {
                 System.out.println("Password cannot be empty.");
             } else if (password.contains(",")) {
@@ -1887,7 +1888,7 @@ public class Main {
             }
         }
 
-        String role = readLine(scanner, "Enter role / title [Default: Administrator]: ");
+        String role = readLine("Enter role / title [Default: Administrator]: ");
         if (role.isEmpty()) role = "Administrator";
 
         boolean success = adminDataManager.registerAdmin(username, password, role);
@@ -1896,10 +1897,10 @@ public class Main {
         } else {
             System.out.println("\n[!] Failed to register administrator account.");
         }
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
-    public static void playerHomescreen(Scanner scanner, PlayerDataManager playerDataManager,
+    public static void playerHomescreen(PlayerDataManager playerDataManager,
                                         CrateManager crateManager, CharacterGachaManager gachaManager,
                                         PlayerAcc player) {
         String choice;
@@ -1925,23 +1926,23 @@ public class Main {
             System.out.println("7. Save & Exit");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    openingCrates(scanner, playerDataManager, crateManager, player);
+                    openingCrates(playerDataManager, crateManager, player);
                     break;
                 case "2":
-                    charactersAndEquipmentMenu(scanner, playerDataManager, gachaManager, player);
+                    charactersAndEquipmentMenu(playerDataManager, gachaManager, player);
                     break;
                 case "3":
-                    inventoryMenu(scanner, playerDataManager, player);
+                    inventoryMenu(playerDataManager, player);
                     break;
                 case "4":
-                    shopAndTradingMenu(scanner, playerDataManager, player);
+                    shopAndTradingMenu(playerDataManager, player);
                     break;
                 case "5":
-                    achievementsAndStatisticsMenu(scanner, playerDataManager, player);
+                    achievementsAndStatisticsMenu(playerDataManager, player);
                     break;
                 case "6":
                     // Account Settings
@@ -1975,7 +1976,7 @@ public class Main {
             }
 
             if (!choice.equals("7") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3") && !choice.equals("4") && !choice.equals("5")) {
-                readLine(scanner, "\nPress Enter to continue...");
+                readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("7"));
     }
@@ -2005,7 +2006,7 @@ public class Main {
     // Characters & Equipment Menu (2.2)
     // =========================================================================
 
-    public static void charactersAndEquipmentMenu(Scanner scanner, PlayerDataManager playerDataManager,
+    public static void charactersAndEquipmentMenu(PlayerDataManager playerDataManager,
                                                    CharacterGachaManager gachaManager, PlayerAcc player) {
         String choice;
         do {
@@ -2025,23 +2026,23 @@ public class Main {
             System.out.println("0. Back to Main Menu");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    viewRosterMenu(scanner, playerDataManager, player);
+                    viewRosterMenu(playerDataManager, player);
                     break;
                 case "2":
-                    manageEquipmentMenu(scanner, playerDataManager, player);
+                    manageEquipmentMenu(playerDataManager, player);
                     break;
                 case "3":
-                    characterGachaMenu(scanner, playerDataManager, gachaManager, player);
+                    characterGachaMenu(playerDataManager, gachaManager, player);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
@@ -2050,7 +2051,7 @@ public class Main {
     // Character Gacha Summon
     // =========================================================================
 
-    private static void characterGachaMenu(Scanner scanner, PlayerDataManager playerDataManager,
+    private static void characterGachaMenu(PlayerDataManager playerDataManager,
                                            CharacterGachaManager gachaManager, PlayerAcc player) {
         String choice;
         do {
@@ -2072,30 +2073,30 @@ public class Main {
             System.out.println("0. Back");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    performGacha(scanner, playerDataManager, gachaManager, player, false);
+                    performGacha(playerDataManager, gachaManager, player, false);
                     break;
                 case "2":
-                    performGacha(scanner, playerDataManager, gachaManager, player, true);
+                    performGacha(playerDataManager, gachaManager, player, true);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
 
-    private static void performGacha(Scanner scanner, PlayerDataManager playerDataManager,
+    private static void performGacha(PlayerDataManager playerDataManager,
                                      CharacterGachaManager gachaManager, PlayerAcc player, boolean isMulti) {
         int cost = isMulti ? CharacterGachaManager.MULTI_PULL_SHARDS : CharacterGachaManager.SINGLE_PULL_SHARDS;
         if (player.getShards() < cost) {
             System.out.println("\n[!] Not enough shards! You need " + cost + " shards, but only have " + player.getShards() + ".");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -2110,7 +2111,7 @@ public class Main {
 
         if (!result.isSuccess()) {
             System.out.println("\n[!] " + result.getMessage());
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -2204,19 +2205,19 @@ public class Main {
 
         announceUnlockedAchievements(newUnlocks);
 
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     // =========================================================================
     // View Roster & Equipment (Sorting & Filtering)
     // =========================================================================
 
-    private static void viewRosterMenu(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void viewRosterMenu(PlayerDataManager playerDataManager, PlayerAcc player) {
         LinkedList<Hero> rawRoster = player.getRoster();
         if (rawRoster.isEmpty()) {
             System.out.println("\n[!] Your hero roster is empty!");
             System.out.println("    Use Shards in the 'Portal of Legends' to summon your first hero.");
-            readLine(scanner, "\nPress Enter to return...");
+            readLine("\nPress Enter to return...");
             return;
         }
 
@@ -2270,13 +2271,13 @@ public class Main {
             System.out.println("Commands: [1-" + displayList.size() + "] Select Hero  |  [S] Change Sort  |  [F] Change Filter  |  [C] Clear Filters  |  [0] Return");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select: ");
+            choice = readLine("Select: ");
             if (choice.equals("0")) break;
 
             if (choice.equalsIgnoreCase("S")) {
-                currentSort = selectHeroSortOrder(scanner, currentSort);
+                currentSort = selectHeroSortOrder(currentSort);
             } else if (choice.equalsIgnoreCase("F")) {
-                Object[] filters = selectHeroFilters(scanner, filterClass, filterStars, filterElement);
+                Object[] filters = selectHeroFilters(filterClass, filterStars, filterElement);
                 filterClass = (CharacterClass) filters[0];
                 filterStars = (Integer) filters[1];
                 filterElement = (String) filters[2];
@@ -2289,20 +2290,20 @@ public class Main {
                 try {
                     int heroIdx = Integer.parseInt(choice) - 1;
                     if (heroIdx >= 0 && heroIdx < displayList.size()) {
-                        heroDetailAndEquipMenu(scanner, playerDataManager, player, displayList.get(heroIdx));
+                        heroDetailAndEquipMenu(playerDataManager, player, displayList.get(heroIdx));
                     } else {
                         System.out.println("Invalid selection.");
-                        readLine(scanner, "Press Enter to continue...");
+                        readLine("Press Enter to continue...");
                     }
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid input.");
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
                 }
             }
         } while (!choice.equals("0"));
     }
 
-    private static HeroSort selectHeroSortOrder(Scanner scanner, HeroSort current) {
+    private static HeroSort selectHeroSortOrder(HeroSort current) {
         System.out.println("\n==================================================");
         System.out.println("              HERO ROSTER SORTING");
         System.out.println("==================================================");
@@ -2313,7 +2314,7 @@ public class Main {
         }
         System.out.println("  [0] Keep Current");
         System.out.println("--------------------------------------------------");
-        String opt = readLine(scanner, "Select sort option: ");
+        String opt = readLine("Select sort option: ");
         try {
             int idx = Integer.parseInt(opt) - 1;
             if (idx >= 0 && idx < values.length) {
@@ -2323,7 +2324,7 @@ public class Main {
         return current;
     }
 
-    private static Object[] selectHeroFilters(Scanner scanner, CharacterClass currentClass,
+    private static Object[] selectHeroFilters(CharacterClass currentClass,
                                               Integer currentStars, String currentElem) {
         System.out.println("\n==================================================");
         System.out.println("              HERO ROSTER FILTERING");
@@ -2334,7 +2335,7 @@ public class Main {
         System.out.println("4. Clear All Filters");
         System.out.println("0. Return");
         System.out.println("--------------------------------------------------");
-        String opt = readLine(scanner, "Select filter type: ");
+        String opt = readLine("Select filter type: ");
 
         CharacterClass newClass = currentClass;
         Integer newStars = currentStars;
@@ -2347,7 +2348,7 @@ public class Main {
             for (int i = 0; i < classes.length; i++) {
                 System.out.printf("%d. %s\n", (i + 1), classes[i].getDisplayName());
             }
-            String cOpt = readLine(scanner, "Select class: ");
+            String cOpt = readLine("Select class: ");
             if (cOpt.equals("0")) {
                 newClass = null;
             } else {
@@ -2363,7 +2364,7 @@ public class Main {
             System.out.println("4. 4★ Heroes");
             System.out.println("5. 5★ Heroes");
             System.out.println("6. 6★ Heroes");
-            String sOpt = readLine(scanner, "Select star rating: ");
+            String sOpt = readLine("Select star rating: ");
             if (sOpt.equals("0")) {
                 newStars = null;
             } else {
@@ -2379,7 +2380,7 @@ public class Main {
             for (int i = 0; i < elements.length; i++) {
                 System.out.printf("%d. %s\n", (i + 1), elements[i].getDisplayName());
             }
-            String eOpt = readLine(scanner, "Select element: ");
+            String eOpt = readLine("Select element: ");
             if (eOpt.equals("0")) {
                 newElem = null;
             } else {
@@ -2401,7 +2402,7 @@ public class Main {
     // Equipment Management Submenu (2.2)
     // =========================================================================
 
-    private static void manageEquipmentMenu(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void manageEquipmentMenu(PlayerDataManager playerDataManager, PlayerAcc player) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -2421,34 +2422,34 @@ public class Main {
             System.out.println("0. Back to Characters Menu");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    viewRosterMenu(scanner, playerDataManager, player);
+                    viewRosterMenu(playerDataManager, player);
                     break;
                 case "2":
-                    viewAllEquippedGear(scanner, player);
+                    viewAllEquippedGear(player);
                     break;
                 case "3":
-                    autoEquipAllHeroes(scanner, playerDataManager, player);
+                    autoEquipAllHeroes(playerDataManager, player);
                     break;
                 case "4":
-                    unequipAllHeroGearFlow(scanner, playerDataManager, player);
+                    unequipAllHeroGearFlow(playerDataManager, player);
                     break;
                 case "5":
-                    undoLastEquipFlow(scanner, playerDataManager, player);
+                    undoLastEquipFlow(playerDataManager, player);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option.");
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
 
-    private static void viewAllEquippedGear(Scanner scanner, PlayerAcc player) {
+    private static void viewAllEquippedGear(PlayerAcc player) {
         System.out.println("\n==================================================");
         System.out.println("        ALL EQUIPPED GEAR ACROSS HEROES");
         System.out.println("==================================================");
@@ -2485,10 +2486,10 @@ public class Main {
             }
         }
         System.out.println("==================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
-    private static void autoEquipAllHeroes(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void autoEquipAllHeroes(PlayerDataManager playerDataManager, PlayerAcc player) {
         System.out.println("\n[!] Automatically equipping the best available gear onto all heroes...");
         int equippedCount = 0;
         for (Hero h : player.getRoster()) {
@@ -2499,7 +2500,7 @@ public class Main {
         playerDataManager.saveAllPlayersToCsv();
         System.out.println("[SUCCESS] Auto-equip complete! " + equippedCount + " item(s) equipped across roster.");
         announceUnlockedAchievements(newUnlocks);
-        readLine(scanner, "Press Enter to continue...");
+        readLine("Press Enter to continue...");
     }
 
     private static int autoEquipHero(PlayerAcc player, Hero hero) {
@@ -2584,10 +2585,10 @@ public class Main {
         return count;
     }
 
-    private static void unequipAllHeroGearFlow(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void unequipAllHeroGearFlow(PlayerDataManager playerDataManager, PlayerAcc player) {
         if (player.getRoster().isEmpty()) {
             System.out.println("\n[!] No heroes in roster.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -2600,7 +2601,7 @@ public class Main {
         }
         System.out.println("  [0] Cancel");
         System.out.println("--------------------------------------------------");
-        String choice = readLine(scanner, "Select hero number: ");
+        String choice = readLine("Select hero number: ");
         if (choice.equals("0")) return;
 
         try {
@@ -2628,7 +2629,7 @@ public class Main {
         } catch (NumberFormatException e) {
             System.out.println("Invalid input.");
         }
-        readLine(scanner, "Press Enter to continue...");
+        readLine("Press Enter to continue...");
     }
 
     /**
@@ -2636,7 +2637,7 @@ public class Main {
      * Undoes the most recent equipment action performed by the player.
      * Pops from the player's equipUndoStack and reverses the gear change.
      */
-    private static void undoLastEquipFlow(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void undoLastEquipFlow(PlayerDataManager playerDataManager, PlayerAcc player) {
         System.out.println("\n==================================================");
         System.out.println("        UNDO LAST EQUIPMENT CHANGE [STACK LIFO]");
         System.out.println("==================================================");
@@ -2650,10 +2651,10 @@ public class Main {
             System.out.println("  Roster and inventory have been restored.");
         }
         System.out.println("==================================================");
-        readLine(scanner, "Press Enter to continue...");
+        readLine("Press Enter to continue...");
     }
 
-    private static void heroDetailAndEquipMenu(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
+    private static void heroDetailAndEquipMenu(PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -2691,20 +2692,20 @@ public class Main {
             System.out.println("0. Back to Roster");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    equipItemFlow(scanner, playerDataManager, player, hero, Weapon.class, "Weapon");
+                    equipItemFlow(playerDataManager, player, hero, Weapon.class, "Weapon");
                     break;
                 case "2":
-                    equipItemFlow(scanner, playerDataManager, player, hero, Armor.class, "Armor");
+                    equipItemFlow(playerDataManager, player, hero, Armor.class, "Armor");
                     break;
                 case "3":
-                    equipItemFlow(scanner, playerDataManager, player, hero, Accessory.class, "Accessory");
+                    equipItemFlow(playerDataManager, player, hero, Accessory.class, "Accessory");
                     break;
                 case "4":
-                    unequipFlow(scanner, playerDataManager, player, hero);
+                    unequipFlow(playerDataManager, player, hero);
                     break;
                 case "5":
                     int eq = autoEquipHero(player, hero);
@@ -2713,18 +2714,18 @@ public class Main {
                     playerDataManager.saveAllPlayersToCsv();
                     System.out.println("\n[SUCCESS] Auto-equipped " + eq + " best items on " + hero.getName() + "!");
                     announceUnlockedAchievements(newUnlocks);
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option.");
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
 
-    private static <T extends Item> void equipItemFlow(Scanner scanner, PlayerDataManager playerDataManager,
+    private static <T extends Item> void equipItemFlow(PlayerDataManager playerDataManager,
                                                        PlayerAcc player, Hero hero,
                                                        Class<T> itemClass, String slotName) {
         LinkedList<Item> matchingItems = new LinkedList<>();
@@ -2737,7 +2738,7 @@ public class Main {
         if (matchingItems.isEmpty()) {
             System.out.println("\n[!] No " + slotName + " items in your inventory.");
             System.out.println("    Open crates in 'Open Crates' to find gear!");
-            readLine(scanner, "\nPress Enter to continue...");
+            readLine("\nPress Enter to continue...");
             return;
         }
 
@@ -2754,7 +2755,7 @@ public class Main {
         System.out.println("--------------------------------------------------");
         System.out.println("Enter item number to equip (or 0 to cancel):");
 
-        String choice = readLine(scanner, "Select: ");
+        String choice = readLine("Select: ");
         if (choice.equals("0")) return;
 
         try {
@@ -2766,7 +2767,7 @@ public class Main {
                     System.out.println("\n[ERROR - STRICT CLASS RESTRICTION]");
                     System.out.println("  " + chosenItem.getName() + " cannot be equipped by " + hero.getCharacterClass().getDisplayName() + "!");
                     System.out.println("  Allowed classes: " + chosenItem.getEquippableClassesDisplay());
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
                     return;
                 }
 
@@ -2805,18 +2806,18 @@ public class Main {
 
                 System.out.println("\n[SUCCESS] Successfully equipped " + chosenItem.getName() + " on " + hero.getName() + "!");
                 announceUnlockedAchievements(newUnlocks);
-                readLine(scanner, "Press Enter to continue...");
+                readLine("Press Enter to continue...");
             } else {
                 System.out.println("Invalid selection.");
-                readLine(scanner, "Press Enter to continue...");
+                readLine("Press Enter to continue...");
             }
         } catch (NumberFormatException e) {
             System.out.println("Invalid number.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
         }
     }
 
-    private static void unequipFlow(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
+    private static void unequipFlow(PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
         System.out.println("\n==================================================");
         System.out.println("                   UNEQUIP GEAR");
         System.out.println("==================================================");
@@ -2828,7 +2829,7 @@ public class Main {
         System.out.println("0. Cancel");
         System.out.println("--------------------------------------------------");
 
-        String choice = readLine(scanner, "Select slot to unequip: ");
+        String choice = readLine("Select slot to unequip: ");
         String slot = null;
         if (choice.equals("1")) slot = "weapon";
         else if (choice.equals("2")) slot = "helmet";
@@ -2853,14 +2854,14 @@ public class Main {
         } else {
             System.out.println("\n[!] That slot is already empty.");
         }
-        readLine(scanner, "Press Enter to continue...");
+        readLine("Press Enter to continue...");
     }
 
     // =========================================================================
     // Inventory Menu (2.3)
     // =========================================================================
 
-    public static void inventoryMenu(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    public static void inventoryMenu(PlayerDataManager playerDataManager, PlayerAcc player) {
         // View modes: 1=Bag Only (Unequipped), 2=All Items (Bag+Equipped), 3=Equipped Only
         int viewMode = 1;
         String typeFilter = "ALL"; // ALL, WEAPON, ARMOR, ACCESSORY
@@ -2937,30 +2938,30 @@ public class Main {
             System.out.println("          [R] Recent Loot [Stack LIFO]  |  [0] Return");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select: ");
+            choice = readLine("Select: ");
             if (choice.equals("0")) break;
 
             if (choice.equalsIgnoreCase("V")) {
-                viewMode = selectInventoryViewMode(scanner, viewMode);
+                viewMode = selectInventoryViewMode(viewMode);
             } else if (choice.equalsIgnoreCase("F")) {
-                typeFilter = selectInventoryTypeFilter(scanner, typeFilter);
+                typeFilter = selectInventoryTypeFilter(typeFilter);
             } else if (choice.equalsIgnoreCase("S")) {
-                currentSort = selectInventorySortStrategy(scanner, currentSort);
+                currentSort = selectInventorySortStrategy(currentSort);
             } else if (choice.equalsIgnoreCase("R")) {
-                viewRecentLootStack(scanner, player);
+                viewRecentLootStack(player);
             } else {
                 try {
                     int itemIdx = Integer.parseInt(choice) - 1;
                     if (itemIdx >= 0 && itemIdx < filtered.size()) {
                         ItemDisplayEntry selected = filtered.get(itemIdx);
-                        itemDetailsView(scanner, playerDataManager, player, selected.item, selected.equippedHero);
+                        itemDetailsView(playerDataManager, player, selected.item, selected.equippedHero);
                     } else {
                         System.out.println("Invalid item number.");
-                        readLine(scanner, "Press Enter to continue...");
+                        readLine("Press Enter to continue...");
                     }
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid input.");
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
                 }
             }
         } while (!choice.equals("0"));
@@ -3007,7 +3008,7 @@ public class Main {
      * Displays recently obtained items in reverse order of acquisition.
      * Uses peek() for O(1) top access and iterates the Stack in LIFO order.
      */
-    private static void viewRecentLootStack(Scanner scanner, PlayerAcc player) {
+    private static void viewRecentLootStack(PlayerAcc player) {
         System.out.println("\n==================================================");
         System.out.println("        RECENTLY OBTAINED LOOT [STACK LIFO]");
         System.out.println("==================================================");
@@ -3026,30 +3027,30 @@ public class Main {
             }
         }
         System.out.println("==================================================");
-        readLine(scanner, "Press Enter to continue...");
+        readLine("Press Enter to continue...");
     }
 
-    private static int selectInventoryViewMode(Scanner scanner, int current) {
+    private static int selectInventoryViewMode(int current) {
         System.out.println("\n--- [SWITCH INVENTORY VIEW MODE] ---");
         System.out.println("1. Bag Only (Unequipped items only) [Default]");
         System.out.println("2. All Items (Unequipped Bag + Hero Equipped Gear)");
         System.out.println("3. Equipped Only (Items currently equipped on heroes)");
         System.out.println("0. Keep Current (" + current + ")");
-        String opt = readLine(scanner, "Select mode: ");
+        String opt = readLine("Select mode: ");
         if (opt.equals("1")) return 1;
         if (opt.equals("2")) return 2;
         if (opt.equals("3")) return 3;
         return current;
     }
 
-    private static String selectInventoryTypeFilter(Scanner scanner, String current) {
+    private static String selectInventoryTypeFilter(String current) {
         System.out.println("\n--- [FILTER BY ITEM TYPE] ---");
         System.out.println("1. All Items");
         System.out.println("2. Weapons Only");
         System.out.println("3. Armor Only (Helmets, Chestplates, Leggings)");
         System.out.println("4. Accessories Only");
         System.out.println("0. Keep Current (" + current + ")");
-        String opt = readLine(scanner, "Select filter: ");
+        String opt = readLine("Select filter: ");
         if (opt.equals("1")) return "ALL";
         if (opt.equals("2")) return "WEAPON";
         if (opt.equals("3")) return "ARMOR";
@@ -3057,7 +3058,7 @@ public class Main {
         return current;
     }
 
-    private static InventorySort selectInventorySortStrategy(Scanner scanner, InventorySort current) {
+    private static InventorySort selectInventorySortStrategy(InventorySort current) {
         System.out.println("\n--- [INVENTORY SORTING STRATEGY] ---");
         InventorySort[] values = InventorySort.values();
         for (int i = 0; i < values.length; i++) {
@@ -3065,7 +3066,7 @@ public class Main {
             System.out.printf("%d. %s%s\n", (i + 1), values[i].getDisplayName(), marker);
         }
         System.out.println("0. Keep Current");
-        String opt = readLine(scanner, "Select sort: ");
+        String opt = readLine("Select sort: ");
         try {
             int idx = Integer.parseInt(opt) - 1;
             if (idx >= 0 && idx < values.length) return values[idx];
@@ -3077,7 +3078,7 @@ public class Main {
     // Item Details View (2.3)
     // =========================================================================
 
-    private static void itemDetailsView(Scanner scanner, PlayerDataManager playerDataManager,
+    private static void itemDetailsView(PlayerDataManager playerDataManager,
                                        PlayerAcc player, Item item, Hero equippedOnHero) {
         String choice;
         do {
@@ -3125,7 +3126,7 @@ public class Main {
             System.out.println("0. Return to Inventory");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select action: ");
+            choice = readLine("Select action: ");
 
             if (choice.equals("1")) {
                 if (equippedOnHero == null) {
@@ -3140,7 +3141,7 @@ public class Main {
                     if (eligibleHeroes.isEmpty()) {
                         System.out.println("\n[!] No heroes in your roster can equip this item.");
                         System.out.println("    Allowed classes: " + item.getEquippableClassesDisplay());
-                        readLine(scanner, "Press Enter to continue...");
+                        readLine("Press Enter to continue...");
                     } else {
                         System.out.println("\n--- [SELECT HERO TO EQUIP " + item.getName() + "] ---");
                         int hIdx = 1;
@@ -3149,7 +3150,7 @@ public class Main {
                                     h.getCharacterClass().getDisplayName(), h.getStarsDisplay());
                         }
                         System.out.println("  [0] Cancel");
-                        String hChoice = readLine(scanner, "Select hero: ");
+                        String hChoice = readLine("Select hero: ");
                         if (!hChoice.equals("0")) {
                             try {
                                 int selectedHeroIdx = Integer.parseInt(hChoice) - 1;
@@ -3170,15 +3171,15 @@ public class Main {
 
                                     System.out.println("\n[SUCCESS] Successfully equipped " + item.getName() + " onto " + targetHero.getName() + "!");
                                     announceUnlockedAchievements(newUnlocks);
-                                    readLine(scanner, "Press Enter to continue...");
+                                    readLine("Press Enter to continue...");
                                     return; // Return to inventory
                                 } else {
                                     System.out.println("Invalid selection.");
-                                    readLine(scanner, "Press Enter to continue...");
+                                    readLine("Press Enter to continue...");
                                 }
                             } catch (NumberFormatException e) {
                                 System.out.println("Invalid number.");
-                                readLine(scanner, "Press Enter to continue...");
+                                readLine("Press Enter to continue...");
                             }
                         }
                     }
@@ -3200,7 +3201,7 @@ public class Main {
                             player.syncCounters();
                             playerDataManager.saveAllPlayersToCsv();
                             System.out.println("\n[SUCCESS] Unequipped " + unequipped.getName() + " from " + equippedOnHero.getName() + " and returned to bag.");
-                            readLine(scanner, "Press Enter to continue...");
+                            readLine("Press Enter to continue...");
                             return;
                         }
                     }
@@ -3213,7 +3214,7 @@ public class Main {
     // Shop & Trading Menu (2.4)
     // =========================================================================
 
-    public static void shopAndTradingMenu(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    public static void shopAndTradingMenu(PlayerDataManager playerDataManager, PlayerAcc player) {
         String choice;
         do {
             System.out.println("\n==================================================");
@@ -3231,61 +3232,61 @@ public class Main {
             System.out.println("0. Back to Main Menu");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    convertCoinsToShards(scanner, playerDataManager, player, 2000, 1);
+                    convertCoinsToShards(playerDataManager, player, 2000, 1);
                     break;
                 case "2":
-                    convertCoinsToShards(scanner, playerDataManager, player, 10000, 5);
+                    convertCoinsToShards(playerDataManager, player, 10000, 5);
                     break;
                 case "3":
-                    convertCoinsToShards(scanner, playerDataManager, player, 20000, 10);
+                    convertCoinsToShards(playerDataManager, player, 20000, 10);
                     break;
                 case "4":
-                    convertCoinsToShardsCustom(scanner, playerDataManager, player);
+                    convertCoinsToShardsCustom(playerDataManager, player);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
 
-    private static void convertCoinsToShardsCustom(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void convertCoinsToShardsCustom(PlayerDataManager playerDataManager, PlayerAcc player) {
         System.out.println("\n--- [CUSTOM SHARD PURCHASE] ---");
         System.out.println("  Conversion Rate: 2,000 Coins = 1 Shard");
         System.out.println("  Your Balance   : " + String.format("%,d", player.getCoins()) + " Coins");
         int maxShardsAffordable = player.getCoins() / 2000;
         System.out.println("  Maximum shards affordable: " + String.format("%,d", maxShardsAffordable));
         System.out.println("--------------------------------------------------");
-        String opt = readLine(scanner, "Enter number of shards to purchase (or 0 to cancel): ");
+        String opt = readLine("Enter number of shards to purchase (or 0 to cancel): ");
         if (opt.equals("0") || opt.trim().isEmpty()) return;
 
         try {
             int desiredShards = Integer.parseInt(opt);
             if (desiredShards <= 0) {
                 System.out.println("Amount must be greater than 0.");
-                readLine(scanner, "Press Enter to continue...");
+                readLine("Press Enter to continue...");
                 return;
             }
             int coinCost = desiredShards * 2000;
-            convertCoinsToShards(scanner, playerDataManager, player, coinCost, desiredShards);
+            convertCoinsToShards(playerDataManager, player, coinCost, desiredShards);
         } catch (NumberFormatException e) {
             System.out.println("Invalid number.");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
         }
     }
 
-    private static void convertCoinsToShards(Scanner scanner, PlayerDataManager playerDataManager,
+    private static void convertCoinsToShards(PlayerDataManager playerDataManager,
                                              PlayerAcc player, int coinCost, int shardsGained) {
         if (player.getCoins() < coinCost) {
             System.out.println("\n[!] Not enough coins! You need " + String.format("%,d", coinCost) +
                     " coins, but only have " + String.format("%,d", player.getCoins()) + ".");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -3319,14 +3320,14 @@ public class Main {
 
         announceUnlockedAchievements(newUnlocks);
 
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
     // =========================================================================
     // Open Crates (2.5 Statistics tracking hook)
     // =========================================================================
 
-    public static void openingCrates(Scanner scanner, PlayerDataManager playerDataManager,
+    public static void openingCrates(PlayerDataManager playerDataManager,
                                       CrateManager crateManager, PlayerAcc player) {
         String choice;
         do {
@@ -3349,22 +3350,22 @@ public class Main {
             System.out.println("0. Back");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    performCrateOpen(scanner, playerDataManager, crateManager, player);
+                    performCrateOpen(playerDataManager, crateManager, player);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
 
-    private static void performCrateOpen(Scanner scanner, PlayerDataManager playerDataManager,
+    private static void performCrateOpen(PlayerDataManager playerDataManager,
                                          CrateManager crateManager, PlayerAcc player) {
         System.out.print("\n  Rolling crate tier");
         for (int i = 0; i < 6; i++) {
@@ -3425,7 +3426,7 @@ public class Main {
     // Achievements & Statistics Menu (2.5 & Player Option 5)
     // =========================================================================
 
-    public static void achievementsAndStatisticsMenu(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    public static void achievementsAndStatisticsMenu(PlayerDataManager playerDataManager, PlayerAcc player) {
         // Automatically check for retroactive achievements upon viewing
         LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
         if (!newUnlocks.isEmpty()) {
@@ -3454,28 +3455,28 @@ public class Main {
             System.out.println("0. Back to Main Menu");
             System.out.println("==================================================");
 
-            choice = readLine(scanner, "Select an option: ");
+            choice = readLine("Select an option: ");
 
             switch (choice) {
                 case "1":
-                    displayStatisticsDashboard(scanner, player);
+                    displayStatisticsDashboard(player);
                     break;
                 case "2":
-                    displayAchievementsList(scanner, playerDataManager, player);
+                    displayAchievementsList(playerDataManager, player);
                     break;
                 case "3":
-                    claimAchievementRewardsFlow(scanner, playerDataManager, player);
+                    claimAchievementRewardsFlow(playerDataManager, player);
                     break;
                 case "0":
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    readLine(scanner, "\nPress Enter to continue...");
+                    readLine("\nPress Enter to continue...");
             }
         } while (!choice.equals("0"));
     }
 
-    private static void displayStatisticsDashboard(Scanner scanner, PlayerAcc player) {
+    private static void displayStatisticsDashboard(PlayerAcc player) {
         accounts.PlayerStats st = player.getStats();
 
         System.out.println("\n==========================================================================");
@@ -3509,7 +3510,7 @@ public class Main {
         System.out.printf("  Total Shards Earned  : %,d Shards\n", st.getShardsEarned());
         System.out.printf("  Total Shards Spent   : %,d Shards\n", st.getShardsSpent());
         System.out.println("==========================================================================");
-        readLine(scanner, "\nPress Enter to return...");
+        readLine("\nPress Enter to return...");
     }
 
     private static int getRosterHighestStar(PlayerAcc player) {
@@ -3520,7 +3521,7 @@ public class Main {
         return highest;
     }
 
-    private static void displayAchievementsList(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void displayAchievementsList(PlayerDataManager playerDataManager, PlayerAcc player) {
         AchievementManager am = playerDataManager.getAchievementManager();
         LinkedList<Achievement> achievements = am.getAchievementsForPlayer(player);
 
@@ -3561,7 +3562,7 @@ public class Main {
             System.out.println("Commands: [1-" + achievements.size() + "] Claim Specific Reward  |  [C] Claim All Rewards  |  [0] Return");
             System.out.println("==========================================================================");
 
-            choice = readLine(scanner, "Select: ");
+            choice = readLine("Select: ");
             if (choice.equals("0")) break;
 
             if (choice.equalsIgnoreCase("C")) {
@@ -3572,7 +3573,7 @@ public class Main {
                 } else {
                     System.out.println("\n[!] No unclaimed achievement rewards available.");
                 }
-                readLine(scanner, "Press Enter to continue...");
+                readLine("Press Enter to continue...");
             } else {
                 try {
                     int aIdx = Integer.parseInt(choice) - 1;
@@ -3592,22 +3593,22 @@ public class Main {
                     } else {
                         System.out.println("Invalid selection.");
                     }
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid input.");
-                    readLine(scanner, "Press Enter to continue...");
+                    readLine("Press Enter to continue...");
                 }
             }
         } while (!choice.equals("0"));
     }
 
-    private static void claimAchievementRewardsFlow(Scanner scanner, PlayerDataManager playerDataManager, PlayerAcc player) {
+    private static void claimAchievementRewardsFlow(PlayerDataManager playerDataManager, PlayerAcc player) {
         AchievementManager am = playerDataManager.getAchievementManager();
         int unclaimed = am.getUnclaimedCount(player);
         if (unclaimed == 0) {
             System.out.println("\n[!] No unclaimed achievement rewards available right now.");
             System.out.println("    Complete more achievements by opening crates, summoning heroes, and collecting gear!");
-            readLine(scanner, "Press Enter to continue...");
+            readLine("Press Enter to continue...");
             return;
         }
 
@@ -3623,7 +3624,7 @@ public class Main {
         System.out.println("  Updated Balance -> Coins: " + String.format("%,d", player.getCoins())
                 + "  |  Shards: " + String.format("%,d", player.getShards()));
         System.out.println("==================================================");
-        readLine(scanner, "\nPress Enter to continue...");
+        readLine("\nPress Enter to continue...");
     }
 
 }
