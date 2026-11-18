@@ -2987,6 +2987,7 @@ public class Main {
         if (f.equals("weapon") && item instanceof Weapon) return true;
         if (f.equals("armor") && item instanceof Armor) return true;
         if (f.equals("accessory") && item instanceof Accessory) return true;
+        if (f.equals("consumable") && item instanceof items.Consumable) return true;
         return item.getType().toLowerCase().contains(f);
     }
 
@@ -3049,12 +3050,14 @@ public class Main {
         System.out.println("2. Weapons Only");
         System.out.println("3. Armor Only (Helmets, Chestplates, Leggings)");
         System.out.println("4. Accessories Only");
+        System.out.println("5. Consumables Only (Potions, Elixirs, Tonics)");
         System.out.println("0. Keep Current (" + current + ")");
         String opt = readLine("Select filter: ");
         if (opt.equals("1")) return "ALL";
         if (opt.equals("2")) return "WEAPON";
         if (opt.equals("3")) return "ARMOR";
         if (opt.equals("4")) return "ACCESSORY";
+        if (opt.equals("5")) return "CONSUMABLE";
         return current;
     }
 
@@ -3112,6 +3115,16 @@ public class Main {
                 Accessory acc = (Accessory) item;
                 System.out.println("  [ACCESSORY STATISTICS]");
                 System.out.printf("  Stat Boost       : +%d to %s\n", acc.getStatBonus(), acc.getBonusType().toUpperCase());
+            } else if (item instanceof items.Consumable) {
+                // Show consumable-specific info: category, stack count, usability
+                items.Consumable c = (items.Consumable) item;
+                int carried = player.countConsumable(c.getId());
+                System.out.println("  [CONSUMABLE INFO]");
+                System.out.println("  Category         : " + c.getCategory());
+                System.out.printf("  Carrying         : %d / %d (Max stack per type: %d)%n",
+                        carried, items.Consumable.MAX_STACK, items.Consumable.MAX_STACK);
+                System.out.println("  Usable By        : All Classes");
+                System.out.println("  Note             : Effects apply during combat (future feature).");
             }
 
             System.out.println("--------------------------------------------------");
@@ -3119,7 +3132,12 @@ public class Main {
             System.out.println("--------------------------------------------------");
 
             if (equippedOnHero == null) {
-                System.out.println("1. Equip this Item to a Hero");
+                if (item instanceof items.Consumable) {
+                    // Consumables are carried in the bag -- they cannot be equipped to a slot
+                    System.out.println("  [Consumable -- cannot be equipped to a hero gear slot]");
+                } else {
+                    System.out.println("1. Equip this Item to a Hero");
+                }
             } else {
                 System.out.println("1. Unequip this Item from " + equippedOnHero.getName());
             }

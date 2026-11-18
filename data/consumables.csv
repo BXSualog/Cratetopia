@@ -1,0 +1,30 @@
+id,name,rarity,category,probability,description
+C001,Strength Potion,Common,Attack,25,Increases Attack by 10%.
+C002,Berserker Elixir,Common,Attack,15,Increases Attack by 20% but decreases Defense by 5%.
+C003,Critical Potion,Common,Attack,25,Increases Critical Rate by 10 percentage points.
+C004,Precision Elixir,Common,Attack,20,Increases Critical Damage by 15%.
+C005,Dragon Power Tonic,Common,Attack,15,Increases Attack by 15%.
+C006,Iron Skin Potion,Common,Defense,25,Increases Defense by 15%.
+C007,Vitality Potion,Common,Defense,25,Increases Maximum HP by 15%.
+C008,Guardian Elixir,Common,Defense,20,Increases Defense by 20% but decreases Speed by 5%.
+C009,Resistance Tonic,Common,Defense,20,Increases Elemental Resistance by 15%.
+C010,Phoenix Essence,Common,Defense,10,Revives the character once with 20% HP after being defeated.
+C011,Swiftwind Potion,Common,Speed,25,Increases Speed by 15%.
+C012,Haste Elixir,Common,Speed,15,Increases Speed by 25%.
+C013,Eagle Eye Tonic,Common,Speed,20,Increases Accuracy by 10 percentage points.
+C014,Evasion Potion,Common,Speed,20,Increases Evasion by 10 percentage points.
+C015,Focus Elixir,Common,Speed,20,Increases Accuracy by 15% and Critical Rate by 5 percentage points.
+C016,Arcane Potion,Common,Magic,25,Increases Magic Attack by 15%.
+C017,Mana Elixir,Common,Magic,20,Increases Maximum Mana by 20%.
+C018,Elemental Tonic,Common,Magic,25,Increases damage for the character's element by 15%.
+C019,Spell Amplifier,Common,Magic,15,Increases Skill Damage by 20%.
+C020,Mystic Focus,Common,Magic,15,Increases Magic Attack by 15% and Mana Recovery by 10%.
+C021,Minor HP Potion,Common,Recovery,30,Restores 20% of Maximum HP.
+C022,Major HP Potion,Common,Recovery,25,Restores 50% of Maximum HP.
+C023,Energy Potion,Common,Recovery,20,Restores 30% of Maximum Mana.
+C024,Full Recovery Elixir,Common,Recovery,15,Restores 50% of Maximum HP and 50% of Maximum Mana.
+C026,EXP Scroll,Common,Progression,30,Grants 500 character EXP.
+C027,Greater EXP Scroll,Common,Progression,20,Grants 1500 character EXP.
+C028,Training Manual,Common,Progression,20,Grants 250 Skill EXP.
+C029,Equipment Enhancement Stone,Common,Progression,15,Material for increasing equipment enhancement level.
+C030,Stat Reset Crystal,Common,Progression,10,Resets allocated character stat points for redistribution.

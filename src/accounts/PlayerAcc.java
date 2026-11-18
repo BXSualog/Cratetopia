@@ -2,6 +2,7 @@ package accounts;
 
 import characters.Hero;
 import items.Armor;
+import items.Consumable;
 import items.Item;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -323,6 +324,54 @@ public class PlayerAcc extends Account {
     // -------------------------------------------------------------------------
     // Item management helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Counts how many of a specific consumable (by ID) the player has in their bag.
+     * Uses a linear search through the inventory LinkedList.
+     *
+     * @param consumableId  The consumable ID to count (e.g. "C001").
+     * @return              The number carried (0, 1, or 2).
+     */
+    public int countConsumable(String consumableId) {
+        if (consumableId == null) return 0;
+        int count = 0;
+        for (Item item : inventory) {
+            if (item instanceof Consumable
+                    && item.getId().equalsIgnoreCase(consumableId)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Returns true if the player can still pick up one more of this consumable
+     * (i.e., current stack count is below MAX_STACK = 2).
+     *
+     * @param consumableId  The consumable ID to check.
+     * @return              true if the player has room for one more.
+     */
+    public boolean canAddConsumable(String consumableId) {
+        return countConsumable(consumableId) < Consumable.MAX_STACK;
+    }
+
+    /**
+     * Adds a consumable to the player's bag if the stack limit (2) is not yet reached.
+     * Unlike addItem(), consumables ARE allowed to stack up to MAX_STACK copies.
+     *
+     * @param c  The Consumable to add.
+     * @return   true if added successfully; false if the stack is already full.
+     */
+    public boolean addConsumableToBag(Consumable c) {
+        if (c == null) return false;
+        if (!canAddConsumable(c.getId())) {
+            // Stack is full -- cannot carry more than 2
+            return false;
+        }
+        inventory.add(c);  // LinkedList.add() -- O(1) append to tail
+        syncCounters();
+        return true;
+    }
 
     /**
      * Checks whether the player already owns an item with the given ID.

@@ -2,6 +2,7 @@ package managers;
 
 import items.Accessory;
 import items.Armor;
+import items.Consumable;
 import items.Item;
 import items.Weapon;
 
@@ -24,18 +25,22 @@ import java.util.LinkedList;
  *   data/accessories.csv
  */
 public class ItemDataManager {
-    private static final String WEAPONS_CSV     = "data/weapons.csv";
-    private static final String ARMOR_CSV       = "data/armor.csv";
-    private static final String ACCESSORIES_CSV = "data/accessories.csv";
+    private static final String WEAPONS_CSV      = "data/weapons.csv";
+    private static final String ARMOR_CSV        = "data/armor.csv";
+    private static final String ACCESSORIES_CSV  = "data/accessories.csv";
+    private static final String CONSUMABLES_CSV  = "data/consumables.csv";
 
-    private final LinkedList<Weapon>    weapons     = new LinkedList<>();
-    private final LinkedList<Armor>     armors      = new LinkedList<>();
-    private final LinkedList<Accessory> accessories = new LinkedList<>();
+    private final LinkedList<Weapon>      weapons      = new LinkedList<>();
+    private final LinkedList<Armor>       armors       = new LinkedList<>();
+    private final LinkedList<Accessory>   accessories  = new LinkedList<>();
+    // DSA: LinkedList -- stores all consumable item templates loaded from CSV
+    private final LinkedList<Consumable>  consumables  = new LinkedList<>();
 
     public ItemDataManager() {
         loadWeapons();
         loadArmors();
         loadAccessories();
+        loadConsumables(); // load consumable catalog on startup
     }
 
     // -------------------------------------------------------------------------
@@ -101,8 +106,44 @@ public class ItemDataManager {
         for (Accessory ac : accessories) {
             if (ac.getId().equalsIgnoreCase(id)) return ac;
         }
+        for (Consumable c : consumables) {
+            if (c.getId().equalsIgnoreCase(id)) return c;
+        }
         return null;
     }
+
+    // -------------------------------------------------------------------------
+    // Consumable accessors
+    // -------------------------------------------------------------------------
+
+    /** Returns all consumable item templates. */
+    public LinkedList<Consumable> getAllConsumables() {
+        return consumables;
+    }
+
+    /**
+     * Returns all consumables that belong to the given category.
+     * Example: getConsumablesByCategory("Attack") returns C001-C005.
+     */
+    public LinkedList<Consumable> getConsumablesByCategory(String category) {
+        LinkedList<Consumable> result = new LinkedList<>();
+        for (Consumable c : consumables) {
+            if (c.getCategory().equalsIgnoreCase(category)) {
+                result.add(c);
+            }
+        }
+        return result;
+    }
+
+    /** Looks up a consumable template by its ID (e.g. "C001"). Returns null if not found. */
+    public Consumable getConsumableById(String id) {
+        if (id == null) return null;
+        for (Consumable c : consumables) {
+            if (c.getId().equalsIgnoreCase(id)) return c;
+        }
+        return null;
+    }
+
 
     /**
      * Creates a fresh instance of an item by template ID for player inventories or equipment slots.
@@ -123,6 +164,11 @@ public class ItemDataManager {
             Accessory ac = (Accessory) template;
             return new Accessory(ac.getId(), ac.getName(), ac.getRarity(), ac.getType(),
                     ac.getStatBonus(), ac.getBonusType(), ac.getEquippableClassesDisplay(), ac.getDescription());
+        } else if (template instanceof Consumable) {
+            // Consumables are created fresh -- no extra fields beyond what Item holds
+            Consumable c = (Consumable) template;
+            return new Consumable(c.getId(), c.getName(), c.getRarity(),
+                    c.getCategory(), c.getDescription(), c.getProbability());
         }
         return null;
     }
@@ -230,6 +276,32 @@ public class ItemDataManager {
             }
         } catch (IOException e) {
             System.err.println("[ItemDataManager] Failed to load accessories: " + e.getMessage());
+        }
+    }
+
+    private void loadConsumables() {
+        // Header: id,name,rarity,category,probability,description
+        try (BufferedReader reader = new BufferedReader(
+                new FileReader(new File(CONSUMABLES_CSV), StandardCharsets.UTF_8))) {
+            String line;
+            boolean first = true;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                if (first) { first = false; continue; } // skip header row
+                // Split into at most 6 columns
+                String[] p = line.split(",", 6);
+                if (p.length < 6) continue;
+                // p[0]=id, p[1]=name, p[2]=rarity, p[3]=category,
+                // p[4]=probability, p[5]=description
+                consumables.add(new Consumable(
+                        p[0].trim(), p[1].trim(), p[2].trim(),
+                        p[3].trim(), p[5].trim(),
+                        parseIntSafe(p[4].trim())
+                ));
+            }
+        } catch (IOException e) {
+            System.err.println("[ItemDataManager] Failed to load consumables: " + e.getMessage());
         }
     }
 
