@@ -84,9 +84,11 @@ public class CrateManager {
 
     // Coin compensation for duplicate items (private = only used inside this class)
     private static final int DUP_COINS_COMMON    = 500;
+    private static final int DUP_COINS_UNCOMMON  = 750;
     private static final int DUP_COINS_RARE      = 1_000;
     private static final int DUP_COINS_EPIC      = 2_000;
     private static final int DUP_COINS_LEGENDARY = 10_000;
+    private static final int DUP_COINS_MYTHIC    = 25_000;
 
     private final ItemDataManager itemData; // source of all item pools
     private final Random rng = new Random(); // shared RNG for all rolls
@@ -470,10 +472,12 @@ public class CrateManager {
      */
     private int dupCoinsForRarity(String rarity) {
         if (rarity == null) return DUP_COINS_COMMON;
-        switch (rarity.toLowerCase()) {
+        switch (rarity.toLowerCase().trim()) {
+            case "mythic":    return DUP_COINS_MYTHIC;
             case "legendary": return DUP_COINS_LEGENDARY;
             case "epic":      return DUP_COINS_EPIC;
             case "rare":      return DUP_COINS_RARE;
+            case "uncommon":  return DUP_COINS_UNCOMMON;
             default:          return DUP_COINS_COMMON;
         }
     }

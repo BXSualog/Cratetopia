@@ -34,9 +34,11 @@ public enum InventorySort {
     private static int rarityRank(String rarity) {
         if (rarity == null) return 0;
         switch (rarity.toLowerCase().trim()) {
-            case "legendary": return 4;
-            case "epic":      return 3;
-            case "rare":      return 2;
+            case "mythic":    return 6;
+            case "legendary": return 5;
+            case "epic":      return 4;
+            case "rare":      return 3;
+            case "uncommon":  return 2;
             case "common":    return 1;
             default:          return 0;
         }

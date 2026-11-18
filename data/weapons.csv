@@ -1,26 +1,178 @@
 id,name,rarity,type,attack,crit_chance,equippable_classes,description
-W001,Rusty Sword,Common,Sword,12,3,Warrior,A worn blade that has seen better days.
-W002,Wooden Club,Common,Club,10,2,Warrior;Tank,A crudely crafted club of dense wood.
-W003,Iron Dagger,Common,Dagger,9,6,Assassin,A short iron blade good for quick strikes.
-W004,Cracked Bow,Common,Bow,11,4,Ranger,A bow with a hairline crack along the limb.
-W005,Apprentice Staff,Common,Staff,8,2,Mage;Support,A gnarled staff used by novice mages.
-W006,Steel Shortsword,Uncommon,Sword,20,5,Warrior,A reliable blade forged by a journeyman smith.
-W007,Hunter's Bow,Uncommon,Bow,18,8,Ranger,A well-balanced bow favored by rangers.
-W008,Silver Dagger,Uncommon,Dagger,16,10,Assassin,A dagger with a silver-coated edge.
-W009,Battle Axe,Uncommon,Axe,24,4,Warrior,A heavy axe built for raw power.
-W010,Mage Wand,Uncommon,Wand,14,6,Mage;Support,Channels arcane energy with surprising efficiency.
-W011,Flamebrand,Rare,Sword,35,8,Warrior,A blade wreathed in perpetual flames.
-W012,Frostpiercer,Rare,Spear,38,7,Warrior;Tank,A spear whose tip is eternally cold.
-W013,Shadow Bow,Rare,Bow,32,12,Ranger,Arrows fired from this bow are nearly invisible.
-W014,Thunder Hammer,Rare,Hammer,44,5,Tank;Warrior,Crackles with electricity on every swing.
-W015,Arcane Tome,Rare,Staff,30,10,Mage;Support,A tome that amplifies spell power greatly.
-W016,Voidblade,Epic,Sword,58,12,Warrior,A blade infused with the energy of the void.
-W017,Stormbringer Axe,Epic,Axe,65,9,Warrior,Summons gales with every powerful swing.
-W018,Phantom Bow,Epic,Bow,55,16,Ranger,Fires spectral arrows that phase through armor.
-W019,Eclipse Staff,Epic,Staff,52,14,Mage;Support,Channels solar and lunar energy simultaneously.
-W020,Serpent's Fang,Epic,Dagger,50,20,Assassin,Twin curved daggers dripping with venom.
-W021,Soulreaver,Legendary,Sword,90,18,Warrior,A sentient blade that feeds on enemy souls.
-W022,Ragnarok Hammer,Legendary,Hammer,100,14,Tank;Warrior,Forged from the heart of a dying star.
-W023,Eternal Longbow,Legendary,Bow,85,22,Ranger,Said to never miss its intended target.
-W024,Godslayer Spear,Legendary,Spear,95,16,Warrior;Tank,A spear that once felled a deity.
-W025,Armageddon Staff,Legendary,Staff,88,20,Mage;Support,Commands apocalyptic arcane forces.
+W001,Novice Wraps,Common,Knuckles,15,3,Brawler,[Bruiser] Basic attacks deal +3 flat physical damage.
+W002,Leather Cestus,Common,Cestus,18,3,Brawler,[Padded Strike] Increases attack speed by 3%.
+W003,Iron-Plated Gauntlets,Common,Gauntlets,22,4,Brawler,[Heavy Fist] Adds +5 Flat PATK on heavy attacks.
+W004,Spiked Knuckles,Uncommon,Knuckles,45,5,Brawler,[Brawler's Rush] Striking an enemy grants +5 Flat PATK for 3 seconds (stacks up to 3 times).
+W005,Reinforced Cestus,Uncommon,Cestus,52,5,Brawler,[Hardened Impact] Physical attacks ignore 5% of target defense.
+W006,Bouncer's Gauntlets,Uncommon,Gauntlets,60,6,Brawler,[Shock Jab] Every 5th attack knockbacks light enemies slightly.
+W007,Pugilist's Brass Knuckles,Rare,Knuckles,95,8,Brawler,[Furious Flurry] Increases attack speed by 8%. Consecutive hits grant +8 Flat PATK (stacks up to 4 times).
+W008,Chain-Bound Cestus,Rare,Cestus,105,8,Brawler,[Iron Clout] Critical hits deal +20 Flat PATK bonus damage.
+W009,Ogre-Crusher Gauntlets,Rare,Gauntlets,118,9,Brawler,[Ground Tremor] Landed attacks have a 10% chance to slow enemy movement by 20% for 2 seconds.
+W010,Ironclad Knuckles,Epic,Knuckles,165,11,Brawler,[Rapid Pummel] Increases attack speed by 12%. Successive hits within 2s grant +10 Flat PATK (up to 5 stacks).
+W011,Cinder-Forged Cestus,Epic,Cestus,180,12,Brawler,[Heavy Impact] Basic attacks deal +15% flat damage and have 15% chance to interrupt enemy skill casting.
+W012,Titan-Grip Gauntlets,Epic,Gauntlets,195,12,Brawler,[Shockwave Strike] Every 4th attack deals 50% of your total PATK to all adjacent targets.
+W013,Void-Touched Knuckles,Legendary,Knuckles,390,16,Brawler,[Relentless Assault] Gain +20% Attack Speed. Striking an enemy grants +25 Flat PATK for 4s (stacks up to 8 times).
+W014,Dragon-Bone Cestus,Legendary,Cestus,420,18,Brawler,[Dragon's Cleave] Physical attacks ignore 25% defense. On crit release a fiery burst dealing 120 Flat PATK.
+W015,Earth-Shaker Gauntlets,Legendary,Gauntlets,450,18,Brawler,[Tectonic Slam] Heavy attacks stun enemies in front for 1s and deal 200 bonus Flat PATK (10s cd).
+W016,God-Hand Gauntlets of the Destroyer,Mythic,Gauntlets,950,25,Brawler,[Fist of the Unbroken Realm] Grants +250 Flat PATK. Attacks strike twice. 10th attack unleashes 500% shockwave.
+W017,Wooden Guard Shield,Common,Shield,10,2,Tank,[Block & Strike] Blocking adds +5 Flat PATK to your next strike.
+W018,Wooden War-Club,Common,Club,12,2,Tank,[Taunting Strike] Increases aggro generation by 10%.
+W019,Iron Mace,Common,Mace,14,3,Tank,[Dull Thud] Ignores 3% of target defense.
+W020,Stone Warhammer,Common,Warhammer,16,3,Tank,[Heavy Weight] 5% chance to interrupt enemy basic attacks.
+W021,Huntsman Battle Axe,Common,Battle Axe,17,4,Tank,[Chop] Basic attacks deal +4 flat damage.
+W022,Practice Greatsword,Common,Greatsword,18,3,Tank,[Wide Swing] Hits up to 2 targets for 50% damage.
+W023,Iron Wall Shield,Uncommon,Shield,35,4,Tank,[Shield Repulse] Successful blocks reflect 10 Flat PATK back to attackers.
+W024,Spiked Wooden Club,Uncommon,Club,42,4,Tank,[Heavy Counter] Taking damage increases Flat PATK by +10 on your next attack.
+W025,Flanged Steel Mace,Uncommon,Mace,48,5,Tank,[Crush Armor] Reduces target defense by 5 for 4 seconds.
+W026,Forged Warhammer,Uncommon,Warhammer,54,5,Tank,[Daze] 10% chance to stun light targets for 0.5 seconds.
+W027,Double-Bit Battle Axe,Uncommon,Battle Axe,56,6,Tank,[Deep Cut] Attacks apply a small bleed dealing 10 Flat PATK damage over 3 seconds.
+W028,Steel Greatsword,Uncommon,Greatsword,58,5,Tank,[Cleaving Edge] Cleaves up to 2 targets for 65% Flat PATK damage.
+W029,Tower Shield of the Sentinel,Rare,Shield,80,6,Tank,[Bastion Slam] Shield bash deals 60 Flat PATK physical damage and knocks back enemies.
+W030,Iron-Bound War-Club,Rare,Club,95,7,Tank,[Unyielding] Gain +20 Flat PATK while above 75% Health.
+W031,Spiked Heavy Mace,Rare,Mace,105,8,Tank,[Shatterpoint] Attacks ignore 15% of target defense.
+W032,Granite War-Sledge,Rare,Warhammer,118,8,Tank,[Concussive Slam] Heavy attacks have a 15% chance to stun for 1 second.
+W033,Berserker Executioner Axe,Rare,Battle Axe,122,9,Tank,[Rupture Blow] Deals +20% damage to targets below 40% Health.
+W034,Knight Templar Greatsword,Rare,Greatsword,125,8,Tank,[Sweeping Might] Cleaves up to 3 targets dealing 75% Flat PATK damage.
+W035,Spiked Vanguard Shield,Epic,Shield,140,9,Tank,[Shield Bash] Blocking empowers your next attack to deal +100 Flat PATK damage and slow attacker by 30%.
+W036,Reinforced Great-Club,Epic,Club,160,10,Tank,[Heavy Weight] Increases threat generation by 50% and grants +30 Flat PATK while above 80% HP.
+W037,Iron-Crusher Mace,Epic,Mace,175,11,Tank,[Armor Shatter] Attacks reduce target's Flat Defense by 20 for 5 seconds (stacks up to 5 times).
+W038,Warhammer of the Stoneguard,Epic,Warhammer,190,11,Tank,[Concussive Blow] Heavy attacks have a 20% chance to stun enemies for 1.5 seconds.
+W039,Barbed Cleaving Axe,Epic,Battle Axe,200,12,Tank,[Rupture] Causes physical attacks to apply a bleed dealing 30 Flat PATK damage over 3 seconds.
+W040,Dreadnought Greatsword,Epic,Greatsword,210,12,Tank,[Wide Sweep] Cleaves up to 3 nearby targets dealing full Flat PATK damage.
+W041,Aegis of the Sun-King,Legendary,Shield,350,15,Tank,[Solar Rebound] Reflects 30% of physical damage taken back to the attacker as bonus Flat PATK damage.
+W042,Ironwood War-Club,Legendary,Club,380,16,Tank,[Unshakable] Taking damage increases your Flat PATK by 15 for 5 seconds (stacks up to 10 times).
+W043,Skull-Rupture Mace,Legendary,Mace,410,17,Tank,[Crushing Force] Basic attacks ignore 30% defense and add 50 Flat PATK to subsequent combo hits.
+W044,Earth-Shatter Warhammer,Legendary,Warhammer,440,17,Tank,[Quake Strike] Ground slams deal 300 Flat PATK in an area and knock down targets for 2 seconds.
+W045,Executioner's Battle Axe,Legendary,Battle Axe,460,18,Tank,[Decapitate] Deals +50% bonus Flat PATK physical damage against targets below 30% Health.
+W046,World-Breaker Greatsword,Legendary,Greatsword,480,18,Tank,[Colossal Impact] Physical skills deal +35% damage. Striking 3+ enemies grants +100 Flat PATK for 6s.
+W047,Bulwark of the Titan-Lord,Mythic,Shield,920,24,Tank,[Fortress of Undying Might] Grants +300 Flat PATK. Converts 10% max DEF to PATK. Fatal damage grants immunity for 4s.
+W048,Shortbow,Common,Bow,14,4,Ranger,[Quick Draw] Increases attack speed by 4%.
+W049,Light Crossbow,Common,Crossbow,16,5,Ranger,[Steady Bolt] Increases critical strike chance by 3%.
+W050,Flintlock Pistol,Common,Gun,17,5,Ranger,[Close Shot] Deals +4 Flat PATK within 4 meters.
+W051,Hunting Rifle,Common,Sniper,20,6,Ranger,[Long Shot] Deals +5 Flat PATK past 10 meters.
+W052,Composite Longbow,Uncommon,Bow,50,6,Ranger,[Distance Power] Deals +10 Flat PATK damage past 8 meters.
+W053,Heavy Repeater,Uncommon,Crossbow,55,7,Ranger,[Double Shot] Every 4th attack fires a second bolt dealing 50% Flat PATK.
+W054,Dual Barrel Flintlock,Uncommon,Gun,58,7,Ranger,[Point Blank] Deals +15% damage to targets within 3 meters.
+W055,Marksman Carbine,Uncommon,Sniper,68,9,Ranger,[Steady Aim] Standing still for 2 seconds grants +15 Flat PATK on next shot.
+W056,Yew Greatbow,Rare,Bow,110,10,Ranger,[Piercing Arrow] Shots pierce through 1 target for 50% damage.
+W057,Arbalest of the Guard,Rare,Crossbow,118,12,Ranger,[Heavy Bolt] Critical hits immobilize targets for 1 second.
+W058,Trench Shotgun,Rare,Gun,125,11,Ranger,[Spread Fire] Hits targets in a narrow cone for 60% Flat PATK damage.
+W059,High-Caliber Recon Rifle,Rare,Sniper,140,14,Ranger,[Vulnerability Mark] Hits reveal target defense granting +30 Flat PATK on follow-up shots.
+W060,Repeater Crossbow,Epic,Crossbow,170,14,Ranger,[Burst Fire] Fires 2 rapid bolts on every 3rd basic attack each dealing 80% Flat PATK.
+W061,Windrunner Greatbow,Epic,Bow,180,15,Ranger,[Gale Shot] Ranged attacks deal +20 Flat PATK for every 5m of distance between you and target.
+W062,Trench Flintlock,Epic,Gun,190,14,Ranger,[Point-Blank Shot] Deals +25% bonus Flat PATK damage when firing at enemies within 3 meters.
+W063,Long-Sight Recon Rifle,Epic,Sniper,220,18,Ranger,[Target Lock] Standing still for 1.5 seconds increases Flat PATK by +50 on your next attack.
+W064,Arbalest of the Shadow-Hunter,Legendary,Crossbow,410,20,Ranger,[Heavy Bolt] Critical strikes deal +40% Flat PATK damage and pin target in place for 1.5s.
+W065,Phoenix-Feather Compound Bow,Legendary,Bow,430,20,Ranger,[Searing Pierce] Arrows pierce through all targets dealing full damage and applying a 40 PATK burn.
+W066,Dual-Barrel Hand Cannon,Legendary,Gun,460,19,Ranger,[Shrapnel Blast] Shots explode on impact dealing 80% Flat PATK damage in a 3-meter cone.
+W067,Anti-Materiel AMR,Legendary,Sniper,520,25,Ranger,[Headshot Execution] Ignores 40% defense. Critical hits increase Flat PATK by +150 for 5 seconds.
+W068,Starlight Annihilator,Mythic,Sniper,1050,30,Ranger,[Celestial Orbital Strike] Grants +280 Flat PATK. Attacks pierce terrain. 4th shot summons 1000% beam.
+W069,Chime Triangle,Common,Triangle,11,2,Support,[Ping] Interrupts basic enemy attacks on hit (10s cooldown).
+W070,Oak Wand,Common,Wand,12,3,Support,[Minor Spark] Basic attacks deal +3 flat magic damage.
+W071,Wooden Lyre,Common,Harp,13,2,Support,[Soothe] Healing abilities restore an extra 5 HP.
+W072,Apprentice Codex,Common,Tome,14,3,Support,[Study] Increases team Flat MATK by +3.
+W073,Copper Talisman,Common,Relic,15,3,Support,[Blessing] Support spells grant +4 Flat MATK to allies for 3s.
+W074,Resonant Brass Bell Triangle,Uncommon,Triangle,38,4,Support,[Disruptive Ring] 15% chance to silence minor enemies for 1 second on hit.
+W075,Willow Magic Wand,Uncommon,Wand,42,5,Support,[Restorative Charge] Casting a spell grants +10 Flat MATK on your next basic attack.
+W076,Silver String Harp,Uncommon,Harp,45,4,Support,[Echoing Note] Spells shield the lowest health ally for 20 Flat MATK value.
+W077,Tome of Healing Light,Uncommon,Tome,48,5,Support,[Aura of Guidance] Increases nearby allies' Flat MATK by +10.
+W078,Silver Ankh,Uncommon,Relic,52,5,Support,[Sanctuary Pulse] Heals allies for 10% of your Flat MATK every 5 seconds.
+W079,Prismatic Harmonic Triangle,Rare,Triangle,85,6,Support,[Cleansing Chime] Removes 1 negative status effect from an ally when casting a buff skill.
+W080,Crystal-Tipped Wand,Rare,Wand,92,7,Support,[Amplifying Ray] Increases ally damage by +20 Flat MATK/PATK for 4 seconds when healed.
+W081,Bard's Golden Harp,Rare,Harp,98,6,Support,[Rejuvenating Melody] Casting a skill restores 40 Flat MATK worth of health over 3s to allies.
+W082,Codex of Holy Chants,Rare,Tome,105,7,Support,[Word of Command] Party members within 8 meters gain +25 Flat MATK/PATK.
+W083,Relic of the Sun Disc,Rare,Relic,112,7,Support,[Solar Flare] Damages enemies for 80 Flat MATK while shielding allies for 40 Flat MATK.
+W084,Resonant Brass Triangle,Epic,Triangle,145,8,Support,[Disruptive Pulse] Interrupts spell casting in 5m radius and deals 80 Flat MATK damage.
+W085,Silver-Leaf Wand,Epic,Wand,150,9,Support,[Restorative Spark] Healing skills apply an extra 30 Flat MATK damage boost to recipient's next hit.
+W086,Celestial Harp,Epic,Harp,160,8,Support,[Symphonic Echo] Attacks release musical waves granting allies shields equal to 50% Flat MATK.
+W087,Codex of the Holy Light,Epic,Tome,165,9,Support,[Aura of Wisdom] Increases Flat MATK by +25 for all party members within 10 meters.
+W088,Ankh of Renewal,Epic,Relic,175,9,Support,[Sacred Vessel] Casting a support spell restores 20 Flat MATK worth of HP to lowest health ally.
+W089,Prismatic Echo Triangle,Legendary,Triangle,370,12,Support,[Harmony Chime] Cleanses all negative status effects from allies and amplifies damage by +15% for 5s.
+W090,Archangel's Baton,Legendary,Wand,380,14,Support,[Divine Empowerment] Grants allies you heal +80 Flat PATK/MATK for 6 seconds.
+W091,Orpheus's Lyre,Legendary,Harp,395,12,Support,[Song of Immortality] Playing an ability heals allies within 12m for 100% Flat MATK over 3 seconds.
+W092,Grimoire of Eternal Grace,Legendary,Tome,410,14,Support,[Words of Power] Increases team Flat MATK by +60. Spells cause enemies to take +20% damage for 4s.
+W093,Relic of the Sanctified Dawn,Legendary,Relic,430,14,Support,[Holy Ray] Light beam damages enemies for 250 Flat MATK and heals allies for 150 Flat MATK.
+W094,Scepter of the High Seraph,Mythic,Wand,880,20,Support,[Genesis Protocol] Grants +220 Flat MATK. Heals/shields scale by 200%. Grants nearby allies +200 ATK.
+W095,Glass Orb,Common,Orb,14,3,Mage,[Mana Pulse] Every 5th attack hits an extra target for 30% damage.
+W096,Basic Spellbook,Common,Grimoire,15,4,Mage,[Page Turn] Increases spell critical chance by 2%.
+W097,Apprentice Staff,Common,Staff,16,3,Mage,[Arcane Bolt] Spells deal +4 flat magic damage.
+W098,Bronze Scepter,Common,Scepter,17,4,Mage,[Focus Power] Basic attacks deal +5 Flat MATK.
+W099,Orb of the Apprentice,Uncommon,Orb,50,5,Mage,[Chain Spark] Basic magic attacks bounce to 1 extra target for 40% damage.
+W100,Grimoire of Spells,Uncommon,Grimoire,52,6,Mage,[Critical Focus] Spell critical hits deal +15 Flat MATK bonus damage.
+W101,Pine Catalyst Staff,Uncommon,Staff,55,5,Mage,[Arcane Accumulation] Casting a spell grants +5 Flat MATK for 4 seconds (stacks up to 3 times).
+W102,Carved Bone Scepter,Uncommon,Scepter,60,6,Mage,[Chill Touch] Spells deal +10 Flat MATK cold damage and slow target by 10%.
+W103,Orb of Nether Energy,Rare,Orb,110,8,Mage,[Void Bounce] Basic attacks bounce to 1 extra target for 60% Flat MATK damage.
+W104,Tome of Unbidden Shadows,Rare,Grimoire,114,10,Mage,[Empowered Mastery] Spell critical chance +8% spell critical damage +15%.
+W105,Runed Ebony Staff,Rare,Staff,120,8,Mage,[Arcane Burst] Spells gain +25 Flat MATK bonus damage every 3rd cast.
+W106,Scepter of Elemental Elements,Rare,Scepter,130,9,Mage,[Elemental Strike] Spells ignore 15% of target magic resistance.
+W107,Spellbound Grimoire,Epic,Grimoire,185,12,Mage,[Spell Amplification] Increases magic critical chance by 10% and magic critical damage by 25%.
+W108,Orb of the Void Eye,Epic,Orb,190,11,Mage,[Singularity Spark] Basic magic attacks bounce to 1 extra target dealing 70% Flat MATK damage.
+W109,Spire of Arcane Energy,Epic,Staff,195,11,Mage,[Arcane Surge] Spells gain +20 Flat MATK for every spell cast in the last 6s (up to 5 stacks).
+W110,Scepter of the Frost-Lich,Epic,Scepter,200,12,Mage,[Glacial Spike] Spells deal 40 Flat MATK bonus ice damage and slow target by 25%.
+W111,Necronomicon of the Lost Realm,Legendary,Grimoire,440,16,Mage,[Soul Siphon] Killing an enemy grants +30 Flat MATK for 10 seconds (stacks up to 10 times).
+W112,Orb of Unbound Chaos,Legendary,Orb,450,15,Mage,[Gravitational Pull] Creates a vortex pulling nearby enemies and dealing 200 Flat MATK damage.
+W113,Staff of the Arch-Mage,Legendary,Staff,460,16,Mage,[Cataclysmic Pulse] Spells deal +120 Flat MATK damage with a 20% chance to reset cooldown.
+W114,Imperial Crystal Scepter,Legendary,Scepter,480,18,Mage,[Elemental Overload] Spells ignore 30% magic resist and deal +50% bonus MATK on critical hit.
+W115,World-Eater Catalyst,Mythic,Staff,1100,22,Mage,[Infinite Destruction] Grants +320 Flat MATK. Removes basic cooldowns. Spells summon 800% dark star meteor.
+W116,Steel Shuriken,Common,Throwing Knives,11,5,Assassin,[Multi-Throw] Attacks 2 targets for 40% damage.
+W117,Iron Kunai,Common,Kunai,12,4,Assassin,[Tipped Edge] Deals +2 flat bleed damage.
+W118,Bone Claw,Common,Claw Blade,13,5,Assassin,[Scratch] Critical strikes grant +3 Flat PATK for 2s.
+W119,Iron Dagger,Common,Dagger,14,6,Assassin,[Quick Stabs] Deals +3 flat damage from behind.
+W120,Training Katana,Common,Katana,15,5,Assassin,[Slice] Increases attack speed by 3%.
+W121,Iron Shortsword,Common,Shortsword,15,5,Assassin,[Swift Blade] Increases movement speed by 3%.
+W122,Steel Stiletto,Common,Durandal,16,6,Assassin,[Thrust] Ignores 3% of target armor.
+W123,Barbed Throwing Knives,Uncommon,Throwing Knives,42,7,Assassin,[Fan Attack] Hits up to 2 targets in a cone for 60% Flat PATK.
+W124,Ninja Kunai,Uncommon,Kunai,44,7,Assassin,[Toxic Tip] Applies poison dealing 8 Flat PATK damage over 4 seconds.
+W125,Poisoned Stiletto,Uncommon,Dagger,48,8,Assassin,[Sneak Attack] Attacks from behind deal +15 Flat PATK physical damage.
+W126,Steel Claw Blade,Uncommon,Claw Blade,49,8,Assassin,[Rend] Critical hits apply a short bleed dealing 15 Flat PATK damage.
+W127,Folded Steel Katana,Uncommon,Katana,52,7,Assassin,[First Strike] Entering combat grants +15 Flat PATK for 3 seconds.
+W128,Slayer Shortsword,Uncommon,Shortsword,54,7,Assassin,[Flurry Strikes] Increases attack speed by 8%.
+W129,Duelist Durandal,Uncommon,Durandal,56,8,Assassin,[Armor Piercer] Ignores 8% of target defense.
+W130,Razor Throwing Knives,Rare,Throwing Knives,95,10,Assassin,[Blade Scatter] Basic ranged attacks hit up to 3 targets for 65% Flat PATK damage.
+W131,Shadow-Ninja Kunai,Rare,Kunai,98,10,Assassin,[Viper Venom] Poison deals 25 Flat PATK physical damage over 4 seconds.
+W132,Assassin's Shadow Dagger,Rare,Dagger,105,12,Assassin,[Backstab Mastery] Attacks from behind deal +30 Flat PATK bonus physical damage.
+W133,Tiger Claw Blade,Rare,Claw Blade,110,11,Assassin,[Deep Laceration] Critical hits deal +35 Flat PATK damage over 3 seconds.
+W134,Masterwork Katana,Rare,Katana,115,10,Assassin,[Iaijutsu Draw] First strike against an enemy deals +40 Flat PATK physical damage.
+W135,Mercenary Broad-Shortsword,Rare,Shortsword,118,10,Assassin,[Relentless] Increases attack speed by 12% and grants +10 Flat PATK on critical hits.
+W136,Royal Guard Durandal,Rare,Durandal,120,11,Assassin,[Flawless Thrust] Ignores 15% of target defense.
+W137,Phantom Throwing Knives,Epic,Throwing Knives,160,13,Assassin,[Fan of Blades] Basic ranged attacks hit up to 3 targets in a cone for 75% Flat PATK.
+W138,Venom-Coated Kunai,Epic,Kunai,165,13,Assassin,[Poisoned Tip] Applies poison dealing 15 Flat PATK damage per second over 5 seconds.
+W139,Shadow-Veil Dagger,Epic,Dagger,175,15,Assassin,[Backstab] Attacks from behind deal +35 Flat PATK bonus physical damage.
+W140,Night-Prowler Claw Blade,Epic,Claw Blade,180,14,Assassin,[Lacerate] Critical hits inflict a bleed dealing 50% attack damage over 3s.
+W141,Mercenary Shortsword,Epic,Shortsword,185,13,Assassin,[Flurry] Increases attack speed by 15%.
+W142,Shadow-Steel Katana,Epic,Katana,190,13,Assassin,[Quick Draw] Entering combat grants +40 Flat PATK for 4 seconds.
+W143,Durandal of the Fallen Knight,Epic,Durandal,195,14,Assassin,[Precision Thrust] Piercing attacks ignore 20% of target armor.
+W144,Viper's Fang Knives,Legendary,Throwing Knives,380,18,Assassin,[Toxic Detonation] Hitting an enemy 3 times detonates dealing 300 Flat PATK physical damage.
+W145,Shadow-Master Kunai,Legendary,Kunai,390,18,Assassin,[Silent Assassination] Attacking from stealth guarantees critical strike for +100% bonus damage.
+W146,Soul-Reaper Dagger,Legendary,Dagger,420,20,Assassin,[Execute] Dealing damage to targets below 40% HP deals +80% Flat PATK. Kills reset movement skills.
+W147,Dragon-Talon Claw Blade,Legendary,Claw Blade,430,19,Assassin,[Rending Strikes] Attacks reduce enemy speed by 10% and defense by 15 (stacks up to 5 times).
+W148,Shadow-Slicer Shortsword,Legendary,Shortsword,440,18,Assassin,[Shadow Step] Teleports behind enemy on critical hit and grants +60 Flat PATK for 3s.
+W149,Muramasa Demon Blade,Legendary,Katana,450,18,Assassin,[Bloodthirst] Gains +5 Flat PATK per 1% missing health. Critical hits heal for 15% damage.
+W150,Durandal of the Void Sovereign,Legendary,Durandal,460,19,Assassin,[True Strike] Converts 20% of physical damage into True Damage.
+W151,Eclipsed Fang of the Void God,Mythic,Dagger,1020,26,Assassin,[Death's Absolute Embrace] Grants +260 Flat PATK. Marks target; mark detonates for 100% damage as True Damage.
+W152,Duellist Saber,Common,Saber,13,4,Warrior,[Riposte] Dodging adds +4 Flat PATK on next hit.
+W153,Iron Arming Sword,Common,Sword,14,4,Warrior,[Balanced] Increases attack speed by 3%.
+W154,Recruit Broadsword,Common,Broadsword,15,4,Warrior,[Heavy Edge] Cleaves up to 2 targets for 40% damage.
+W155,Steel Longsword,Common,Longsword,16,5,Warrior,[Reach] Increases attack range slightly.
+W156,Wooden Claymore,Common,Claymore,18,4,Warrior,[Heavy Swing] Deals +4 flat physical damage.
+W157,Officer's Saber,Uncommon,Saber,46,6,Warrior,[Parry Strike] Dodging or parrying grants +15 Flat PATK for your next attack.
+W158,Forged Steel Sword,Uncommon,Sword,48,6,Warrior,[Swift Blade] Increases attack speed by 6% and grants +8 Flat PATK.
+W159,Soldier's Broadsword,Uncommon,Broadsword,52,6,Warrior,[Wide Sweep] Cleaves up to 2 targets for 60% Flat PATK damage.
+W160,Knight's Longsword,Uncommon,Longsword,56,7,Warrior,[Long Reach] Extends melee range and deals +10% bonus damage.
+W161,Heavy Iron Claymore,Uncommon,Claymore,64,6,Warrior,[Guard Breaker] Deals +15% damage to shielded targets.
+W162,Masterwork Steel Sword,Rare,Sword,105,9,Warrior,[Precision Edge] Increases attack speed by 10% and Flat PATK by +15.
+W163,Duellist's Fine Saber,Rare,Saber,108,9,Warrior,[Counter-Thrust] Parrying triggers an instant strike dealing 120% Flat PATK physical damage.
+W164,Veteran Vanguard Broadsword,Rare,Broadsword,112,8,Warrior,[Cleaving Arc] Sweeps hit up to 2 nearby targets for 75% Flat PATK damage.
+W165,Highland Longsword,Rare,Longsword,118,9,Warrior,[Armor Piercer] Ignores 15% of target defense and extends melee range.
+W166,Great Mercenary Claymore,Rare,Claymore,132,8,Warrior,[Crushing Blow] Heavy attacks deal +30 Flat PATK and stagger light enemies.
+W167,Iron Arming Sword,Epic,Sword,175,12,Warrior,[Balanced Strike] Increases attack speed by 10% and Flat PATK by +20.
+W168,Duellist Saber,Epic,Saber,180,12,Warrior,[Riposte] Dodging or parrying empowers next strike to deal +75 Flat PATK damage.
+W169,Knight's Broadsword,Epic,Broadsword,185,11,Warrior,[Heavy Edge] Cleaves up to 2 targets for 80% Flat PATK physical damage.
+W170,Refined Longsword,Epic,Longsword,190,12,Warrior,[Reach] Extends melee attack range by 1 meter and increases physical damage by 15%.
+W171,Braveheart Claymore,Epic,Claymore,210,12,Warrior,[Shatter Guard] Deals +30% bonus Flat PATK damage against shielded or parrying targets.
+W172,Excalibur's Replica,Legendary,Sword,420,18,Warrior,[Radiant Blade] Strikes generate light energy. At 5 stacks unleashes 250 Flat PATK shockwave.
+W173,Wind-Cutter Saber,Legendary,Saber,430,19,Warrior,[Blade Storm] Increases attack speed by 25%. Basic attacks have 20% chance to trigger instant strike.
+W174,Warlord's Royal Broadsword,Legendary,Broadsword,440,17,Warrior,[Sweeping Cleave] Sweeps hit all enemies in 180-degree arc for 100% Flat PATK.
+W175,Longsword of the Dragon Knight,Legendary,Longsword,460,18,Warrior,[Dragontooth Piercer] Attacks ignore 35% of target defense and grant +40 Flat PATK for 5s.
+W176,Titan-Slayer Claymore,Legendary,Claymore,500,18,Warrior,[Colossus Crush] Deals bonus physical damage equal to 5% of target max health (capped at 300).
+W177,Rune-Blade of the World-Conqueror,Mythic,Claymore,1080,25,Warrior,[Dominion of the Sovereign] Grants +300 Flat PATK. Creates 150 PATK aura. Attacks summon 600% ghost blade.
