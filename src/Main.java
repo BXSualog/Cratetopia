@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Main {
-    // Single shared scanner -- declared once, used everywhere
+    // Single shared scanner — declared once, used everywhere
     private static final Scanner scanner = new Scanner(System.in);
 
     /**
