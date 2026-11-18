@@ -540,15 +540,15 @@ public class AdminDataManager {
      * Returns top players sorted by coins descending.
      */
     public LinkedList<PlayerAcc> getTopPlayersByCoins(int limit) {
-        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        // DSA: TreeMap (descending) — O(log n) per insert, in-order = sorted
+        TreeMap<String, PlayerAcc> map = new TreeMap<>();
         if (playerDataManager != null) {
-            copy.addAll(playerDataManager.getPlayerList());
+            for (PlayerAcc p : playerDataManager.getPlayerList()) {
+                map.put(String.format("%07d_%s", 9999999 - p.getCoins(), p.getUsername()), p);
+            }
         }
-        copy.sort((a, b) -> Integer.compare(b.getCoins(), a.getCoins()));
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (int i = 0; i < copy.size() && i < limit; i++) {
-            result.add(copy.get(i));
-        }
+        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
         return result;
     }
 
@@ -556,15 +556,14 @@ public class AdminDataManager {
      * Returns top players sorted by shards descending.
      */
     public LinkedList<PlayerAcc> getTopPlayersByShards(int limit) {
-        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        TreeMap<String, PlayerAcc> map = new TreeMap<>();
         if (playerDataManager != null) {
-            copy.addAll(playerDataManager.getPlayerList());
+            for (PlayerAcc p : playerDataManager.getPlayerList()) {
+                map.put(String.format("%07d_%s", 9999999 - p.getShards(), p.getUsername()), p);
+            }
         }
-        copy.sort((a, b) -> Integer.compare(b.getShards(), a.getShards()));
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (int i = 0; i < copy.size() && i < limit; i++) {
-            result.add(copy.get(i));
-        }
+        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
         return result;
     }
 
@@ -572,15 +571,14 @@ public class AdminDataManager {
      * Returns top players sorted by hero roster size descending.
      */
     public LinkedList<PlayerAcc> getTopPlayersByHeroes(int limit) {
-        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        TreeMap<String, PlayerAcc> map = new TreeMap<>();
         if (playerDataManager != null) {
-            copy.addAll(playerDataManager.getPlayerList());
+            for (PlayerAcc p : playerDataManager.getPlayerList()) {
+                map.put(String.format("%07d_%s", 9999999 - p.getRoster().size(), p.getUsername()), p);
+            }
         }
-        copy.sort((a, b) -> Integer.compare(b.getRoster().size(), a.getRoster().size()));
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (int i = 0; i < copy.size() && i < limit; i++) {
-            result.add(copy.get(i));
-        }
+        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
         return result;
     }
 
@@ -588,15 +586,14 @@ public class AdminDataManager {
      * Returns top players sorted by inventory item count descending.
      */
     public LinkedList<PlayerAcc> getTopPlayersByItems(int limit) {
-        LinkedList<PlayerAcc> copy = new LinkedList<>();
+        TreeMap<String, PlayerAcc> map = new TreeMap<>();
         if (playerDataManager != null) {
-            copy.addAll(playerDataManager.getPlayerList());
+            for (PlayerAcc p : playerDataManager.getPlayerList()) {
+                map.put(String.format("%07d_%s", 9999999 - p.getInventory().size(), p.getUsername()), p);
+            }
         }
-        copy.sort((a, b) -> Integer.compare(b.getInventory().size(), a.getInventory().size()));
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (int i = 0; i < copy.size() && i < limit; i++) {
-            result.add(copy.get(i));
-        }
+        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
         return result;
     }
 

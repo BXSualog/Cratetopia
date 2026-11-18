@@ -4,7 +4,7 @@ import accounts.PlayerAcc;
 import characters.Hero;
 
 import java.util.LinkedList;
-import java.util.PriorityQueue;
+import java.util.TreeMap;
 import java.util.Random;
 
 /**
@@ -25,13 +25,12 @@ import java.util.Random;
  * DSA Concepts demonstrated here
  * --------------------------------
  * LinkedList<Hero>  summonedHeroes  (inside GachaResult)
- *   Stores the heroes pulled in order.  LinkedList supports fast add-to-tail.
+ *   Stores the heroes pulled in order. LinkedList supports fast add-to-tail.
  *
- * PriorityQueue<Hero>  highestRankPulls  (inside GachaResult)
- *   A min-heap (but Hero.compareTo is reversed so it acts like a MAX-heap).
- *   hero.compareTo() puts higher-star heroes first, so peek() always gives
- *   us the best hero pulled in this session.
- *   offer() (insert): O(log n)  |  peek() (read top): O(1)
+ * TreeMap<Integer, LinkedList<Hero>>  highestRankPulls  (inside GachaResult)
+ *   A self-balancing Red-Black BST ordered by star level descending.
+ *   firstEntry() immediately gives the top star tier pulled along with all
+ *   heroes tied for that rank in O(log n) time.
  *
  * Duplicate hero policy:
  *   If the rolled hero is already in the player's roster, it converts to shards:
@@ -320,8 +319,8 @@ public class CharacterGachaManager {
      *
      * DSA Concepts:
      *   LinkedList<Hero>  summonedHeroes    – new heroes in pull order
-     *   PriorityQueue<Hero> highestRankPulls – max-heap ordered by star level;
-     *                                          peek() gives the best hero pulled
+     *   TreeMap<Integer,LinkedList<Hero>> highestRankPulls – grouped by stars descending;
+     *                                          firstKey() gives the top tier
      *   LinkedList<DuplicateHeroEntry>       – duplicate heroes that became shards
      */
     public static class GachaResult {
@@ -332,9 +331,9 @@ public class CharacterGachaManager {
         // DSA: LinkedList — keeps pull results in the order they were rolled
         private final LinkedList<Hero> summonedHeroes = new LinkedList<>();
 
-        // DSA: PriorityQueue (Heap) — Hero.compareTo() puts highest stars first.
-        //       offer() is O(log n), peek() is O(1) — gives the top hero cheaply.
-        private final PriorityQueue<Hero> highestRankPulls = new PriorityQueue<>();
+        // DSA: TreeMap (descending) — groups heroes by star level; firstKey() gives the top tier.
+        private final TreeMap<Integer, LinkedList<Hero>> highestRankPulls =
+                new TreeMap<>((a, b) -> Integer.compare(b, a));
 
         // Tracks heroes that were duplicates (converted to shards instead)
         private final LinkedList<DuplicateHeroEntry> duplicateHeroes = new LinkedList<>();
@@ -352,14 +351,20 @@ public class CharacterGachaManager {
 
         /**
          * Records a newly obtained hero.
-         * Adds to both the ordered LinkedList and the priority-queue heap.
+         * Adds to both the ordered LinkedList and the TreeMap bucket.
          *
          * @param hero  The hero that was added to the player's roster.
          */
         public void addHero(Hero hero) {
             if (hero != null) {
-                summonedHeroes.add(hero);    // O(1) add to tail of LinkedList
-                highestRankPulls.offer(hero); // O(log n) heap insert
+                summonedHeroes.add(hero);
+                // DSA: TreeMap — groups heroes by star tier (descending key order)
+                LinkedList<Hero> bucket = highestRankPulls.get(hero.getStars());
+                if (bucket == null) {
+                    bucket = new LinkedList<>();
+                    highestRankPulls.put(hero.getStars(), bucket);
+                }
+                bucket.add(hero);
             }
         }
 
@@ -387,10 +392,10 @@ public class CharacterGachaManager {
         public LinkedList<Hero> getSummonedHeroes()             { return summonedHeroes; }
 
         /**
-         * Returns the PriorityQueue sorted highest-star-first.
-         * Call peek() to see the best hero without removing it.
+         * Returns the TreeMap of pulls grouped by star level descending.
+         * Call firstEntry() to inspect the highest tier summoned.
          */
-        public PriorityQueue<Hero> getHighestRankPulls()        { return highestRankPulls; }
+        public TreeMap<Integer, LinkedList<Hero>> getHighestRankPulls() { return highestRankPulls; }
 
         /** Returns the list of duplicate-hero entries. */
         public LinkedList<DuplicateHeroEntry> getDuplicateHeroes() { return duplicateHeroes; }

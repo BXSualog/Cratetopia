@@ -15,10 +15,6 @@ import items.Weapon;
  *   All fields are private.  Stats can only be read through getters, never
  *   set directly from outside.  This keeps Hero in a consistent state.
  *
- * COMPARABLE (Interface implementation):
- *   Hero implements Comparable<Hero> so PriorityQueue in GachaResult can
- *   automatically sort heroes from highest to lowest star rating.
- *
  * POLYMORPHISM (instanceof checks in equip()):
  *   equip() accepts any Item, then uses instanceof to figure out which slot
  *   to put it in (Weapon → weapon slot, Armor → one of 3 armor slots, etc.).
@@ -44,7 +40,7 @@ import items.Weapon;
  *   Flat bonus  = sum of armor healthBonus + accessory bonus (if health type)
  *   Percent bonus = sum of armor healthPercentBonus + active set bonus
  */
-public class Hero implements Comparable<Hero> {
+public class Hero {
 
     // --- Armor slot index constants (used so we avoid magic numbers like 0, 1, 2) ---
     public static final int SLOT_HELMET   = 0; // equippedArmors[0]
@@ -541,34 +537,6 @@ public class Hero implements Comparable<Hero> {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < stars; i++) sb.append("★");
         return sb.toString();
-    }
-
-    // -------------------------------------------------------------------------
-    // Comparable – required for PriorityQueue ordering in GachaResult
-    // -------------------------------------------------------------------------
-
-    /**
-     * Compares two Heroes so the PriorityQueue (MaxHeap) puts the highest-star
-     * hero at the front.
-     *
-     * DSA Concept – Comparable / Priority Queue ordering:
-     *   When we call highestRankPulls.offer(hero) in GachaResult, the
-     *   PriorityQueue uses this compareTo() to decide where in the heap to
-     *   place the hero.  Higher stars → compared as "smaller" so they bubble
-     *   to the top (min-heap behaviour reversed by comparing other.stars
-     *   against this.stars instead of the other way around).
-     *
-     * @param other  The other Hero to compare against.
-     * @return       Negative if this hero should come BEFORE other in the queue.
-     */
-    @Override
-    public int compareTo(Hero other) {
-        if (other == null) return 1; // nulls go to the end
-        // Compare other.stars vs this.stars → higher stars rank first
-        int cmp = Integer.compare(other.stars, this.stars);
-        if (cmp != 0) return cmp;
-        // Tie-break alphabetically by name
-        return this.name.compareToIgnoreCase(other.name);
     }
 
     // -------------------------------------------------------------------------

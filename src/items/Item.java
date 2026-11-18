@@ -1,7 +1,7 @@
 package items;
 
 import characters.CharacterClass;
-import java.util.TreeSet;
+import java.util.LinkedList;
 
 /**
  * Item – the abstract base class for every piece of equipment in the game.
@@ -18,18 +18,10 @@ import java.util.TreeSet;
  * Weapon/Armor/Accessory don't have to repeat it.  That is the "Don't Repeat
  * Yourself" principle in action.
  *
- * DSA Concept – TreeSet (Sorted Set)
+ * DSA Concept – LinkedList
  * ------------------------------------
- * equippableClasses is a TreeSet<CharacterClass>.
- *
- * A TreeSet stores elements in sorted order and prevents duplicates, backed
- * by a self-balancing Binary Search Tree (BST) internally.
- *   • Inserting a class: O(log n)
- *   • Checking if a class is present (contains): O(log n)
- *
- * This is better than a plain array here because:
- *   – We never add duplicate classes.
- *   – We don't need index-based access; we only need "does this set contain X?"
+ * equippableClasses is a LinkedList<CharacterClass>.
+ * Stores allowed character classes in order with simple linear traversal.
  */
 public abstract class Item {
 
@@ -42,8 +34,8 @@ public abstract class Item {
     // The original comma/semicolon-separated string from the CSV ("Warrior;Mage")
     private final String equippableClassesRaw;
 
-    // DSA: TreeSet keeps class entries sorted and duplicate-free, backed by a BST.
-    private final TreeSet<CharacterClass> equippableClasses = new TreeSet<>();
+    // DSA: LinkedList — stores allowed character classes for this item
+    private final LinkedList<CharacterClass> equippableClasses = new LinkedList<>();
 
     // True when the item can be equipped by ANY character class.
     private final boolean canBeEquippedByAll;
@@ -81,13 +73,13 @@ public abstract class Item {
                 ? equippableClassesRaw.trim() : "All";
         this.description = description;
 
-        // --- Parse equippable classes into the TreeSet ---
+        // --- Parse equippable classes into the LinkedList ---
         boolean all = false;
         if (this.equippableClassesRaw.equalsIgnoreCase("All")) {
-            // "All" → add every CharacterClass constant to the set
+            // "All" → add every CharacterClass constant
             all = true;
             for (CharacterClass cc : CharacterClass.values()) {
-                this.equippableClasses.add(cc); // TreeSet.add() = O(log n) BST insert
+                this.equippableClasses.add(cc);
             }
         } else {
             // Split on ";" and add each named class individually
@@ -119,7 +111,7 @@ public abstract class Item {
     public String getRarity()                                   { return rarity; }
     public String getType()                                     { return type; }
     public String getEquippableClassesRaw()                     { return equippableClassesRaw; }
-    public TreeSet<CharacterClass> getEquippableClasses()       { return equippableClasses; }
+    public LinkedList<CharacterClass> getEquippableClasses()    { return equippableClasses; }
     public String getDescription()                              { return description; }
     public int getQuantity()                                    { return quantity; }
     public void setQuantity(int quantity)                       { this.quantity = Math.max(1, quantity); }
@@ -132,17 +124,13 @@ public abstract class Item {
     /**
      * Checks whether this item can be equipped by the given character class.
      *
-     * DSA note – TreeSet.contains():
-     *   Because the TreeSet is backed by a BST, this lookup runs in O(log n)
-     *   time — faster than scanning an unsorted list.
-     *
      * @param characterClass  The hero's class to check.
      * @return                true if the hero's class is allowed to equip this item.
      */
     public boolean canEquip(CharacterClass characterClass) {
         if (characterClass == null) return false;
         if (canBeEquippedByAll) return true;          // no restriction → always yes
-        return equippableClasses.contains(characterClass); // O(log n) BST lookup
+        return equippableClasses.contains(characterClass);
     }
 
     /**
@@ -154,7 +142,6 @@ public abstract class Item {
     public String getEquippableClassesDisplay() {
         if (canBeEquippedByAll) return "All Classes";
         StringBuilder sb = new StringBuilder();
-        // TreeSet iterates in sorted order, so output is always alphabetical
         for (CharacterClass cc : equippableClasses) {
             if (sb.length() > 0) sb.append(", ");
             sb.append(cc.getDisplayName());

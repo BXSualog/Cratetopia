@@ -46,9 +46,13 @@ public class PlayerAcc extends Account {
     private final LinkedList<Item> inventory = new LinkedList<>();
     private final LinkedList<Hero> roster    = new LinkedList<>();
 
-    // --- DSA: Stack (LIFO) for Player Activity History ---
-    // Tracks recent gameplay actions in Last-In, First-Out order.
+    // --- DSA: Stack (LIFO) for Player Activity History & Undo Operations ---
+    // 1. activityHistory: Tracks recent gameplay events (crate opens, summons, etc.)
     private final Stack<String> activityHistory = new Stack<>();
+    // 2. recentlyObtainedItems: Tracks items obtained from crates/rewards
+    private final Stack<Item> recentlyObtainedItems = new Stack<>();
+    // 3. equipUndoStack: Tracks equipment changes for undo operations
+    private final Stack<EquipAction> equipUndoStack = new Stack<>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -138,7 +142,7 @@ public class PlayerAcc extends Account {
     }
 
     // -------------------------------------------------------------------------
-    // DSA: Stack (LIFO) Methods for Activity Log
+    // DSA: Stack (LIFO) Methods for Activity Log, Recent Loot & Undo
     // -------------------------------------------------------------------------
 
     public Stack<String> getActivityHistory() {
@@ -153,6 +157,69 @@ public class PlayerAcc extends Account {
 
     public String peekRecentActivity() {
         return activityHistory.isEmpty() ? "No recent activity" : activityHistory.peek();
+    }
+
+    // --- Recently Obtained Items Stack ---
+    public Stack<Item> getRecentlyObtainedItems() {
+        return recentlyObtainedItems;
+    }
+
+    public void pushRecentlyObtained(Item item) {
+        if (item != null) {
+            recentlyObtainedItems.push(item);
+        }
+    }
+
+    public Item peekRecentlyObtained() {
+        return recentlyObtainedItems.isEmpty() ? null : recentlyObtainedItems.peek();
+    }
+
+    // --- Equipment Undo Stack ---
+    public Stack<EquipAction> getEquipUndoStack() {
+        return equipUndoStack;
+    }
+
+    public void pushEquipAction(Hero hero, String slot, Item previousItem, Item newItem) {
+        equipUndoStack.push(new EquipAction(hero, slot, previousItem, newItem));
+    }
+
+    public boolean canUndoEquip() {
+        return !equipUndoStack.isEmpty();
+    }
+
+    /**
+     * Undoes the last equipment action (equip, unequip, or swap).
+     * Restores the hero's slot to previousItem and updates player inventory.
+     *
+     * @return Description of the undone action, or null if nothing to undo.
+     */
+    public String undoLastEquip() {
+        if (equipUndoStack.isEmpty()) return null;
+        EquipAction action = equipUndoStack.pop(); // LIFO: pop the most recent action
+        Hero hero = action.getHero();
+        String slot = action.getSlot();
+        Item previousItem = action.getPreviousItem();
+        Item newItem = action.getNewItem();
+
+        if (hero == null) return null;
+
+        // Reverse the action:
+        // 1. Remove newItem from hero (if one was equipped) and put it back in inventory
+        if (newItem != null) {
+            hero.unequip(slot);
+            if (!inventory.contains(newItem)) {
+                inventory.add(newItem);
+            }
+        }
+        // 2. Put previousItem back on the hero (if there was one) and remove from inventory
+        if (previousItem != null) {
+            hero.equip(previousItem);
+            inventory.remove(previousItem);
+        }
+
+        syncCounters();
+        pushActivity("Undid: " + action.toString());
+        return action.toString();
     }
 
     /**

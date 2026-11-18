@@ -3,14 +3,15 @@ import items.Armor;
 import items.Item;
 import items.Weapon;
 
-import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 /**
  * InventorySort – specifies the sorting strategy for player inventory and equipment.
  *
  * OOP Concept – ENUM with methods & Strategy pattern
- * DSA Concept – TreeSort (Binary Search Tree Sort), LinkedList linear search filtering
+ * DSA Concept – TreeMap (Red-Black BST) for O(n log n) sorted key grouping,
+ *               LinkedList linear search filtering.
  */
 public enum InventorySort {
     RECENT("Recent (Default)"),
@@ -62,58 +63,65 @@ public enum InventorySort {
         return 0;
     }
 
+    private static String pad(int n) {
+        return String.format("%07d", Math.max(0, n));
+    }
+
     /**
-     * Returns a comparator for the given inventory sorting strategy.
+     * Builds a sort key so TreeMap sorts items in the correct order.
+     * Number padding ensures lexicographical order matches numeric order.
      */
-    public static Comparator<Item> getComparator(InventorySort strategy) {
-        if (strategy == null) return (a, b) -> 0;
+    public static String buildSortKey(Item item, InventorySort strategy) {
+        if (item == null || strategy == null) return "";
         switch (strategy) {
             case TYPE:
-                return (a, b) -> {
-                    int c = Integer.compare(typeRank(a), typeRank(b));
-                    if (c != 0) return c;
-                    int r = Integer.compare(rarityRank(b.getRarity()), rarityRank(a.getRarity()));
-                    return (r != 0) ? r : a.getName().compareToIgnoreCase(b.getName());
-                };
-
+                // Type ascending (Weapon -> Armor -> Accessory), then Rarity descending, then Name A-Z
+                return pad(typeRank(item)) + "_" + pad(99 - rarityRank(item.getRarity())) + "_" + item.getName().toLowerCase();
             case RARITY:
-                return (a, b) -> {
-                    int r = Integer.compare(rarityRank(b.getRarity()), rarityRank(a.getRarity()));
-                    return (r != 0) ? r : a.getName().compareToIgnoreCase(b.getName());
-                };
-
+                // Rarity descending (Legendary -> Common), then Name A-Z
+                return pad(99 - rarityRank(item.getRarity())) + "_" + item.getName().toLowerCase();
             case NAME:
-                return (a, b) -> a.getName().compareToIgnoreCase(b.getName());
-
+                // Name ascending A-Z
+                return item.getName().toLowerCase();
             case QUANTITY:
-                return (a, b) -> {
-                    int q = Integer.compare(b.getQuantity(), a.getQuantity());
-                    return (q != 0) ? q : a.getName().compareToIgnoreCase(b.getName());
-                };
-
+                // Quantity descending, then Name A-Z
+                return pad(999999 - item.getQuantity()) + "_" + item.getName().toLowerCase();
             case STAT:
-                return (a, b) -> {
-                    int s = Integer.compare(primaryStatValue(b), primaryStatValue(a));
-                    return (s != 0) ? s : a.getName().compareToIgnoreCase(b.getName());
-                };
-
+                // Primary stat bonus descending, then Name A-Z
+                return pad(999999 - primaryStatValue(item)) + "_" + item.getName().toLowerCase();
             default:
-                return (a, b) -> 0;
+                return item.getName().toLowerCase();
         }
     }
 
     /**
-     * Sorts a list of items using the TreeSort (Binary Search Tree Sort) ADT.
+     * Sorts a list of items using the TreeMap (Red-Black BST) ADT.
+     * Items are grouped into TreeMap buckets by sort key, then collected back.
+     * Average Time Complexity: O(n log n).
      */
     public static LinkedList<Item> sort(LinkedList<Item> items, InventorySort strategy) {
-        LinkedList<Item> sorted = new LinkedList<>(items);
-        if (strategy == null || strategy == RECENT) {
+        LinkedList<Item> sorted = new LinkedList<>(items != null ? items : new LinkedList<>());
+        if (strategy == null || strategy == RECENT || sorted.size() <= 1) {
             return sorted;
         }
 
-        Comparator<Item> comp = getComparator(strategy);
-        // DSA: Uses TreeSort (Binary Search Tree In-Order Traversal)
-        return TreeSort.sort(sorted, comp);
+        // DSA: TreeMap (Red-Black BST) – keys are sorted automatically
+        TreeMap<String, LinkedList<Item>> map = new TreeMap<>();
+        for (Item item : sorted) {
+            String key = buildSortKey(item, strategy);
+            LinkedList<Item> bucket = map.get(key);
+            if (bucket == null) {
+                bucket = new LinkedList<>();
+                map.put(key, bucket);
+            }
+            bucket.add(item);
+        }
+
+        LinkedList<Item> result = new LinkedList<>();
+        for (LinkedList<Item> bucket : map.values()) {
+            result.addAll(bucket);
+        }
+        return result;
     }
 
     /**

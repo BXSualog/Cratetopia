@@ -515,15 +515,17 @@ public class Main {
         if (dist.isEmpty()) {
             System.out.println("  No heroes have been unlocked by any players yet.");
         } else {
-            // Sort by count descending
-            java.util.List<java.util.Map.Entry<String, Integer>> sorted = new java.util.ArrayList<>(dist.entrySet());
-            sorted.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
-
+            // DSA: TreeMap — sort heroes by ownership count descending
+            java.util.TreeMap<String, String> ranked = new java.util.TreeMap<>();
+            for (java.util.Map.Entry<String, Integer> e : dist.entrySet()) {
+                ranked.put(String.format("%07d_%s", 9999999 - e.getValue(), e.getKey()), e.getKey() + "|" + e.getValue());
+            }
             System.out.printf("  %-4s %-25s %-12s\n", "#", "Hero Name", "Players Owned");
             System.out.println("  --------------------------------------------------");
             int rank = 1;
-            for (java.util.Map.Entry<String, Integer> entry : sorted) {
-                System.out.printf("  [%2d] %-25s : %d player(s)\n", rank++, entry.getKey(), entry.getValue());
+            for (String val : ranked.values()) {
+                String[] parts = val.split("\\|", 2);
+                System.out.printf("  [%2d] %-25s : %s player(s)\n", rank++, parts[0], parts[1]);
             }
         }
         System.out.println("==================================================");
@@ -1902,6 +1904,7 @@ public class Main {
             System.out.println();
             System.out.println("Coins: " + player.getCoins() + "          Shards: " + player.getShards());
             System.out.println("Heroes Collected: " + player.getHeroesCollected() + "  Items Owned: " + player.getItemsOwned());
+            System.out.println("  Recent Activity  : " + player.peekRecentActivity());
             System.out.println();
             System.out.println("--------------------------------------------------");
             System.out.println("1. Open Crates");
@@ -2122,6 +2125,11 @@ public class Main {
 
         // Synchronize counters and check achievements
         player.syncCounters();
+        // DSA: Stack — push recent summon activity (LIFO; most recent on top)
+        player.pushActivity("Summoned " + (isMulti ? "10x" : "1x") + " — got " + result.getSummonedHeroes().size() + " new hero(es)");
+        for (Hero h : result.getSummonedHeroes()) {
+            player.pushActivity("New hero: " + h.getName() + " (" + h.getStarsDisplay() + ")");
+        }
         LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);
 
         // Auto-save shards spent & summoned heroes
@@ -2155,23 +2163,12 @@ public class Main {
             }
         }
 
-        // Use PriorityQueue to announce highest tier summoned
-        // Drain the max-heap to find ALL heroes at the top star level
+        // DSA: TreeMap — firstEntry() gives the highest star tier bucket
         if (!result.getHighestRankPulls().isEmpty()) {
             System.out.println("--------------------------------------------------");
-            // Peek to find the highest star level in this session
-            int topStars = result.getHighestRankPulls().peek().getStars();
-            // Collect all heroes matching the top tier by draining the heap into a LinkedList
-            LinkedList<Hero> topHeroes = new LinkedList<>();
-            java.util.PriorityQueue<Hero> tempHeap = new java.util.PriorityQueue<>(result.getHighestRankPulls());
-            while (!tempHeap.isEmpty()) {
-                Hero h = tempHeap.poll();
-                if (h.getStars() == topStars) {
-                    topHeroes.add(h);
-                } else {
-                    break; // heap is sorted descending by stars, so once stars differ we're done
-                }
-            }
+            java.util.Map.Entry<Integer, LinkedList<Hero>> topEntry = result.getHighestRankPulls().firstEntry();
+            int topStars = topEntry.getKey();
+            LinkedList<Hero> topHeroes = topEntry.getValue();
             if (topHeroes.size() == 1) {
                 Hero top = topHeroes.getFirst();
                 System.out.println("  ★ Top Summon: " + top.getName() + " - \"" + top.getTitle() + "\" ("
@@ -2411,6 +2408,7 @@ public class Main {
             System.out.println("2. View All Equipped Gear Across All Heroes");
             System.out.println("3. Auto-Equip Best Gear on All Heroes");
             System.out.println("4. Unequip All Gear From a Hero");
+            System.out.println("5. Undo Last Equipment Change [Stack LIFO] (" + (player.canUndoEquip() ? "Available: " + player.getEquipUndoStack().peek().toString() : "None") + ")");
             System.out.println("0. Back to Characters Menu");
             System.out.println("==================================================");
 
@@ -2428,6 +2426,9 @@ public class Main {
                     break;
                 case "4":
                     unequipAllHeroGearFlow(input, playerDataManager, player);
+                    break;
+                case "5":
+                    undoLastEquipFlow(input, playerDataManager, player);
                     break;
                 case "0":
                     break;
@@ -2621,6 +2622,28 @@ public class Main {
         input.readLine("Press Enter to continue...");
     }
 
+    /**
+     * DSA Concept – Stack (LIFO):
+     * Undoes the most recent equipment action performed by the player.
+     * Pops from the player's equipUndoStack and reverses the gear change.
+     */
+    private static void undoLastEquipFlow(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player) {
+        System.out.println("\n==================================================");
+        System.out.println("        UNDO LAST EQUIPMENT CHANGE [STACK LIFO]");
+        System.out.println("==================================================");
+        if (!player.canUndoEquip()) {
+            System.out.println("  No recent equipment actions to undo.");
+        } else {
+            String actionDesc = player.undoLastEquip();
+            playerDataManager.saveAllPlayersToCsv();
+            System.out.println("  [SUCCESS] Successfully undone!");
+            System.out.println("  " + actionDesc);
+            System.out.println("  Roster and inventory have been restored.");
+        }
+        System.out.println("==================================================");
+        input.readLine("Press Enter to continue...");
+    }
+
     private static void heroDetailAndEquipMenu(InputHandling input, PlayerDataManager playerDataManager, PlayerAcc player, Hero hero) {
         String choice;
         do {
@@ -2741,12 +2764,27 @@ public class Main {
                 // Remove newly equipped item from inventory
                 player.removeItem(chosenItem);
 
+                // Determine target slot key for undo tracking
+                String targetSlotKey = slotName.toLowerCase();
+                if (chosenItem instanceof Armor) {
+                    int as = Hero.armorSlotFor((Armor) chosenItem);
+                    if (as == Hero.SLOT_HELMET) targetSlotKey = "helmet";
+                    else if (as == Hero.SLOT_CHEST) targetSlotKey = "chest";
+                    else if (as == Hero.SLOT_LEGGINGS) targetSlotKey = "leggings";
+                } else if (chosenItem instanceof Accessory) {
+                    targetSlotKey = "accessory";
+                }
+
                 // Equip and return old item if swapped
                 Item oldItem = hero.equip(chosenItem);
                 if (oldItem != null) {
                     player.addItem(oldItem);
                     System.out.println("\n[SWAP] Returned previous item to inventory: " + oldItem.getName());
                 }
+
+                // DSA: Stack — push equip action onto undo stack (LIFO)
+                player.pushEquipAction(hero, targetSlotKey, oldItem, chosenItem);
+                player.pushActivity("Equipped " + chosenItem.getName() + " on " + hero.getName());
 
                 // Record statistics and check achievements
                 player.getStats().recordEquipmentEquipped();
@@ -2794,6 +2832,10 @@ public class Main {
         if (unequipped != null) {
             player.addItem(unequipped);
             player.syncCounters();
+
+            // DSA: Stack — push unequip action onto undo stack (LIFO)
+            player.pushEquipAction(hero, slot, unequipped, null);
+            player.pushActivity("Unequipped " + unequipped.getName() + " from " + hero.getName());
 
             // Auto-save unequipped gear & inventory state
             playerDataManager.saveAllPlayersToCsv();
@@ -2882,7 +2924,8 @@ public class Main {
 
             System.out.println("--------------------------------------------------");
             System.out.println("Commands: [1-" + filtered.size() + "] Inspect Item Details & Equip/Unequip");
-            System.out.println("          [V] Switch View Mode  |  [F] Filter by Item Type  |  [S] Sort Items  |  [0] Return");
+            System.out.println("          [V] Switch View Mode  |  [F] Filter by Item Type  |  [S] Sort Items");
+            System.out.println("          [R] Recent Loot [Stack LIFO]  |  [0] Return");
             System.out.println("==================================================");
 
             choice = input.readLine("Select: ");
@@ -2894,6 +2937,8 @@ public class Main {
                 typeFilter = selectInventoryTypeFilter(input, typeFilter);
             } else if (choice.equalsIgnoreCase("S")) {
                 currentSort = selectInventorySortStrategy(input, currentSort);
+            } else if (choice.equalsIgnoreCase("R")) {
+                viewRecentLootStack(input, player);
             } else {
                 try {
                     int itemIdx = Integer.parseInt(choice) - 1;
@@ -2937,10 +2982,42 @@ public class Main {
 
     private static void sortItemEntries(LinkedList<ItemDisplayEntry> list, InventorySort sort) {
         if (sort == null || sort == InventorySort.RECENT || list == null || list.size() <= 1) return;
-        java.util.Comparator<Item> itemComp = InventorySort.getComparator(sort);
-        LinkedList<ItemDisplayEntry> sorted = TreeSort.sort(list, (a, b) -> itemComp.compare(a.item, b.item));
+        java.util.TreeMap<String, LinkedList<ItemDisplayEntry>> map = new java.util.TreeMap<>();
+        for (ItemDisplayEntry e : list) {
+            String key = InventorySort.buildSortKey(e.item, sort);
+            LinkedList<ItemDisplayEntry> bucket = map.get(key);
+            if (bucket == null) { bucket = new LinkedList<>(); map.put(key, bucket); }
+            bucket.add(e);
+        }
         list.clear();
-        list.addAll(sorted);
+        for (LinkedList<ItemDisplayEntry> bucket : map.values()) list.addAll(bucket);
+    }
+
+    /**
+     * DSA Concept – Stack (LIFO):
+     * Displays recently obtained items in reverse order of acquisition.
+     * Uses peek() for O(1) top access and iterates the Stack in LIFO order.
+     */
+    private static void viewRecentLootStack(InputHandling input, PlayerAcc player) {
+        System.out.println("\n==================================================");
+        System.out.println("        RECENTLY OBTAINED LOOT [STACK LIFO]");
+        System.out.println("==================================================");
+        java.util.Stack<Item> stack = player.getRecentlyObtainedItems();
+        if (stack.isEmpty()) {
+            System.out.println("  No items recently obtained in this session.");
+            System.out.println("  Open crates to find new weapons, armors, and accessories!");
+        } else {
+            System.out.println("  Most Recent (Top of Stack): " + stack.peek().getName());
+            System.out.println("  --------------------------------------------------");
+            // Display from newest to oldest (LIFO order)
+            int rank = 1;
+            for (int i = stack.size() - 1; i >= 0 && rank <= 10; i--) {
+                Item item = stack.get(i);
+                System.out.printf("  [%d] %-30s | %s\n", rank++, item.getName() + " (" + item.getRarity() + ")", item.getSummary().trim());
+            }
+        }
+        System.out.println("==================================================");
+        input.readLine("Press Enter to continue...");
     }
 
     private static int selectInventoryViewMode(InputHandling input, int current) {
@@ -3299,6 +3376,12 @@ public class Main {
         // Record crate statistics
         player.getStats().recordCrateOpened(tier, result.getCoinsEarned(), result.getShardsEarned(), result.getItems().size());
         player.syncCounters();
+
+        // DSA: Stack — push to player activity history & recently obtained items stack
+        player.pushActivity("Opened " + tier + " (+" + result.getCoinsEarned() + " coins)");
+        for (Item item : result.getItems()) {
+            player.pushRecentlyObtained(item);
+        }
 
         // Check achievements
         LinkedList<Achievement> newUnlocks = playerDataManager.getAchievementManager().checkAndUnlockAchievements(player);

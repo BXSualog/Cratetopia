@@ -40,6 +40,7 @@ public class PlayerFeaturesTest {
         testStatisticsTracking();
         testAchievementUnlockAndClaiming();
         testDataPersistenceAndCounterSynchronization();
+        testStackRecentLootAndEquipUndo();
 
         System.out.println("\n==================================================");
         System.out.println("   >>> ALL PLAYER TESTS COMPLETED SUCCESSFULLY! <<<");
@@ -416,5 +417,46 @@ public class PlayerFeaturesTest {
         // Clean up test player
         playerDataManager.deletePlayer(testUser);
         System.out.println("  [PASS] Cleaned up temporary test user");
+    }
+
+    /**
+     * Requirement DSA: Stack (LIFO) ADT verification.
+     * Verifies recently obtained loot stack and equipment action undo stack.
+     */
+    private static void testStackRecentLootAndEquipUndo() {
+        System.out.println("\n--- [TEST 9] Stack (LIFO) Recent Loot & Equipment Undo ---");
+
+        PlayerAcc player = new PlayerAcc("StackTester", "pass123");
+
+        // 1. Test Recently Obtained Loot Stack
+        Item sword = new Weapon("S_W1", "Test Sword", "Rare", "Sword", 30, 5, "Warrior", "Test");
+        Item shield = new Armor("S_A1", "Test Shield", "Epic", "Chest", "Iron", 40, 50, 0, "Warrior", "Test");
+
+        player.pushRecentlyObtained(sword);
+        player.pushRecentlyObtained(shield);
+
+        check(player.peekRecentlyObtained() == shield, "Stack peek() returns most recently obtained item (shield)");
+        check(player.getRecentlyObtainedItems().size() == 2, "Recently obtained stack size is 2");
+
+        // 2. Test Equipment Undo Stack
+        Hero hero = new Hero("H_STACK", "Knight", "Valiant", "Fire", CharacterClass.WARRIOR, 5, 500, 100, 50, 10, "A knight");
+        player.getRoster().add(hero);
+        player.getInventory().add(sword);
+
+        // Player equips sword
+        player.removeItem(sword);
+        Item oldItem = hero.equip(sword);
+        player.pushEquipAction(hero, "weapon", oldItem, sword);
+
+        check(hero.getEquippedWeapon() == sword, "Hero currently has sword equipped");
+        check(player.canUndoEquip(), "Player can undo equip action");
+        check(player.getEquipUndoStack().size() == 1, "Equip undo stack size is 1");
+
+        // Perform Undo
+        String undone = player.undoLastEquip();
+        check(undone != null, "Undo executed successfully: " + undone);
+        check(hero.getEquippedWeapon() == null, "Hero's weapon slot is restored to null");
+        check(player.getInventory().contains(sword), "Sword is restored to player's inventory");
+        check(!player.canUndoEquip(), "Equip undo stack is now empty");
     }
 }
