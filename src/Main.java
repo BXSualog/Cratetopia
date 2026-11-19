@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Main {
-    // Single shared scanner — declared once, used everywhere
+
     private static final Scanner scanner = new Scanner(System.in);
 
     /**
@@ -1922,8 +1922,7 @@ public class Main {
             System.out.println("3. Inventory");
             System.out.println("4. Shop & Trading");
             System.out.println("5. Achievements & Statistics");
-            System.out.println("6. Account Settings");
-            System.out.println("7. Save & Exit");
+            System.out.println("6. Save & Exit");
             System.out.println("==================================================");
 
             choice = readLine("Select an option: ");
@@ -1945,9 +1944,6 @@ public class Main {
                     achievementsAndStatisticsMenu(playerDataManager, player);
                     break;
                 case "6":
-                    // Account Settings
-                    break;
-                case "7":
                     System.out.print("\nSaving");
                     for (int i = 0; i < 5; i++) {
                         System.out.print(".");
@@ -1975,10 +1971,10 @@ public class Main {
                     System.out.println("Invalid option. Please try again.");
             }
 
-            if (!choice.equals("7") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3") && !choice.equals("4") && !choice.equals("5")) {
+            if (!choice.equals("6") && !choice.equals("1") && !choice.equals("2") && !choice.equals("3") && !choice.equals("4") && !choice.equals("5")) {
                 readLine("\nPress Enter to continue...");
             }
-        } while (!choice.equals("7"));
+        } while (!choice.equals("6"));
     }
 
     // =========================================================================
