@@ -1,0 +1,24 @@
+CRATETOPIA
+==========
+
+RUN THE GAME
+  Windows : double-click run.bat
+  Mac/Linux: ./run.sh
+  Or, from this folder: java -jar Cratetopia.jar   (needs Java 11 or newer)
+  Keep the "data" folder next to the jar - the game reads and saves its files there.
+
+EDIT THE CODE
+  Open this folder in IntelliJ. The source is in "src". Run Main.
+  (Run with the project folder as the working directory so "data/" is found.)
+
+ADMIN LOGIN   (main menu, option 3)
+  username: admin     password: admin123
+  Change it in the admin dashboard, option 6 (Admin Accounts).
+
+DATA FILES (in "data")
+  players.csv, player_inventory.csv, player_heroes.csv, player_stats.csv  - player saves
+  weapons.csv, armor.csv, accessories.csv, armor_sets.csv                  - item catalog
+  warriors.csv, mages.csv, assassins.csv, tanks.csv, rangers.csv,
+  supports.csv, brawlers.csv                                               - hero catalog
+  admins.csv                                                               - admin accounts
+  crate_config.csv, gacha_config.csv                                       - created when an admin edits the rates
