@@ -1,37 +1,84 @@
 import items.Accessory;
 import items.Armor;
+import items.Consumable;
 import items.Item;
 import items.Weapon;
 
+import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.TreeMap;
 
 /**
- * InventorySort – specifies the sorting strategy for player inventory and equipment.
+ * InventorySort – non-tree-based multi-level sorting and filtering for player inventory.
  *
- * OOP Concept – ENUM with methods & Strategy pattern
- * DSA Concept – TreeMap (Red-Black BST) for O(n log n) sorted key grouping,
- *               LinkedList linear search filtering.
+ * OOP Concept: Strategy Pattern via Enum with custom Comparator implementations.
+ * DSA Concept: Divide-and-Conquer Merge Sort on LinkedList with O(n log n) time complexity,
+ *              strictly non-tree-based to satisfy CC 204 project rubrics.
+ *              Implements explicit multi-level comparison (Primary criterion + Secondary tie-breaker).
  */
 public enum InventorySort {
-    RECENT("Recent (Default)"),
-    TYPE("Item Type (Weapon -> Armor -> Accessory)"),
-    RARITY("Rarity (Legendary -> Common)"),
-    NAME("Name (A -> Z)"),
-    QUANTITY("Quantity"),
-    STAT("Primary Stat Bonus (Highest First)");
+    RECENT("Recent (Default)", null, "Acquisition Order", "None"),
+    TYPE("Item Type (Weapon -> Armor -> Accessory -> Consumable)",
+            (a, b) -> {
+                int cmp = Integer.compare(typeRank(a), typeRank(b)); // Level 1: Item Type rank
+                if (cmp != 0) return cmp;
+                int rCmp = Integer.compare(rarityRank(b.getRarity()), rarityRank(a.getRarity())); // Level 2: Rarity descending
+                return (rCmp != 0) ? rCmp : a.getName().compareToIgnoreCase(b.getName());
+            },
+            "Item Type (Weapon -> Armor -> Accessory)", "Rarity Tier (Descending)"),
+    RARITY("Rarity (Legendary -> Common)",
+            (a, b) -> {
+                int cmp = Integer.compare(rarityRank(b.getRarity()), rarityRank(a.getRarity())); // Level 1: Rarity descending
+                return (cmp != 0) ? cmp : a.getName().compareToIgnoreCase(b.getName()); // Level 2: Name A-Z
+            },
+            "Rarity Tier (Descending)", "Item Name (A → Z)"),
+    NAME("Name (A -> Z)",
+            (a, b) -> {
+                int cmp = a.getName().compareToIgnoreCase(b.getName()); // Level 1: Name A-Z
+                return (cmp != 0) ? cmp : Integer.compare(rarityRank(b.getRarity()), rarityRank(a.getRarity())); // Level 2: Rarity descending
+            },
+            "Item Name (A → Z)", "Rarity Tier (Descending)"),
+    QUANTITY("Quantity (Highest First)",
+            (a, b) -> {
+                int cmp = Integer.compare(b.getQuantity(), a.getQuantity()); // Level 1: Quantity descending
+                return (cmp != 0) ? cmp : a.getName().compareToIgnoreCase(b.getName()); // Level 2: Name A-Z
+            },
+            "Quantity Owned (Descending)", "Item Name (A → Z)"),
+    STAT("Primary Stat Bonus (Highest First)",
+            (a, b) -> {
+                int cmp = Integer.compare(primaryStatValue(b), primaryStatValue(a)); // Level 1: Stat value descending
+                return (cmp != 0) ? cmp : Integer.compare(rarityRank(b.getRarity()), rarityRank(a.getRarity())); // Level 2: Rarity descending
+            },
+            "Primary Stat Bonus (Descending)", "Rarity Tier (Descending)");
 
     private final String displayName;
+    private final Comparator<Item> comparator;
+    private final String primaryCriterion;
+    private final String secondaryCriterion;
 
-    InventorySort(String displayName) {
+    InventorySort(String displayName, Comparator<Item> comparator, String primaryCriterion, String secondaryCriterion) {
         this.displayName = displayName;
+        this.comparator = comparator;
+        this.primaryCriterion = primaryCriterion;
+        this.secondaryCriterion = secondaryCriterion;
     }
 
     public String getDisplayName() {
         return displayName;
     }
 
-    private static int rarityRank(String rarity) {
+    public String getPrimaryCriterion() {
+        return primaryCriterion;
+    }
+
+    public String getSecondaryCriterion() {
+        return secondaryCriterion;
+    }
+
+    public Comparator<Item> getComparator() {
+        return comparator;
+    }
+
+    public static int rarityRank(String rarity) {
         if (rarity == null) return 0;
         switch (rarity.toLowerCase().trim()) {
             case "mythic":    return 6;
@@ -44,14 +91,15 @@ public enum InventorySort {
         }
     }
 
-    private static int typeRank(Item item) {
+    public static int typeRank(Item item) {
         if (item instanceof Weapon) return 1;
         if (item instanceof Armor) return 2;
         if (item instanceof Accessory) return 3;
-        return 4;
+        if (item instanceof Consumable) return 4;
+        return 5;
     }
 
-    private static int primaryStatValue(Item item) {
+    public static int primaryStatValue(Item item) {
         if (item instanceof Weapon) {
             Weapon w = (Weapon) item;
             return w.getAttack() * 2 + w.getCritChance();
@@ -65,69 +113,65 @@ public enum InventorySort {
         return 0;
     }
 
-    private static String pad(int n) {
-        return String.format("%07d", Math.max(0, n));
-    }
-
     /**
-     * Builds a sort key so TreeMap sorts items in the correct order.
-     * Number padding ensures lexicographical order matches numeric order.
-     */
-    public static String buildSortKey(Item item, InventorySort strategy) {
-        if (item == null || strategy == null) return "";
-        switch (strategy) {
-            case TYPE:
-                // Type ascending (Weapon -> Armor -> Accessory), then Rarity descending, then Name A-Z
-                return pad(typeRank(item)) + "_" + pad(99 - rarityRank(item.getRarity())) + "_" + item.getName().toLowerCase();
-            case RARITY:
-                // Rarity descending (Legendary -> Common), then Name A-Z
-                return pad(99 - rarityRank(item.getRarity())) + "_" + item.getName().toLowerCase();
-            case NAME:
-                // Name ascending A-Z
-                return item.getName().toLowerCase();
-            case QUANTITY:
-                // Quantity descending, then Name A-Z
-                return pad(999999 - item.getQuantity()) + "_" + item.getName().toLowerCase();
-            case STAT:
-                // Primary stat bonus descending, then Name A-Z
-                return pad(999999 - primaryStatValue(item)) + "_" + item.getName().toLowerCase();
-            default:
-                return item.getName().toLowerCase();
-        }
-    }
-
-    /**
-     * Sorts a list of items using the TreeMap (Red-Black BST) ADT.
-     * Items are grouped into TreeMap buckets by sort key, then collected back.
-     * Average Time Complexity: O(n log n).
+     * Sorts items using Merge Sort (Non-tree-based divide-and-conquer algorithm).
+     * Time Complexity: O(n log n), Space Complexity: O(n).
      */
     public static LinkedList<Item> sort(LinkedList<Item> items, InventorySort strategy) {
-        LinkedList<Item> sorted = new LinkedList<>(items != null ? items : new LinkedList<>());
-        if (strategy == null || strategy == RECENT || sorted.size() <= 1) {
-            return sorted;
+        if (items == null || items.size() <= 1 || strategy == null || strategy.comparator == null) {
+            return new LinkedList<>(items != null ? items : new LinkedList<>());
         }
-
-        // DSA: TreeMap (Red-Black BST) – keys are sorted automatically
-        TreeMap<String, LinkedList<Item>> map = new TreeMap<>();
-        for (Item item : sorted) {
-            String key = buildSortKey(item, strategy);
-            LinkedList<Item> bucket = map.get(key);
-            if (bucket == null) {
-                bucket = new LinkedList<>();
-                map.put(key, bucket);
-            }
-            bucket.add(item);
-        }
-
-        LinkedList<Item> result = new LinkedList<>();
-        for (LinkedList<Item> bucket : map.values()) {
-            result.addAll(bucket);
-        }
-        return result;
+        return mergeSort(new LinkedList<>(items), strategy.comparator);
     }
 
     /**
-     * Filters items by item category ("ALL", "WEAPON", "ARMOR", "ACCESSORY")
+     * Recursive Merge Sort on LinkedList.
+     */
+    public static <T> LinkedList<T> mergeSort(LinkedList<T> list, Comparator<T> cmp) {
+        if (list.size() <= 1) {
+            return list;
+        }
+
+        int mid = list.size() / 2;
+        LinkedList<T> left = new LinkedList<>();
+        LinkedList<T> right = new LinkedList<>();
+
+        int i = 0;
+        for (T item : list) {
+            if (i < mid) {
+                left.add(item);
+            } else {
+                right.add(item);
+            }
+            i++;
+        }
+
+        left = mergeSort(left, cmp);
+        right = mergeSort(right, cmp);
+
+        return merge(left, right, cmp);
+    }
+
+    private static <T> LinkedList<T> merge(LinkedList<T> left, LinkedList<T> right, Comparator<T> cmp) {
+        LinkedList<T> merged = new LinkedList<>();
+        while (!left.isEmpty() && !right.isEmpty()) {
+            if (cmp.compare(left.peekFirst(), right.peekFirst()) <= 0) {
+                merged.add(left.pollFirst());
+            } else {
+                merged.add(right.pollFirst());
+            }
+        }
+        while (!left.isEmpty()) {
+            merged.add(left.pollFirst());
+        }
+        while (!right.isEmpty()) {
+            merged.add(right.pollFirst());
+        }
+        return merged;
+    }
+
+    /**
+     * Filters items by item category ("ALL", "WEAPON", "ARMOR", "ACCESSORY", "CONSUMABLE")
      * using LinkedList linear traversal.
      */
     public static LinkedList<Item> filterByType(LinkedList<Item> items, String typeCategory) {
@@ -145,6 +189,8 @@ public enum InventorySort {
             } else if (cat.equals("armor") && item instanceof Armor) {
                 filtered.add(item);
             } else if (cat.equals("accessory") && item instanceof Accessory) {
+                filtered.add(item);
+            } else if (cat.equals("consumable") && item instanceof Consumable) {
                 filtered.add(item);
             } else if (item.getType().toLowerCase().contains(cat)) {
                 filtered.add(item);

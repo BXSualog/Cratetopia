@@ -23,7 +23,7 @@ package items;
  *   type = "Chest"      → SLOT_CHEST    (index 1)
  *   type = "Leggings"   → SLOT_LEGGINGS (index 2)
  */
-public class Armor extends Item {
+public class Armor extends Item implements Equipable {
 
     // "None" means this piece does not belong to any named set.
     // Otherwise, it's a name like "Dragon" that must match other armor pieces

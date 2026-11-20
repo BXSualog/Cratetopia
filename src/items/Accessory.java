@@ -17,7 +17,7 @@ package items;
  * Accessories are loaded from data/accessories.csv.
  * CSV header: id, name, rarity, type, stat_bonus, bonus_type, equippable_classes, description
  */
-public class Accessory extends Item {
+public class Accessory extends Item implements Equipable {
 
     // The numeric amount of the stat boost (e.g. 30 attack or 50 health)
     private final int statBonus;

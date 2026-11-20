@@ -15,7 +15,7 @@ package items;
  *  - A player may carry at most MAX_STACK = 2 of the same consumable.
  *  - Effects are display-only for now; gameplay use is a future feature.
  */
-public class Consumable extends Item {
+public class Consumable extends Item implements Usable {
 
     // Max number of this consumable a player can carry at one time
     public static final int MAX_STACK = 2;

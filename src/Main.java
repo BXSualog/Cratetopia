@@ -2271,7 +2271,34 @@ public class Main {
             if (choice.equals("0")) break;
 
             if (choice.equalsIgnoreCase("S")) {
-                currentSort = selectHeroSortOrder(currentSort);
+                HeroSort chosenSort = selectHeroSortOrder(currentSort);
+                if (chosenSort != currentSort) {
+                    // CC 204 Rubric Requirement: Show data before and after sorting
+                    LinkedList<Hero> beforeSort = HeroSort.filter(rawRoster, filterClass, filterStars, filterElement);
+                    LinkedList<Hero> afterSort = HeroSort.sort(beforeSort, chosenSort);
+                    
+                    System.out.println("\n--------------------------------------------------");
+                    System.out.println("  [DSA SORT COMPARISON] Before & After Demonstration");
+                    System.out.println("  Sort Strategy: " + chosenSort.getDisplayName());
+                    System.out.println("  Level 1 (Primary)  : " + chosenSort.getPrimaryCriterion());
+                    System.out.println("  Level 2 (Secondary): " + chosenSort.getSecondaryCriterion());
+                    System.out.println("--------------------------------------------------");
+                    System.out.println("--- BEFORE SORTING (Original Order) ---");
+                    int bIdx = 1;
+                    for (Hero h : beforeSort) {
+                        System.out.printf("  %2d. %-24s | %d★ | HP:%-4d ATK:%-3d DEF:%-3d\n",
+                                bIdx++, h.getName(), h.getStars(), h.getTotalHp(), h.getTotalAttack(), h.getTotalDefense());
+                    }
+                    System.out.println("\n--- AFTER SORTING (" + chosenSort.getDisplayName() + ") ---");
+                    int aIdx = 1;
+                    for (Hero h : afterSort) {
+                        System.out.printf("  %2d. %-24s | %d★ | HP:%-4d ATK:%-3d DEF:%-3d\n",
+                                aIdx++, h.getName(), h.getStars(), h.getTotalHp(), h.getTotalAttack(), h.getTotalDefense());
+                    }
+                    System.out.println("--------------------------------------------------");
+                    readLine("Press Enter to continue to sorted roster view...");
+                    currentSort = chosenSort;
+                }
             } else if (choice.equalsIgnoreCase("F")) {
                 Object[] filters = selectHeroFilters(filterClass, filterStars, filterElement);
                 filterClass = (CharacterClass) filters[0];
@@ -2942,7 +2969,35 @@ public class Main {
             } else if (choice.equalsIgnoreCase("F")) {
                 typeFilter = selectInventoryTypeFilter(typeFilter);
             } else if (choice.equalsIgnoreCase("S")) {
-                currentSort = selectInventorySortStrategy(currentSort);
+                InventorySort chosenSort = selectInventorySortStrategy(currentSort);
+                if (chosenSort != currentSort) {
+                    // CC 204 Rubric Requirement: Show data before and after sorting
+                    LinkedList<ItemDisplayEntry> beforeList = new LinkedList<>(filtered);
+                    LinkedList<ItemDisplayEntry> afterList = new LinkedList<>(filtered);
+                    sortItemEntries(afterList, chosenSort);
+
+                    System.out.println("\n--------------------------------------------------");
+                    System.out.println("  [DSA SORT COMPARISON] Before & After Demonstration");
+                    System.out.println("  Sort Strategy: " + chosenSort.getDisplayName());
+                    System.out.println("  Level 1 (Primary)  : " + chosenSort.getPrimaryCriterion());
+                    System.out.println("  Level 2 (Secondary): " + chosenSort.getSecondaryCriterion());
+                    System.out.println("--------------------------------------------------");
+                    System.out.println("--- BEFORE SORTING (Original Order) ---");
+                    int bIdx = 1;
+                    for (ItemDisplayEntry e : beforeList) {
+                        System.out.printf("  %2d. %-28s | %-10s | %-10s\n",
+                                bIdx++, e.item.getName(), e.item.getRarity(), e.item.getType());
+                    }
+                    System.out.println("\n--- AFTER SORTING (" + chosenSort.getDisplayName() + ") ---");
+                    int aIdx = 1;
+                    for (ItemDisplayEntry e : afterList) {
+                        System.out.printf("  %2d. %-28s | %-10s | %-10s\n",
+                                aIdx++, e.item.getName(), e.item.getRarity(), e.item.getType());
+                    }
+                    System.out.println("--------------------------------------------------");
+                    readLine("Press Enter to continue to sorted inventory view...");
+                    currentSort = chosenSort;
+                }
             } else if (choice.equalsIgnoreCase("R")) {
                 viewRecentLootStack(player);
             } else {
@@ -2989,15 +3044,17 @@ public class Main {
 
     private static void sortItemEntries(LinkedList<ItemDisplayEntry> list, InventorySort sort) {
         if (sort == null || sort == InventorySort.RECENT || list == null || list.size() <= 1) return;
-        java.util.TreeMap<String, LinkedList<ItemDisplayEntry>> map = new java.util.TreeMap<>();
-        for (ItemDisplayEntry e : list) {
-            String key = InventorySort.buildSortKey(e.item, sort);
-            LinkedList<ItemDisplayEntry> bucket = map.get(key);
-            if (bucket == null) { bucket = new LinkedList<>(); map.put(key, bucket); }
-            bucket.add(e);
-        }
+        
+        java.util.Comparator<ItemDisplayEntry> entryComparator = (e1, e2) -> {
+            if (sort.getComparator() != null) {
+                return sort.getComparator().compare(e1.item, e2.item);
+            }
+            return 0;
+        };
+
+        LinkedList<ItemDisplayEntry> sorted = InventorySort.mergeSort(list, entryComparator);
         list.clear();
-        for (LinkedList<ItemDisplayEntry> bucket : map.values()) list.addAll(bucket);
+        list.addAll(sorted);
     }
 
     /**

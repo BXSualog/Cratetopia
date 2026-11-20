@@ -1,60 +1,154 @@
 package characters;
 
+import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.TreeMap;
 
 /**
- * HeroSort – sorting and filtering strategies for the hero roster.
- * DSA: TreeMap (Red-Black BST) for O(n log n) sorted key grouping.
+ * HeroSort – non-tree-based multi-level sorting and filtering for hero roster.
+ *
+ * OOP Concept: Strategy Pattern via Enum with custom Comparator implementations.
+ * DSA Concept: Divide-and-Conquer Merge Sort on LinkedList with O(n log n) time complexity,
+ *              strictly non-tree-based to satisfy CC 204 project rubrics.
+ *              Implements explicit multi-level comparison (Primary criterion + Secondary tie-breaker).
  */
 public enum HeroSort {
-    DEFAULT("Default (Roster Order)"),
-    RARITY_DESC("Star Level (6★ → 1★)"),
-    RARITY_ASC("Star Level (1★ → 6★)"),
-    HP_DESC("Total HP (Highest First)"),
-    ATK_DESC("Total Attack (Highest First)"),
-    DEF_DESC("Total Defense (Highest First)"),
-    CRIT_DESC("Total Crit % (Highest First)"),
-    NAME_ASC("Hero Name (A → Z)"),
-    CLASS_ORDER("Class Grouping");
+    DEFAULT("Default (Roster Order)", null, "Original Order", "None"),
+    RARITY_DESC("Star Level (6★ → 1★)",
+            (a, b) -> {
+                int cmp = Integer.compare(b.getStars(), a.getStars()); // Level 1: Stars descending
+                return (cmp != 0) ? cmp : a.getName().compareToIgnoreCase(b.getName()); // Level 2: Name A-Z
+            },
+            "Star Rating (Descending)", "Hero Name (A → Z)"),
+    RARITY_ASC("Star Level (1★ → 6★)",
+            (a, b) -> {
+                int cmp = Integer.compare(a.getStars(), b.getStars()); // Level 1: Stars ascending
+                return (cmp != 0) ? cmp : a.getName().compareToIgnoreCase(b.getName()); // Level 2: Name A-Z
+            },
+            "Star Rating (Ascending)", "Hero Name (A → Z)"),
+    HP_DESC("Total HP (Highest First)",
+            (a, b) -> {
+                int cmp = Integer.compare(b.getTotalHp(), a.getTotalHp()); // Level 1: Total HP descending
+                return (cmp != 0) ? cmp : Integer.compare(b.getStars(), a.getStars()); // Level 2: Stars descending
+            },
+            "Total HP (Highest First)", "Star Rating (Descending)"),
+    ATK_DESC("Total Attack (Highest First)",
+            (a, b) -> {
+                int cmp = Integer.compare(b.getTotalAttack(), a.getTotalAttack()); // Level 1: Total Attack descending
+                return (cmp != 0) ? cmp : Integer.compare(b.getStars(), a.getStars()); // Level 2: Stars descending
+            },
+            "Total Attack (Highest First)", "Star Rating (Descending)"),
+    DEF_DESC("Total Defense (Highest First)",
+            (a, b) -> {
+                int cmp = Integer.compare(b.getTotalDefense(), a.getTotalDefense()); // Level 1: Total Defense descending
+                return (cmp != 0) ? cmp : Integer.compare(b.getStars(), a.getStars()); // Level 2: Stars descending
+            },
+            "Total Defense (Highest First)", "Star Rating (Descending)"),
+    CRIT_DESC("Total Crit % (Highest First)",
+            (a, b) -> {
+                int cmp = Integer.compare(b.getTotalCritChance(), a.getTotalCritChance()); // Level 1: Crit % descending
+                return (cmp != 0) ? cmp : Integer.compare(b.getTotalAttack(), a.getTotalAttack()); // Level 2: Attack descending
+            },
+            "Total Crit % (Highest First)", "Total Attack (Descending)"),
+    NAME_ASC("Hero Name (A → Z)",
+            (a, b) -> {
+                int cmp = a.getName().compareToIgnoreCase(b.getName()); // Level 1: Name A-Z
+                return (cmp != 0) ? cmp : Integer.compare(b.getStars(), a.getStars()); // Level 2: Stars descending
+            },
+            "Hero Name (A → Z)", "Star Rating (Descending)"),
+    CLASS_ORDER("Class Grouping",
+            (a, b) -> {
+                int cmp = a.getCharacterClass().name().compareTo(b.getCharacterClass().name()); // Level 1: Class name
+                return (cmp != 0) ? cmp : Integer.compare(b.getStars(), a.getStars()); // Level 2: Stars descending
+            },
+            "Character Class (Grouped)", "Star Rating (Descending)");
 
     private final String displayName;
-    HeroSort(String d) { this.displayName = d; }
-    public String getDisplayName() { return displayName; }
+    private final Comparator<Hero> comparator;
+    private final String primaryCriterion;
+    private final String secondaryCriterion;
 
-    /** Sorts heroes by inserting into a TreeMap and reading back in key order. */
+    HeroSort(String displayName, Comparator<Hero> comparator, String primaryCriterion, String secondaryCriterion) {
+        this.displayName = displayName;
+        this.comparator = comparator;
+        this.primaryCriterion = primaryCriterion;
+        this.secondaryCriterion = secondaryCriterion;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getPrimaryCriterion() {
+        return primaryCriterion;
+    }
+
+    public String getSecondaryCriterion() {
+        return secondaryCriterion;
+    }
+
+    public Comparator<Hero> getComparator() {
+        return comparator;
+    }
+
+    /**
+     * Sorts heroes using Merge Sort (Non-tree-based divide-and-conquer algorithm).
+     * Time Complexity: O(n log n) guaranteed, Space Complexity: O(n).
+     */
     public static LinkedList<Hero> sort(LinkedList<Hero> heroes, HeroSort strategy) {
-        if (strategy == null || strategy == DEFAULT || heroes == null) return new LinkedList<>(heroes != null ? heroes : new LinkedList<>());
-
-        // DSA: TreeMap with custom comparator — O(log n) per insert, in-order traversal gives sorted output
-        TreeMap<String, LinkedList<Hero>> map = new TreeMap<>();
-        for (Hero h : heroes) {
-            String key = buildKey(h, strategy);
-            LinkedList<Hero> bucket = map.get(key);
-            if (bucket == null) { bucket = new LinkedList<>(); map.put(key, bucket); }
-            bucket.add(h);
+        if (heroes == null || heroes.size() <= 1 || strategy == null || strategy.comparator == null) {
+            return new LinkedList<>(heroes != null ? heroes : new LinkedList<>());
         }
-        LinkedList<Hero> result = new LinkedList<>();
-        for (LinkedList<Hero> bucket : map.values()) result.addAll(bucket);
-        return result;
+        return mergeSort(new LinkedList<>(heroes), strategy.comparator);
     }
 
-    private static String buildKey(Hero h, HeroSort strategy) {
-        // Pad numbers so lexicographic order = numeric order; prefix for inversion
-        switch (strategy) {
-            case RARITY_DESC:  return pad(99 - h.getStars()) + h.getName().toLowerCase();
-            case RARITY_ASC:   return pad(h.getStars())       + h.getName().toLowerCase();
-            case HP_DESC:      return pad(999999 - h.getTotalHp())  + h.getName().toLowerCase();
-            case ATK_DESC:     return pad(999999 - h.getTotalAttack())  + h.getName().toLowerCase();
-            case DEF_DESC:     return pad(999999 - h.getTotalDefense())  + h.getName().toLowerCase();
-            case CRIT_DESC:    return pad(999999 - h.getTotalCritChance())  + h.getName().toLowerCase();
-            case NAME_ASC:     return h.getName().toLowerCase();
-            case CLASS_ORDER:  return h.getCharacterClass().name() + pad(99 - h.getStars()) + h.getName().toLowerCase();
-            default:           return h.getName().toLowerCase();
+    /**
+     * Recursive Merge Sort implementation operating on LinkedList.
+     */
+    private static LinkedList<Hero> mergeSort(LinkedList<Hero> list, Comparator<Hero> cmp) {
+        if (list.size() <= 1) {
+            return list;
         }
+
+        int mid = list.size() / 2;
+        LinkedList<Hero> left = new LinkedList<>();
+        LinkedList<Hero> right = new LinkedList<>();
+
+        int i = 0;
+        for (Hero h : list) {
+            if (i < mid) {
+                left.add(h);
+            } else {
+                right.add(h);
+            }
+            i++;
+        }
+
+        left = mergeSort(left, cmp);
+        right = mergeSort(right, cmp);
+
+        return merge(left, right, cmp);
     }
 
-    private static String pad(int n) { return String.format("%07d", Math.max(0, n)); }
+    /**
+     * Merge step of Merge Sort algorithm.
+     */
+    private static LinkedList<Hero> merge(LinkedList<Hero> left, LinkedList<Hero> right, Comparator<Hero> cmp) {
+        LinkedList<Hero> merged = new LinkedList<>();
+        while (!left.isEmpty() && !right.isEmpty()) {
+            if (cmp.compare(left.peekFirst(), right.peekFirst()) <= 0) {
+                merged.add(left.pollFirst());
+            } else {
+                merged.add(right.pollFirst());
+            }
+        }
+        while (!left.isEmpty()) {
+            merged.add(left.pollFirst());
+        }
+        while (!right.isEmpty()) {
+            merged.add(right.pollFirst());
+        }
+        return merged;
+    }
 
     /** Filters heroes by class, star rating, and element. Null/"ALL" skips that filter. */
     public static LinkedList<Hero> filter(LinkedList<Hero> heroes, CharacterClass classFilter,

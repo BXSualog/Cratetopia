@@ -1,7 +1,8 @@
 package items;
 
 /**
- * Weapon – a concrete subclass of Item representing a weapon piece of equipment.
+ * Weapon – a concrete subclass of Item representing a weapon piece of
+ * equipment.
  *
  * OOP Concepts – INHERITANCE & POLYMORPHISM
  * ------------------------------------------
@@ -9,20 +10,21 @@ package items;
  * equippable-class restriction logic, etc. — all inherited for free.
  *
  * It adds two weapon-specific stats:
- *   attack    – flat attack points added to the hero's base attack
- *   critChance – extra critical hit percentage
+ * attack – flat attack points added to the hero's base attack
+ * critChance – extra critical hit percentage
  *
  * The @Override on getSummary() is POLYMORPHISM in action: when any code calls
  * item.getSummary() on a Weapon object, Java runs THIS version automatically.
  *
  * Weapons are loaded from data/weapons.csv.
- * CSV header: id, name, rarity, type, attack, crit_chance, equippable_classes, description
+ * CSV header: id, name, rarity, type, attack, crit_chance, equippable_classes,
+ * description
  */
-public class Weapon extends Item {
+public class Weapon extends Item implements Equipable {
 
     // Weapon-specific stats (private & final = immutable after construction)
-    private final int attack;      // bonus attack points added to the hero
-    private final int critChance;  // bonus crit chance percentage
+    private final int attack; // bonus attack points added to the hero
+    private final int critChance; // bonus crit chance percentage
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -42,10 +44,10 @@ public class Weapon extends Item {
      * @param description       Flavour / stat description text.
      */
     public Weapon(String id, String name, String rarity, String type,
-                  int attack, int critChance, String equippableClasses, String description) {
+            int attack, int critChance, String equippableClasses, String description) {
         // Call the Item constructor to store all the shared fields.
         super(id, name, rarity, type, equippableClasses, description);
-        this.attack     = attack;
+        this.attack = attack;
         this.critChance = critChance;
     }
 
@@ -54,7 +56,7 @@ public class Weapon extends Item {
      * (any hero class can equip this weapon).
      */
     public Weapon(String id, String name, String rarity, String type,
-                  int attack, int critChance, String description) {
+            int attack, int critChance, String description) {
         this(id, name, rarity, type, attack, critChance, "All", description);
     }
 
@@ -63,10 +65,14 @@ public class Weapon extends Item {
     // -------------------------------------------------------------------------
 
     /** Returns the flat attack bonus this weapon provides. */
-    public int getAttack()     { return attack; }
+    public int getAttack() {
+        return attack;
+    }
 
     /** Returns the bonus crit-chance percentage this weapon provides. */
-    public int getCritChance() { return critChance; }
+    public int getCritChance() {
+        return critChance;
+    }
 
     // -------------------------------------------------------------------------
     // Polymorphism – our unique implementation of the abstract getSummary()
@@ -74,7 +80,8 @@ public class Weapon extends Item {
 
     /**
      * Returns a formatted stat summary line used in the equip UI.
-     * Example: "  ATK: 45   | CRIT: 8% | Classes: Warrior, Assassin | Deals fire damage"
+     * Example: " ATK: 45 | CRIT: 8% | Classes: Warrior, Assassin | Deals fire
+     * damage"
      *
      * OOP note – @Override means we are replacing the abstract version in Item
      * with a Weapon-specific format.
