@@ -388,6 +388,11 @@ public class AdminDataManager {
         if (player == null) return false;
         int updated = Math.max(0, player.getCoins() + coinDelta);
         player.setCoins(updated);
+        if (coinDelta > 0 && player.getStats() != null) {
+            player.getStats().recordCoinsEarned(coinDelta);
+        } else if (coinDelta < 0 && player.getStats() != null) {
+            player.getStats().recordCoinsSpent(-coinDelta);
+        }
         playerDataManager.saveAllPlayersToCsv();
         return true;
     }
@@ -400,6 +405,11 @@ public class AdminDataManager {
         if (player == null) return false;
         int updated = Math.max(0, player.getShards() + shardDelta);
         player.setShards(updated);
+        if (shardDelta > 0 && player.getStats() != null) {
+            player.getStats().recordShardsEarned(shardDelta);
+        } else if (shardDelta < 0 && player.getStats() != null) {
+            player.getStats().recordShardsSpent(-shardDelta);
+        }
         playerDataManager.saveAllPlayersToCsv();
         return true;
     }
@@ -528,9 +538,15 @@ public class AdminDataManager {
 
         if (coins > 0) {
             player.setCoins(player.getCoins() + coins);
+            if (player.getStats() != null) {
+                player.getStats().recordCoinsEarned(coins);
+            }
         }
         if (shards > 0) {
             player.setShards(player.getShards() + shards);
+            if (player.getStats() != null) {
+                player.getStats().recordShardsEarned(shards);
+            }
         }
         playerDataManager.saveAllPlayersToCsv();
         return true;

@@ -323,13 +323,27 @@ public class PlayerFeaturesTest {
 
         boolean found6StarAch = false;
         for (Achievement a : heroUnlocks) {
-            if (a.getId().equals("HERO_6STAR")) found6StarAch = true;
+            if (a.getId().equals("RED_RED_RED")) found6StarAch = true;
         }
-        check(found6StarAch, "Collecting 6★ hero unlocked: Legendary Destiny (HERO_6STAR)");
+        check(found6StarAch, "Collecting 6★ hero unlocked: RED RED RED");
 
         // Claim all pending rewards
+        int coinsPrior = player.getCoins();
+        int coinsEarnedBefore = player.getStats().getCoinsEarned();
         int claimedCount = am.claimAllRewards(player);
         check(claimedCount >= 1, "Claim all rewards claimed pending achievements");
+        check(player.getCoins() > coinsPrior, "Player coins balance increased after claiming rewards");
+        check(player.getStats().getCoinsEarned() > coinsEarnedBefore, "Player stats coinsEarned recorded claimed rewards");
+
+        // Verify Collect all Heroes achievement template exists
+        boolean foundCollectAll = false;
+        for (Achievement tmpl : am.getMasterTemplates()) {
+            if ("COLLECT_ALL_HEROES".equals(tmpl.getId())) {
+                foundCollectAll = true;
+                break;
+            }
+        }
+        check(foundCollectAll, "Achievement 'Collect all Heroes' is registered with target 35");
 
         // Clean up test achievements
         am.removePlayer(uniqueAchUser);

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -18,7 +19,8 @@ import java.util.TreeMap;
  * reward disbursements, and CSV persistence for player_achievements.csv.
  *
  * OOP Concepts: ENCAPSULATION, DELEGATION
- * DSA Concepts: TreeMap (BST) for O(log n) player lookups, LinkedList for collections.
+ * DSA Concepts: TreeMap (BST) for O(log n) player lookups, LinkedList for
+ * collections.
  */
 public class AchievementManager {
 
@@ -28,7 +30,8 @@ public class AchievementManager {
     private final LinkedList<Achievement> masterTemplates = new LinkedList<>();
 
     // DSA: TreeMap (Red-Black BST) indexed by case-insensitive username
-    private final TreeMap<String, LinkedList<Achievement>> playerAchievements = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final TreeMap<String, LinkedList<Achievement>> playerAchievements = new TreeMap<>(
+            String.CASE_INSENSITIVE_ORDER);
 
     public AchievementManager() {
         initMasterTemplates();
@@ -36,50 +39,91 @@ public class AchievementManager {
     }
 
     private void initMasterTemplates() {
-        // --- Crates ---
-        masterTemplates.add(new Achievement("CRATE_001", "First Crate Opened", "Open your very first crate.",
+        // =====================================================================
+        // TIER 1: VERY EASY (Tutorial & First Actions)
+        // =====================================================================
+        masterTemplates.add(new Achievement("CRATE_001", "First Steps", "Open a crate.",
                 Achievement.Category.CRATES, 1, 200, 1));
+        masterTemplates.add(new Achievement("SUMMON_001", "A New Beginning", "Unlock a character.",
+                Achievement.Category.HEROES, 1, 500, 0));
+        masterTemplates.add(new Achievement("GEAR_UP", "Gear Up", "Change a character's equipped weapon.",
+                Achievement.Category.EQUIPMENT, 1, 300, 1));
+        masterTemplates.add(new Achievement("POTION_FIRST", "A New Taste", "Consume a potion.",
+                Achievement.Category.CONSUMABLES, 1, 250, 1));
+
+        // =====================================================================
+        // TIER 2: EASY (Early Milestones)
+        // =====================================================================
+        masterTemplates.add(new Achievement("LUCKY_CHARM", "Lucky Charm", "Get a legendary tier character.",
+                Achievement.Category.HEROES, 1, 2500, 5));
+        masterTemplates.add(new Achievement("JACKPOT", "Jackpot", "Get a legendary tier weapon.",
+                Achievement.Category.ITEMS, 1, 2500, 5));
+        masterTemplates.add(new Achievement("COINS_250K", "Golden Shower", "Amass 250,000 coins.",
+                Achievement.Category.ECONOMY, 250000, 5000, 10));
+        masterTemplates.add(new Achievement("VARIETY_DRINKER", "Variety Drinker", "Consume all available potions.",
+                Achievement.Category.CONSUMABLES, 24, 5000, 10));
+
+        // =====================================================================
+        // TIER 3: MEDIUM (Mid-Game Progression & Stat Targets)
+        // =====================================================================
+        masterTemplates.add(new Achievement("COINS_500K", "Half-way Millionaire", "Amass 500,000 coins.",
+                Achievement.Category.ECONOMY, 500000, 10000, 15));
+        masterTemplates.add(new Achievement("PARTY_ASSEMBLE", "Party Assemble!!", "Get a character for each class.",
+                Achievement.Category.HEROES, 6, 6000, 12));
+        masterTemplates.add(new Achievement("THE_AVATAR", "The Avatar", "Have a character for each element.",
+                Achievement.Category.HEROES, 6, 6000, 12));
+        masterTemplates.add(new Achievement("STAT_ATK_100", "Unstoppable Force", "Reach 100 damage points on a hero.",
+                Achievement.Category.STATS, 100, 3000, 5));
+        masterTemplates.add(new Achievement("STAT_DEF_100", "Immovable Object", "Reach 100 defense points on a hero.",
+                Achievement.Category.STATS, 100, 3000, 5));
+        masterTemplates.add(new Achievement("STAT_REG_100", "Extreme Healing Factor", "Reach 100 regeneration points.",
+                Achievement.Category.STATS, 100, 4000, 8));
+
+        // =====================================================================
+        // TIER 4: HARD (Late-Game Stat Caps & High Investments)
+        // =====================================================================
+        masterTemplates.add(new Achievement("STAT_HP_1000", "Cushion Body", "Reach 1,000 health points on a hero.",
+                Achievement.Category.STATS, 1000, 5000, 10));
+        masterTemplates.add(new Achievement("STAT_SPD_MAX", "Crazy Rapid Boots", "Reach max movement speed.",
+                Achievement.Category.STATS, 50, 5000, 10));
+        masterTemplates.add(new Achievement("COINS_1M", "Filthy Rich", "Amass a million coins.",
+                Achievement.Category.ECONOMY, 1000000, 25000, 30));
+        masterTemplates.add(new Achievement("FULL_SET", "Last Piece", "Unlock a full set bonus.",
+                Achievement.Category.EQUIPMENT, 1, 8000, 15));
+
+        // =====================================================================
+        // TIER 5: VERY HARD / RNG EXTREME (Endgame & Pure Luck)
+        // =====================================================================
+        masterTemplates.add(new Achievement("CHOSEN_ONE", "The Chosen One", "Get an iridescent tier weapon.",
+                Achievement.Category.ITEMS, 1, 15000, 25));
+        masterTemplates.add(
+                new Achievement("RED_RED_RED", "RED RED RED", "Get an iridescent tier character for the first time.",
+                        Achievement.Category.HEROES, 1, 20000, 30));
+        masterTemplates.add(new Achievement("GENIUS_IN_DISGUISE", "A Genius In Disguise",
+                "Get an iridescent tier character without hitting pity.",
+                Achievement.Category.HEROES, 1, 30000, 50));
+
+        // Additional supporting achievements
         masterTemplates.add(new Achievement("CRATE_025", "Crate Enthusiast", "Open a total of 25 crates.",
                 Achievement.Category.CRATES, 25, 1000, 3));
         masterTemplates.add(new Achievement("CRATE_050", "Crate Hoarder", "Open a total of 50 crates.",
                 Achievement.Category.CRATES, 50, 2500, 5));
         masterTemplates.add(new Achievement("CRATE_100", "Centurion Opener", "Open a total of 100 crates.",
                 Achievement.Category.CRATES, 100, 5000, 10));
-
-        // --- Summons ---
-        masterTemplates.add(new Achievement("SUMMON_001", "First Summon", "Perform your first hero summon at the Portal of Legends.",
-                Achievement.Category.SUMMONS, 1, 500, 0));
-        masterTemplates.add(new Achievement("SUMMON_010", "Portal Seeker", "Perform 10 total hero summons.",
-                Achievement.Category.SUMMONS, 10, 1500, 2));
-        masterTemplates.add(new Achievement("SUMMON_050", "Master Summoner", "Perform 50 total hero summons.",
-                Achievement.Category.SUMMONS, 50, 5000, 10));
-
-        // --- Heroes ---
-        masterTemplates.add(new Achievement("HERO_5STAR", "Heroic Ascendance", "Summon or own a 5★ hero in your roster.",
-                Achievement.Category.HEROES, 5, 2500, 5));
-        masterTemplates.add(new Achievement("HERO_6STAR", "Legendary Destiny", "Summon or own a 6★ hero in your roster.",
-                Achievement.Category.HEROES, 6, 10000, 15));
-        masterTemplates.add(new Achievement("ROSTER_005", "Squad Formation", "Recruit at least 5 heroes into your roster.",
-                Achievement.Category.HEROES, 5, 1000, 2));
-        masterTemplates.add(new Achievement("ROSTER_010", "Grand Legion", "Recruit at least 10 heroes into your roster.",
-                Achievement.Category.HEROES, 10, 3000, 5));
-
-        // --- Items ---
+        masterTemplates
+                .add(new Achievement("ROSTER_005", "Squad Formation", "Recruit at least 5 heroes into your roster.",
+                        Achievement.Category.HEROES, 5, 1000, 2));
+        masterTemplates
+                .add(new Achievement("ROSTER_010", "Grand Legion", "Recruit at least 10 heroes into your roster.",
+                        Achievement.Category.HEROES, 10, 3000, 5));
+        masterTemplates
+                .add(new Achievement("COLLECT_ALL_HEROES", "Collect all Heroes", "Collect all 35 heroes across all classes.",
+                        Achievement.Category.HEROES, 35, 50000, 50));
         masterTemplates.add(new Achievement("ITEMS_010", "Armory Recruit", "Obtain at least 10 total items.",
                 Achievement.Category.ITEMS, 10, 1000, 0));
         masterTemplates.add(new Achievement("ITEMS_030", "Master Armorer", "Obtain at least 30 total items.",
                 Achievement.Category.ITEMS, 30, 3000, 3));
-
-        // --- Economy ---
-        masterTemplates.add(new Achievement("COINS_10K", "Coin Hoarder", "Earn 10,000 total coins in your journey.",
-                Achievement.Category.ECONOMY, 10000, 2000, 2));
-        masterTemplates.add(new Achievement("COINS_50K", "Midas Fortune", "Earn 50,000 total coins in your journey.",
-                Achievement.Category.ECONOMY, 50000, 10000, 10));
-
-        // --- Equipment ---
-        masterTemplates.add(new Achievement("FULL_SET", "Armor Harmonizer", "Equip any hero with a complete 3-piece armor set bonus.",
-                Achievement.Category.EQUIPMENT, 1, 3000, 5));
-        masterTemplates.add(new Achievement("FULL_GEAR", "Fully Geared Champion", "Equip a hero with all 5 gear slots (Weapon, Helmet, Chest, Leggings, Accessory).",
+        masterTemplates.add(new Achievement("FULL_GEAR", "Fully Geared Champion", "Equip a hero with all 5 gear slots.",
                 Achievement.Category.EQUIPMENT, 1, 2000, 3));
     }
 
@@ -88,7 +132,8 @@ public class AchievementManager {
     }
 
     public synchronized LinkedList<Achievement> getAchievementsForPlayer(String username) {
-        if (username == null) return new LinkedList<>();
+        if (username == null)
+            return new LinkedList<>();
         LinkedList<Achievement> list = playerAchievements.get(username);
         if (list == null) {
             list = new LinkedList<>();
@@ -101,17 +146,20 @@ public class AchievementManager {
     }
 
     public LinkedList<Achievement> getAchievementsForPlayer(PlayerAcc player) {
-        if (player == null) return new LinkedList<>();
+        if (player == null)
+            return new LinkedList<>();
         return getAchievementsForPlayer(player.getUsername());
     }
 
     /**
-     * Checks all achievements for the given player and unlocks any that satisfy their conditions.
+     * Checks all achievements for the given player and unlocks any that satisfy
+     * their conditions.
      * Returns a list of newly unlocked achievements.
      */
     public synchronized LinkedList<Achievement> checkAndUnlockAchievements(PlayerAcc player) {
         LinkedList<Achievement> newlyUnlocked = new LinkedList<>();
-        if (player == null) return newlyUnlocked;
+        if (player == null)
+            return newlyUnlocked;
 
         LinkedList<Achievement> list = getAchievementsForPlayer(player.getUsername());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -138,13 +186,24 @@ public class AchievementManager {
      * @return true if rewards were successfully claimed.
      */
     public synchronized boolean claimReward(PlayerAcc player, String achievementId) {
-        if (player == null || achievementId == null) return false;
+        if (player == null || achievementId == null)
+            return false;
         LinkedList<Achievement> list = getAchievementsForPlayer(player.getUsername());
         for (Achievement ach : list) {
             if (ach.getId().equalsIgnoreCase(achievementId)) {
                 if (ach.isUnlocked() && !ach.isRewardClaimed()) {
-                    player.setCoins(player.getCoins() + ach.getRewardCoins());
-                    player.setShards(player.getShards() + ach.getRewardShards());
+                    if (ach.getRewardCoins() > 0) {
+                        player.setCoins(player.getCoins() + ach.getRewardCoins());
+                        if (player.getStats() != null) {
+                            player.getStats().recordCoinsEarned(ach.getRewardCoins());
+                        }
+                    }
+                    if (ach.getRewardShards() > 0) {
+                        player.setShards(player.getShards() + ach.getRewardShards());
+                        if (player.getStats() != null) {
+                            player.getStats().recordShardsEarned(ach.getRewardShards());
+                        }
+                    }
                     ach.setRewardClaimed(true);
                     saveAchievementsToCsv(ACHIEVEMENTS_CSV_PATH);
                     return true;
@@ -161,13 +220,24 @@ public class AchievementManager {
      * @return count of achievements claimed.
      */
     public synchronized int claimAllRewards(PlayerAcc player) {
-        if (player == null) return 0;
+        if (player == null)
+            return 0;
         int count = 0;
         LinkedList<Achievement> list = getAchievementsForPlayer(player.getUsername());
         for (Achievement ach : list) {
             if (ach.isUnlocked() && !ach.isRewardClaimed()) {
-                player.setCoins(player.getCoins() + ach.getRewardCoins());
-                player.setShards(player.getShards() + ach.getRewardShards());
+                if (ach.getRewardCoins() > 0) {
+                    player.setCoins(player.getCoins() + ach.getRewardCoins());
+                    if (player.getStats() != null) {
+                        player.getStats().recordCoinsEarned(ach.getRewardCoins());
+                    }
+                }
+                if (ach.getRewardShards() > 0) {
+                    player.setShards(player.getShards() + ach.getRewardShards());
+                    if (player.getStats() != null) {
+                        player.getStats().recordShardsEarned(ach.getRewardShards());
+                    }
+                }
                 ach.setRewardClaimed(true);
                 count++;
             }
@@ -179,28 +249,34 @@ public class AchievementManager {
     }
 
     public int getUnlockedCount(PlayerAcc player) {
-        if (player == null) return 0;
+        if (player == null)
+            return 0;
         int count = 0;
         for (Achievement ach : getAchievementsForPlayer(player.getUsername())) {
-            if (ach.isUnlocked()) count++;
+            if (ach.isUnlocked())
+                count++;
         }
         return count;
     }
 
     public int getClaimedCount(PlayerAcc player) {
-        if (player == null) return 0;
+        if (player == null)
+            return 0;
         int count = 0;
         for (Achievement ach : getAchievementsForPlayer(player.getUsername())) {
-            if (ach.isRewardClaimed()) count++;
+            if (ach.isRewardClaimed())
+                count++;
         }
         return count;
     }
 
     public int getUnclaimedCount(PlayerAcc player) {
-        if (player == null) return 0;
+        if (player == null)
+            return 0;
         int count = 0;
         for (Achievement ach : getAchievementsForPlayer(player.getUsername())) {
-            if (ach.isUnlocked() && !ach.isRewardClaimed()) count++;
+            if (ach.isUnlocked() && !ach.isRewardClaimed())
+                count++;
         }
         return count;
     }
@@ -265,7 +341,7 @@ public class AchievementManager {
             writer.write("username,achievement_id,unlocked,unlocked_at,reward_claimed");
             writer.newLine();
 
-            for (java.util.Map.Entry<String, LinkedList<Achievement>> entry : playerAchievements.entrySet()) {
+            for (Map.Entry<String, LinkedList<Achievement>> entry : playerAchievements.entrySet()) {
                 String username = entry.getKey();
                 for (Achievement ach : entry.getValue()) {
                     writer.write(username + "," +

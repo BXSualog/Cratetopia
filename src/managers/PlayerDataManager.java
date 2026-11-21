@@ -222,6 +222,8 @@ public class PlayerDataManager {
         }
 
         PlayerAcc newPlayer = new PlayerAcc(username, password);
+        newPlayer.getStats().recordCoinsEarned(500);
+        newPlayer.getStats().recordShardsEarned(10);
         playerList.add(newPlayer);
         saveAllPlayersToCsv();
         return true;
@@ -386,10 +388,28 @@ public class PlayerDataManager {
                         int diamond = parts.length > 11 ? parseIntOrDefault(parts[11], 0) : 0;
                         int rarity = parts.length > 12 ? parseIntOrDefault(parts[12], 0) : 0;
                         int equipped = parts.length > 13 ? parseIntOrDefault(parts[13], 0) : 0;
+                        int potions = parts.length > 14 ? parseIntOrDefault(parts[14], 0) : 0;
+                        int weaponsSwapped = parts.length > 15 ? parseIntOrDefault(parts[15], 0) : 0;
+                        boolean legChar = parts.length > 16 && Boolean.parseBoolean(parts[16]);
+                        boolean iriChar = parts.length > 17 && Boolean.parseBoolean(parts[17]);
+                        boolean iriCharNoPity = parts.length > 18 && Boolean.parseBoolean(parts[18]);
+                        boolean legWep = parts.length > 19 && Boolean.parseBoolean(parts[19]);
+                        boolean iriWep = parts.length > 20 && Boolean.parseBoolean(parts[20]);
+                        String consumedPotionsStr = parts.length > 21 ? parts[21] : "";
 
                         player.setStats(new accounts.PlayerStats(crates, summons, items,
                                 coinsEarned, coinsSpent, shardsEarned, shardsSpent,
-                                wooden, silver, gold, diamond, rarity, equipped));
+                                wooden, silver, gold, diamond, rarity, equipped,
+                                potions, weaponsSwapped, legChar, iriChar, iriCharNoPity,
+                                legWep, iriWep, consumedPotionsStr));
+
+                        // Ensure lifetime coins and shards earned are at least current wallet + spent
+                        if (player.getStats().getCoinsEarned() < player.getCoins() + player.getStats().getCoinsSpent()) {
+                            player.getStats().setCoinsEarned(player.getCoins() + player.getStats().getCoinsSpent());
+                        }
+                        if (player.getStats().getShardsEarned() < player.getShards() + player.getStats().getShardsSpent()) {
+                            player.getStats().setShardsEarned(player.getShards() + player.getStats().getShardsSpent());
+                        }
                     }
                 }
             }
@@ -403,7 +423,7 @@ public class PlayerDataManager {
         ensureParentDir(file);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-            writer.write("username,cratesOpened,summonsPerformed,itemsObtained,coinsEarned,coinsSpent,shardsEarned,shardsSpent,woodenCrates,silverCrates,goldCrates,diamondCrates,highestHeroRarity,equipmentEquipped");
+            writer.write("username,cratesOpened,summonsPerformed,itemsObtained,coinsEarned,coinsSpent,shardsEarned,shardsSpent,woodenCrates,silverCrates,goldCrates,diamondCrates,highestHeroRarity,equipmentEquipped,potionsConsumed,weaponsSwapped,gotLegendaryCharacter,gotIridescentCharacter,gotIridescentCharacterNoPity,gotLegendaryWeapon,gotIridescentWeapon,consumedPotions");
             writer.newLine();
             for (PlayerAcc player : playerList) {
                 accounts.PlayerStats st = player.getStats();
@@ -420,7 +440,15 @@ public class PlayerDataManager {
                         st.getGoldCrates() + "," +
                         st.getDiamondCrates() + "," +
                         st.getHighestHeroRarity() + "," +
-                        st.getEquipmentEquipped());
+                        st.getEquipmentEquipped() + "," +
+                        st.getPotionsConsumed() + "," +
+                        st.getWeaponsSwapped() + "," +
+                        st.isGotLegendaryCharacter() + "," +
+                        st.isGotIridescentCharacter() + "," +
+                        st.isGotIridescentCharacterNoPity() + "," +
+                        st.isGotLegendaryWeapon() + "," +
+                        st.isGotIridescentWeapon() + "," +
+                        st.getConsumedPotionIdsSerialized());
                 writer.newLine();
             }
         } catch (IOException e) {

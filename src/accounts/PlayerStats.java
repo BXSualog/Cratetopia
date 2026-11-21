@@ -27,12 +27,24 @@ public class PlayerStats {
     // --- Items & Equipment ---
     private int itemsObtained;
     private int equipmentEquipped;
+    private int potionsConsumed;
+    private int weaponsSwapped;
 
     // --- Currencies & Economy ---
     private int coinsEarned;
     private int coinsSpent;
     private int shardsEarned;
     private int shardsSpent;
+
+    // --- Gacha / Milestones ---
+    private boolean gotLegendaryCharacter;
+    private boolean gotIridescentCharacter;
+    private boolean gotIridescentCharacterNoPity;
+    private boolean gotLegendaryWeapon;
+    private boolean gotIridescentWeapon;
+
+    // Consumed unique potion IDs (joined by ';' in CSV if needed or tracked in memory)
+    private java.util.HashSet<String> consumedPotionIds = new java.util.HashSet<>();
 
     /**
      * Default constructor with zeroed counters.
@@ -47,10 +59,17 @@ public class PlayerStats {
         this.highestHeroRarity = 0;
         this.itemsObtained = 0;
         this.equipmentEquipped = 0;
+        this.potionsConsumed = 0;
+        this.weaponsSwapped = 0;
         this.coinsEarned = 0;
         this.coinsSpent = 0;
         this.shardsEarned = 0;
         this.shardsSpent = 0;
+        this.gotLegendaryCharacter = false;
+        this.gotIridescentCharacter = false;
+        this.gotIridescentCharacterNoPity = false;
+        this.gotLegendaryWeapon = false;
+        this.gotIridescentWeapon = false;
     }
 
     /**
@@ -59,7 +78,11 @@ public class PlayerStats {
     public PlayerStats(int cratesOpened, int summonsPerformed, int itemsObtained,
                        int coinsEarned, int coinsSpent, int shardsEarned, int shardsSpent,
                        int woodenCrates, int silverCrates, int goldCrates, int diamondCrates,
-                       int highestHeroRarity, int equipmentEquipped) {
+                       int highestHeroRarity, int equipmentEquipped,
+                       int potionsConsumed, int weaponsSwapped,
+                       boolean gotLegendaryCharacter, boolean gotIridescentCharacter,
+                       boolean gotIridescentCharacterNoPity, boolean gotLegendaryWeapon,
+                       boolean gotIridescentWeapon, String consumedPotionsStr) {
         this.cratesOpened = cratesOpened;
         this.summonsPerformed = summonsPerformed;
         this.itemsObtained = itemsObtained;
@@ -73,6 +96,20 @@ public class PlayerStats {
         this.diamondCrates = diamondCrates;
         this.highestHeroRarity = highestHeroRarity;
         this.equipmentEquipped = equipmentEquipped;
+        this.potionsConsumed = potionsConsumed;
+        this.weaponsSwapped = weaponsSwapped;
+        this.gotLegendaryCharacter = gotLegendaryCharacter;
+        this.gotIridescentCharacter = gotIridescentCharacter;
+        this.gotIridescentCharacterNoPity = gotIridescentCharacterNoPity;
+        this.gotLegendaryWeapon = gotLegendaryWeapon;
+        this.gotIridescentWeapon = gotIridescentWeapon;
+        if (consumedPotionsStr != null && !consumedPotionsStr.trim().isEmpty()) {
+            for (String pid : consumedPotionsStr.split(";")) {
+                if (!pid.trim().isEmpty()) {
+                    this.consumedPotionIds.add(pid.trim().toUpperCase());
+                }
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -125,9 +162,45 @@ public class PlayerStats {
         this.equipmentEquipped++;
     }
 
+    public void recordWeaponSwapped() {
+        this.weaponsSwapped++;
+    }
+
+    public void recordPotionConsumed(String potionId) {
+        this.potionsConsumed++;
+        if (potionId != null && !potionId.trim().isEmpty()) {
+            this.consumedPotionIds.add(potionId.trim().toUpperCase());
+        }
+    }
+
+    public void recordLegendaryCharacter() {
+        this.gotLegendaryCharacter = true;
+    }
+
+    public void recordIridescentCharacter(boolean isPity) {
+        this.gotIridescentCharacter = true;
+        if (!isPity) {
+            this.gotIridescentCharacterNoPity = true;
+        }
+    }
+
+    public void recordLegendaryWeapon() {
+        this.gotLegendaryWeapon = true;
+    }
+
+    public void recordIridescentWeapon() {
+        this.gotIridescentWeapon = true;
+    }
+
     public void recordHeroRarity(int stars) {
         if (stars > this.highestHeroRarity) {
             this.highestHeroRarity = stars;
+        }
+        if (stars == 5) {
+            this.gotLegendaryCharacter = true;
+        } else if (stars >= 6) {
+            this.gotLegendaryCharacter = true;
+            this.gotIridescentCharacter = true;
         }
     }
 
@@ -161,6 +234,32 @@ public class PlayerStats {
 
     public int getEquipmentEquipped()       { return equipmentEquipped; }
     public void setEquipmentEquipped(int v) { this.equipmentEquipped = v; }
+
+    public int getPotionsConsumed()       { return potionsConsumed; }
+    public void setPotionsConsumed(int v) { this.potionsConsumed = v; }
+
+    public int getWeaponsSwapped()       { return weaponsSwapped; }
+    public void setWeaponsSwapped(int v) { this.weaponsSwapped = v; }
+
+    public boolean isGotLegendaryCharacter() { return gotLegendaryCharacter; }
+    public void setGotLegendaryCharacter(boolean b) { this.gotLegendaryCharacter = b; }
+
+    public boolean isGotIridescentCharacter() { return gotIridescentCharacter; }
+    public void setGotIridescentCharacter(boolean b) { this.gotIridescentCharacter = b; }
+
+    public boolean isGotIridescentCharacterNoPity() { return gotIridescentCharacterNoPity; }
+    public void setGotIridescentCharacterNoPity(boolean b) { this.gotIridescentCharacterNoPity = b; }
+
+    public boolean isGotLegendaryWeapon() { return gotLegendaryWeapon; }
+    public void setGotLegendaryWeapon(boolean b) { this.gotLegendaryWeapon = b; }
+
+    public boolean isGotIridescentWeapon() { return gotIridescentWeapon; }
+    public void setGotIridescentWeapon(boolean b) { this.gotIridescentWeapon = b; }
+
+    public java.util.HashSet<String> getConsumedPotionIds() { return consumedPotionIds; }
+    public String getConsumedPotionIdsSerialized() {
+        return String.join(";", consumedPotionIds);
+    }
 
     public int getCoinsEarned()       { return coinsEarned; }
     public void setCoinsEarned(int v) { this.coinsEarned = v; }
