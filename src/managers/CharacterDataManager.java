@@ -31,13 +31,13 @@ import java.util.TreeMap;
 public class CharacterDataManager {
 
     // File paths for each class-specific CSV
-    private static final String WARRIORS_CSV  = "data/warriors.csv";
-    private static final String MAGES_CSV     = "data/mages.csv";
-    private static final String ASSASSINS_CSV = "data/assassins.csv";
-    private static final String TANKS_CSV     = "data/tanks.csv";
-    private static final String RANGERS_CSV   = "data/rangers.csv";
-    private static final String SUPPORTS_CSV  = "data/supports.csv";
-    private static final String BRAWLERS_CSV  = "data/brawlers.csv";
+    private static final String WARRIORS_CSV  = "data/classes/warriors.csv";
+    private static final String MAGES_CSV     = "data/classes/mages.csv";
+    private static final String ASSASSINS_CSV = "data/classes/assassins.csv";
+    private static final String TANKS_CSV     = "data/classes/tanks.csv";
+    private static final String RANGERS_CSV   = "data/classes/rangers.csv";
+    private static final String SUPPORTS_CSV  = "data/classes/supports.csv";
+    private static final String BRAWLERS_CSV  = "data/classes/brawlers.csv";
 
     // DSA: TreeMap stores heroes organized by their CharacterClass.
     private final TreeMap<CharacterClass, LinkedList<Hero>> heroesByClass = new TreeMap<>();

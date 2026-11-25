@@ -35,7 +35,7 @@ import java.util.TreeMap;
  */
 public class ArmorSetCatalog {
 
-    private static final String ARMOR_SETS_CSV = "data/armor_sets.csv";
+    private static final String ARMOR_SETS_CSV = "data/items/armor_sets.csv";
 
     // DSA: TreeMap — key = set name (case-insensitive), value = ArmorSet definition
     private final TreeMap<String, ArmorSet> catalog =

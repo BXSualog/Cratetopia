@@ -30,8 +30,8 @@ import java.util.TreeMap;
  */
 public class AdminDataManager {
 
-    private static final String ADMINS_CSV_PATH = "data/admins.csv";
-    private static final String ADMIN_CSV_PATH  = "data/admin.csv";
+    private static final String ADMINS_CSV_PATH = "data/admin/admins.csv";
+    private static final String ADMIN_CSV_PATH  = "data/admin/admin.csv";
 
     // Hardcoded fallback credentials (used when CSV is missing or empty)
     private static final String DEFAULT_ADMIN_USER = "admin";

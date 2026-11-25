@@ -404,10 +404,10 @@ public class PlayerFeaturesTest {
         playerDataManager.saveAllPlayersToCsv();
 
         // Verify CSV files exist on disk
-        File statsFile = new File("data/player_statistics.csv");
-        File achFile = new File("data/player_achievements.csv");
-        File adminFile1 = new File("data/admin.csv");
-        File adminFile2 = new File("data/admins.csv");
+        File statsFile = new File("data/player/player_statistics.csv");
+        File achFile = new File("data/player/player_achievements.csv");
+        File adminFile1 = new File("data/admin/admin.csv");
+        File adminFile2 = new File("data/admin/admins.csv");
 
         check(statsFile.exists(), "player_statistics.csv exists on disk");
         check(achFile.exists(), "player_achievements.csv exists on disk");

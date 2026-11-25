@@ -17,10 +17,10 @@ import java.util.LinkedList;
  * Adheres strictly to DSA constraints using LinkedList collections.
  */
 public class PlayerDataManager {
-    private static final String CSV_FILE_PATH        = "data/players.csv";
-    private static final String INVENTORY_CSV_PATH   = "data/player_inventory.csv";
-    private static final String HEROES_CSV_PATH      = "data/player_heroes.csv";
-    private static final String STATISTICS_CSV_PATH  = "data/player_statistics.csv";
+    private static final String CSV_FILE_PATH        = "data/player/players.csv";
+    private static final String INVENTORY_CSV_PATH   = "data/player/player_inventory.csv";
+    private static final String HEROES_CSV_PATH      = "data/player/player_heroes.csv";
+    private static final String STATISTICS_CSV_PATH  = "data/player/player_statistics.csv";
     private static final String ACHIEVEMENTS_CSV_PATH= AchievementManager.ACHIEVEMENTS_CSV_PATH;
 
     private final LinkedList<PlayerAcc> playerList = new LinkedList<>();

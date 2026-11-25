@@ -25,10 +25,10 @@ import java.util.LinkedList;
  *   data/accessories.csv
  */
 public class ItemDataManager {
-    private static final String WEAPONS_CSV      = "data/weapons.csv";
-    private static final String ARMOR_CSV        = "data/armor.csv";
-    private static final String ACCESSORIES_CSV  = "data/accessories.csv";
-    private static final String CONSUMABLES_CSV  = "data/consumables.csv";
+    private static final String WEAPONS_CSV      = "data/items/weapons.csv";
+    private static final String ARMOR_CSV        = "data/items/armor.csv";
+    private static final String ACCESSORIES_CSV  = "data/items/accessories.csv";
+    private static final String CONSUMABLES_CSV  = "data/items/consumables.csv";
 
     private final LinkedList<Weapon>      weapons      = new LinkedList<>();
     private final LinkedList<Armor>       armors       = new LinkedList<>();

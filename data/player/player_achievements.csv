@@ -1,19 +1,19 @@
 username,achievement_id,unlocked,unlocked_at,reward_claimed
-BX,CRATE_001,false,,false
-BX,SUMMON_001,false,,false
+BX,CRATE_001,true,2026-11-25 16:51:18,false
+BX,SUMMON_001,true,2026-11-25 17:44:50,false
 BX,GEAR_UP,false,,false
 BX,POTION_FIRST,false,,false
-BX,LUCKY_CHARM,false,,false
+BX,LUCKY_CHARM,true,2026-11-25 17:44:50,false
 BX,JACKPOT,true,2026-11-21 20:26:08,false
 BX,COINS_250K,false,,false
 BX,VARIETY_DRINKER,false,,false
 BX,COINS_500K,false,,false
-BX,PARTY_ASSEMBLE,false,,false
+BX,PARTY_ASSEMBLE,true,2026-11-25 17:44:50,false
 BX,THE_AVATAR,true,2026-11-21 20:26:08,false
 BX,STAT_ATK_100,true,2026-11-21 20:26:08,false
-BX,STAT_DEF_100,false,,false
+BX,STAT_DEF_100,true,2026-11-25 17:44:50,false
 BX,STAT_REG_100,false,,false
-BX,STAT_HP_1000,false,,false
+BX,STAT_HP_1000,true,2026-11-25 17:44:50,false
 BX,STAT_SPD_MAX,false,,false
 BX,COINS_1M,false,,false
 BX,FULL_SET,false,,false
@@ -24,7 +24,7 @@ BX,CRATE_025,false,,false
 BX,CRATE_050,false,,false
 BX,CRATE_100,false,,false
 BX,ROSTER_005,true,2026-11-14 15:25:57,true
-BX,ROSTER_010,false,,false
+BX,ROSTER_010,true,2026-11-25 17:44:50,false
 BX,COLLECT_ALL_HEROES,false,,false
 BX,ITEMS_010,true,2026-11-14 15:25:57,true
 BX,ITEMS_030,false,,false

@@ -24,7 +24,7 @@ import java.util.TreeMap;
  */
 public class AchievementManager {
 
-    public static final String ACHIEVEMENTS_CSV_PATH = "data/player_achievements.csv";
+    public static final String ACHIEVEMENTS_CSV_PATH = "data/player/player_achievements.csv";
 
     // Master list of all registered achievement definitions
     private final LinkedList<Achievement> masterTemplates = new LinkedList<>();
