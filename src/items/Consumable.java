@@ -71,6 +71,11 @@ public class Consumable extends Item implements Usable {
      * Example: "[Consumable | Attack] Strength Potion -- Increases Attack by 10%"
      */
     @Override
+    public String getItemCategory() {
+        return "CONSUMABLE";
+    }
+
+    @Override
     public String getSummary() {
         return "[Consumable | " + category + "] " + getName()
                 + " -- " + getDescription();

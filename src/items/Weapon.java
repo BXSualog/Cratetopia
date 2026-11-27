@@ -87,6 +87,11 @@ public class Weapon extends Item implements Equipable {
      * with a Weapon-specific format.
      */
     @Override
+    public String getItemCategory() {
+        return "WEAPON";
+    }
+
+    @Override
     public String getSummary() {
         return String.format("  ATK: %-4d | CRIT: %d%% | Classes: %-16s | %s",
                 attack, critChance, getEquippableClassesDisplay(), getDescription());

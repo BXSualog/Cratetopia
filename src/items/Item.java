@@ -150,6 +150,26 @@ public abstract class Item {
     }
 
     // -------------------------------------------------------------------------
+    // Category – broad group this item belongs to (WEAPON / ARMOR / ACCESSORY / CONSUMABLE)
+    // Each subclass overrides this to return its own category name.
+    // This lets us filter items without using instanceof.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the broad category of this item as a simple string.
+     * Subclasses override this to identify themselves:
+     *   Weapon     -> "WEAPON"
+     *   Armor      -> "ARMOR"
+     *   Accessory  -> "ACCESSORY"
+     *   Consumable -> "CONSUMABLE"
+     *
+     * @return  Category string in UPPERCASE.
+     */
+    public String getItemCategory() {
+        return "ITEM"; // default — subclasses override this
+    }
+
+    // -------------------------------------------------------------------------
     // Abstract method – every subclass must provide its own summary format
     // -------------------------------------------------------------------------
 

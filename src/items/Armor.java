@@ -122,8 +122,12 @@ public class Armor extends Item implements Equipable {
      *   "  [Set: Dragon] DEF: 50   | HP+: 200  | HP%+: 15% | Classes: Tank | …"
      */
     @Override
+    public String getItemCategory() {
+        return "ARMOR";
+    }
+
+    @Override
     public String getSummary() {
-        // Show "[Set: Dragon] " prefix only when this piece belongs to a set
         String setTag = hasSetName() ? "[Set: " + setName + "] " : "";
         return String.format("  %sDEF: %-4d | HP+: %-4d | HP%%+: %-3d%% | Classes: %-16s | %s",
                 setTag, defense, healthBonus, healthPercentBonus,

@@ -85,6 +85,11 @@ public class Accessory extends Item implements Equipable {
      * The bonusType is printed in UPPERCASE so it stands out visually.
      */
     @Override
+    public String getItemCategory() {
+        return "ACCESSORY";
+    }
+
+    @Override
     public String getSummary() {
         return String.format("  +%-4d %-11s | Classes: %-16s | %s",
                 statBonus, bonusType.toUpperCase(), getEquippableClassesDisplay(), getDescription());

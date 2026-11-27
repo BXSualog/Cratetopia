@@ -13,34 +13,33 @@ import java.util.LinkedList;
 import java.util.TreeMap;
 
 /**
- * AdminDataManager – manages administrator accounts, credentials, and data operations.
+ * AdminDataManager – manages administrator accounts, credentials, and data
+ * operations.
  *
  * OOP Concepts demonstrated here
  * --------------------------------
- * ENCAPSULATION      : The admin list and CSV handling are encapsulated within this class.
- * DELEGATION         : Coordinates operations across PlayerDataManager, ItemDataManager,
- *                      and CharacterDataManager to empower the Admin Dashboard.
+ * ENCAPSULATION : The admin list and CSV handling are encapsulated within this
+ * class.
+ * DELEGATION : Coordinates operations across PlayerDataManager,
+ * ItemDataManager,
+ * and CharacterDataManager to empower the Admin Dashboard.
  *
  * DSA Concepts demonstrated here
  * --------------------------------
  * LinkedList<AdminAcc> adminList:
- *   Adheres strictly to DSA constraints using LinkedList collections.
+ * Adheres strictly to DSA constraints using LinkedList collections.
  * Linear Search:
- *   O(n) linear search for admin authentication, lookups, and duplicate checking.
+ * O(n) linear search for admin authentication, lookups, and duplicate checking.
  */
 public class AdminDataManager {
 
     private static final String ADMINS_CSV_PATH = "data/admin/admins.csv";
-    private static final String ADMIN_CSV_PATH  = "data/admin/admin.csv";
+    private static final String ADMIN_CSV_PATH = "data/admin/admin.csv";
 
     // Hardcoded fallback credentials (used when CSV is missing or empty)
     private static final String DEFAULT_ADMIN_USER = "admin";
     private static final String DEFAULT_ADMIN_PASS = "admin123";
     private static final String DEFAULT_ADMIN_ROLE = "Administrator";
-
-    private static final String DEFAULT_SUPERADMIN_USER = "superadmin";
-    private static final String DEFAULT_SUPERADMIN_PASS = "cratetopia2026";
-    private static final String DEFAULT_SUPERADMIN_ROLE = "Super Administrator";
 
     // DSA: LinkedList to hold registered administrators
     private final LinkedList<AdminAcc> adminList = new LinkedList<>();
@@ -62,8 +61,8 @@ public class AdminDataManager {
      * Constructor with 3 primary data managers.
      */
     public AdminDataManager(PlayerDataManager playerDataManager,
-                            ItemDataManager itemDataManager,
-                            CharacterDataManager charDataManager) {
+            ItemDataManager itemDataManager,
+            CharacterDataManager charDataManager) {
         this(playerDataManager, itemDataManager, charDataManager, null, null);
     }
 
@@ -71,15 +70,15 @@ public class AdminDataManager {
      * Full constructor with references to all game managers.
      */
     public AdminDataManager(PlayerDataManager playerDataManager,
-                            ItemDataManager itemDataManager,
-                            CharacterDataManager charDataManager,
-                            CrateManager crateManager,
-                            CharacterGachaManager gachaManager) {
+            ItemDataManager itemDataManager,
+            CharacterDataManager charDataManager,
+            CrateManager crateManager,
+            CharacterGachaManager gachaManager) {
         this.playerDataManager = playerDataManager;
-        this.itemDataManager   = itemDataManager;
-        this.charDataManager   = charDataManager;
-        this.crateManager       = crateManager;
-        this.gachaManager       = gachaManager;
+        this.itemDataManager = itemDataManager;
+        this.charDataManager = charDataManager;
+        this.crateManager = crateManager;
+        this.gachaManager = gachaManager;
         loadAdminsFromCsv();
     }
 
@@ -88,25 +87,44 @@ public class AdminDataManager {
     // -------------------------------------------------------------------------
 
     public void setManagers(PlayerDataManager playerDataManager,
-                            ItemDataManager itemDataManager,
-                            CharacterDataManager charDataManager,
-                            CrateManager crateManager,
-                            CharacterGachaManager gachaManager) {
+            ItemDataManager itemDataManager,
+            CharacterDataManager charDataManager,
+            CrateManager crateManager,
+            CharacterGachaManager gachaManager) {
         this.playerDataManager = playerDataManager;
-        this.itemDataManager   = itemDataManager;
-        this.charDataManager   = charDataManager;
-        this.crateManager       = crateManager;
-        this.gachaManager       = gachaManager;
+        this.itemDataManager = itemDataManager;
+        this.charDataManager = charDataManager;
+        this.crateManager = crateManager;
+        this.gachaManager = gachaManager;
     }
 
-    public PlayerDataManager getPlayerDataManager()         { return playerDataManager; }
-    public ItemDataManager getItemDataManager()             { return itemDataManager; }
-    public CharacterDataManager getCharDataManager()       { return charDataManager; }
-    public CrateManager getCrateManager()                   { return crateManager; }
-    public CharacterGachaManager getGachaManager()           { return gachaManager; }
+    public PlayerDataManager getPlayerDataManager() {
+        return playerDataManager;
+    }
 
-    public void setCrateManager(CrateManager cm)            { this.crateManager = cm; }
-    public void setGachaManager(CharacterGachaManager gm)   { this.gachaManager = gm; }
+    public ItemDataManager getItemDataManager() {
+        return itemDataManager;
+    }
+
+    public CharacterDataManager getCharDataManager() {
+        return charDataManager;
+    }
+
+    public CrateManager getCrateManager() {
+        return crateManager;
+    }
+
+    public CharacterGachaManager getGachaManager() {
+        return gachaManager;
+    }
+
+    public void setCrateManager(CrateManager cm) {
+        this.crateManager = cm;
+    }
+
+    public void setGachaManager(CharacterGachaManager gm) {
+        this.gachaManager = gm;
+    }
 
     public LinkedList<AdminAcc> getAdminList() {
         return adminList;
@@ -118,7 +136,8 @@ public class AdminDataManager {
 
     /**
      * Loads admin credentials from data/admins.csv.
-     * If the file does not exist or is empty, creates it and seeds default credentials.
+     * If the file does not exist or is empty, creates it and seeds default
+     * credentials.
      */
     public void loadAdminsFromCsv() {
         adminList.clear();
@@ -154,7 +173,7 @@ public class AdminDataManager {
                 if (parts.length >= 2) {
                     String username = parts[0].trim();
                     String password = parts[1].trim();
-                    String role     = (parts.length >= 3 && !parts[2].trim().isEmpty())
+                    String role = (parts.length >= 3 && !parts[2].trim().isEmpty())
                             ? parts[2].trim()
                             : DEFAULT_ADMIN_ROLE;
 
@@ -179,11 +198,11 @@ public class AdminDataManager {
      */
     private void seedDefaultAdmins() {
         adminList.add(new AdminAcc(DEFAULT_ADMIN_USER, DEFAULT_ADMIN_PASS, DEFAULT_ADMIN_ROLE));
-        adminList.add(new AdminAcc(DEFAULT_SUPERADMIN_USER, DEFAULT_SUPERADMIN_PASS, DEFAULT_SUPERADMIN_ROLE));
     }
 
     /**
-     * Saves all current administrator accounts to data/admins.csv and data/admin.csv.
+     * Saves all current administrator accounts to data/admins.csv and
+     * data/admin.csv.
      */
     public void saveAdminsToCsv() {
         saveAdminsToFile(new File(ADMINS_CSV_PATH));
@@ -202,8 +221,8 @@ public class AdminDataManager {
 
             for (AdminAcc admin : adminList) {
                 writer.write(admin.getUsername() + "," +
-                             admin.getPassword() + "," +
-                             admin.getRole());
+                        admin.getPassword() + "," +
+                        admin.getRole());
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -223,7 +242,8 @@ public class AdminDataManager {
      * @return true if taken, false otherwise.
      */
     public boolean isAdminUsernameTaken(String username) {
-        if (username == null) return false;
+        if (username == null)
+            return false;
         for (AdminAcc admin : adminList) {
             if (admin.getUsername().equalsIgnoreCase(username.trim())) {
                 return true;
@@ -239,7 +259,8 @@ public class AdminDataManager {
      * @return AdminAcc if found; null otherwise.
      */
     public AdminAcc getAdmin(String username) {
-        if (username == null) return null;
+        if (username == null)
+            return null;
         for (AdminAcc admin : adminList) {
             if (admin.getUsername().equalsIgnoreCase(username.trim())) {
                 return admin;
@@ -250,8 +271,10 @@ public class AdminDataManager {
 
     /**
      * Authenticates an admin against stored accounts.
-     * If matched, returns the authenticated AdminAcc object; otherwise returns null.
-     * Also checks hardcoded fallback credentials if list is empty or file access failed.
+     * If matched, returns the authenticated AdminAcc object; otherwise returns
+     * null.
+     * Also checks hardcoded fallback credentials if list is empty or file access
+     * failed.
      *
      * @param username Entered admin username.
      * @param password Entered admin password.
@@ -269,15 +292,10 @@ public class AdminDataManager {
             }
         }
 
-        // 2. Hardcoded fallback check (ensures access even if file is missing/corrupted)
+        // 2. Hardcoded fallback check (ensures access even if file is
+        // missing/corrupted)
         if (DEFAULT_ADMIN_USER.equalsIgnoreCase(username.trim()) && DEFAULT_ADMIN_PASS.equals(password)) {
             AdminAcc fallback = new AdminAcc(DEFAULT_ADMIN_USER, DEFAULT_ADMIN_PASS, DEFAULT_ADMIN_ROLE);
-            adminList.add(fallback);
-            saveAdminsToCsv();
-            return fallback;
-        }
-        if (DEFAULT_SUPERADMIN_USER.equalsIgnoreCase(username.trim()) && DEFAULT_SUPERADMIN_PASS.equals(password)) {
-            AdminAcc fallback = new AdminAcc(DEFAULT_SUPERADMIN_USER, DEFAULT_SUPERADMIN_PASS, DEFAULT_SUPERADMIN_ROLE);
             adminList.add(fallback);
             saveAdminsToCsv();
             return fallback;
@@ -295,11 +313,14 @@ public class AdminDataManager {
      * @return true if created successfully; false if username is taken or invalid.
      */
     public boolean registerAdmin(String username, String password, String role) {
-        if (username == null || password == null) return false;
+        if (username == null || password == null)
+            return false;
         username = username.trim();
         password = password.trim();
-        if (username.isEmpty() || password.isEmpty()) return false;
-        if (isAdminUsernameTaken(username)) return false;
+        if (username.isEmpty() || password.isEmpty())
+            return false;
+        if (isAdminUsernameTaken(username))
+            return false;
 
         AdminAcc newAdmin = new AdminAcc(username, password, role);
         adminList.add(newAdmin);
@@ -315,7 +336,8 @@ public class AdminDataManager {
      * Finds a player account by username via PlayerDataManager.
      */
     public PlayerAcc findPlayer(String username) {
-        if (playerDataManager == null || username == null) return null;
+        if (playerDataManager == null || username == null)
+            return null;
         return playerDataManager.getPlayer(username);
     }
 
@@ -328,7 +350,8 @@ public class AdminDataManager {
      */
     public LinkedList<PlayerAcc> searchPlayers(String query) {
         LinkedList<PlayerAcc> results = new LinkedList<>();
-        if (playerDataManager == null || query == null) return results;
+        if (playerDataManager == null || query == null)
+            return results;
         String q = query.trim().toLowerCase();
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
             if (p.getUsername().toLowerCase().contains(q)) {
@@ -346,7 +369,8 @@ public class AdminDataManager {
      */
     public boolean banPlayer(String username) {
         PlayerAcc player = findPlayer(username);
-        if (player == null) return false;
+        if (player == null)
+            return false;
         player.setBanned(true);
         playerDataManager.saveAllPlayersToCsv();
         return true;
@@ -360,7 +384,8 @@ public class AdminDataManager {
      */
     public boolean unbanPlayer(String username) {
         PlayerAcc player = findPlayer(username);
-        if (player == null) return false;
+        if (player == null)
+            return false;
         player.setBanned(false);
         playerDataManager.saveAllPlayersToCsv();
         return true;
@@ -374,7 +399,8 @@ public class AdminDataManager {
      */
     public boolean togglePlayerBan(String username) {
         PlayerAcc player = findPlayer(username);
-        if (player == null) return false;
+        if (player == null)
+            return false;
         player.setBanned(!player.isBanned());
         playerDataManager.saveAllPlayersToCsv();
         return true;
@@ -385,7 +411,8 @@ public class AdminDataManager {
      */
     public boolean modifyPlayerCoins(String username, int coinDelta) {
         PlayerAcc player = findPlayer(username);
-        if (player == null) return false;
+        if (player == null)
+            return false;
         int updated = Math.max(0, player.getCoins() + coinDelta);
         player.setCoins(updated);
         if (coinDelta > 0 && player.getStats() != null) {
@@ -402,7 +429,8 @@ public class AdminDataManager {
      */
     public boolean modifyPlayerShards(String username, int shardDelta) {
         PlayerAcc player = findPlayer(username);
-        if (player == null) return false;
+        if (player == null)
+            return false;
         int updated = Math.max(0, player.getShards() + shardDelta);
         player.setShards(updated);
         if (shardDelta > 0 && player.getStats() != null) {
@@ -420,7 +448,8 @@ public class AdminDataManager {
      */
     public boolean resetPlayerProgress(String username) {
         PlayerAcc player = findPlayer(username);
-        if (player == null) return false;
+        if (player == null)
+            return false;
         player.setCoins(500);
         player.setShards(10);
         player.getInventory().clear();
@@ -435,7 +464,8 @@ public class AdminDataManager {
      * Permanently deletes a player account from the system.
      */
     public boolean deletePlayer(String username) {
-        if (playerDataManager == null || username == null) return false;
+        if (playerDataManager == null || username == null)
+            return false;
         PlayerAcc target = null;
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
             if (p.getUsername().equalsIgnoreCase(username.trim())) {
@@ -460,25 +490,30 @@ public class AdminDataManager {
     }
 
     public int getActivePlayersCount() {
-        if (playerDataManager == null) return 0;
+        if (playerDataManager == null)
+            return 0;
         int count = 0;
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
-            if (!p.isBanned()) count++;
+            if (!p.isBanned())
+                count++;
         }
         return count;
     }
 
     public int getBannedPlayersCount() {
-        if (playerDataManager == null) return 0;
+        if (playerDataManager == null)
+            return 0;
         int count = 0;
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
-            if (p.isBanned()) count++;
+            if (p.isBanned())
+                count++;
         }
         return count;
     }
 
     public long getTotalEconomyCoins() {
-        if (playerDataManager == null) return 0;
+        if (playerDataManager == null)
+            return 0;
         long total = 0;
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
             total += p.getCoins();
@@ -487,7 +522,8 @@ public class AdminDataManager {
     }
 
     public long getTotalEconomyShards() {
-        if (playerDataManager == null) return 0;
+        if (playerDataManager == null)
+            return 0;
         long total = 0;
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
             total += p.getShards();
@@ -500,14 +536,16 @@ public class AdminDataManager {
     }
 
     public int getTotalItemsCatalogCount() {
-        if (itemDataManager == null) return 0;
+        if (itemDataManager == null)
+            return 0;
         return itemDataManager.getWeapons().size() +
-               itemDataManager.getArmors().size() +
-               itemDataManager.getAccessories().size();
+                itemDataManager.getArmors().size() +
+                itemDataManager.getAccessories().size();
     }
 
     public int getTotalHeroesOwnedAcrossPlayers() {
-        if (playerDataManager == null) return 0;
+        if (playerDataManager == null)
+            return 0;
         int sum = 0;
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
             sum += p.getRoster().size();
@@ -516,7 +554,8 @@ public class AdminDataManager {
     }
 
     public int getTotalItemsOwnedAcrossPlayers() {
-        if (playerDataManager == null) return 0;
+        if (playerDataManager == null)
+            return 0;
         int sum = 0;
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
             sum += p.getInventory().size();
@@ -534,7 +573,8 @@ public class AdminDataManager {
      */
     public boolean grantPlayerCurrency(String username, int coins, int shards) {
         PlayerAcc player = findPlayer(username);
-        if (player == null) return false;
+        if (player == null)
+            return false;
 
         if (coins > 0) {
             player.setCoins(player.getCoins() + coins);
@@ -564,7 +604,11 @@ public class AdminDataManager {
             }
         }
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
+        for (PlayerAcc p : map.values()) {
+            if (result.size() >= limit)
+                break;
+            result.add(p);
+        }
         return result;
     }
 
@@ -579,7 +623,11 @@ public class AdminDataManager {
             }
         }
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
+        for (PlayerAcc p : map.values()) {
+            if (result.size() >= limit)
+                break;
+            result.add(p);
+        }
         return result;
     }
 
@@ -594,7 +642,11 @@ public class AdminDataManager {
             }
         }
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
+        for (PlayerAcc p : map.values()) {
+            if (result.size() >= limit)
+                break;
+            result.add(p);
+        }
         return result;
     }
 
@@ -609,17 +661,23 @@ public class AdminDataManager {
             }
         }
         LinkedList<PlayerAcc> result = new LinkedList<>();
-        for (PlayerAcc p : map.values()) { if (result.size() >= limit) break; result.add(p); }
+        for (PlayerAcc p : map.values()) {
+            if (result.size() >= limit)
+                break;
+            result.add(p);
+        }
         return result;
     }
 
     /**
-     * Calculates the frequency of ownership for each hero across all registered player accounts.
+     * Calculates the frequency of ownership for each hero across all registered
+     * player accounts.
      * Uses DSA TreeMap for sorted hero display.
      */
     public TreeMap<String, Integer> getHeroOwnershipDistribution() {
         TreeMap<String, Integer> dist = new TreeMap<>();
-        if (playerDataManager == null) return dist;
+        if (playerDataManager == null)
+            return dist;
 
         for (PlayerAcc p : playerDataManager.getPlayerList()) {
             for (Hero h : p.getRoster()) {
@@ -645,4 +703,3 @@ public class AdminDataManager {
         }
     }
 }
-
